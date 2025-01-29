@@ -4,8 +4,11 @@ export const url = {
   login: () => '/login',
   main: () => '/',
   error: () => 'error-page',
+  edo: () => '/edo',
 };
 
 export const links = {
   login: () => [apiPath, 'auth/login/'].join('/'),
+  sideBar: () => [apiPath, 'edo', 'doc-sidebar/'].join('/'),
+  getUsers: () => [apiPath, 'core', 'user-list/'].join('/'),
 };

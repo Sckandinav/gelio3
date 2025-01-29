@@ -102,7 +102,7 @@ export const Menu = () => {
                             style={{ overflow: 'hidden' }}
                           >
                             <NavLink
-                              className="btn btn-outline-success d-flex align-items-center mx-3 mb-1 mt-1"
+                              className="btn btn-outline-success d-flex align-items-center mx-3 mt-1"
                               to={subItem.to}
                               onClick={() => dispatch(menuToggle())}
                             >

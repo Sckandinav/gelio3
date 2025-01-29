@@ -8,6 +8,7 @@ import { Layout } from './Components/Layout/Layout.jsx';
 import { url } from './routes/routes';
 import { Main } from './Pages/Main.jsx';
 import { ErrorPage } from './Pages/ErrorPage.jsx';
+import { Edo } from './Pages/Edo.jsx';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         }
       >
         <Route index element={<Main />} />
+        <Route path={url.edo()} element={<Edo />}></Route>
         <Route path={url.error()} element={<ErrorPage />} />
         <Route path="*" element={<NotFound />} />
       </Route>
