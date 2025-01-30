@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Button, Card, CloseButton, Col, Row, Dropdown } from 'react-bootstrap';
 import { motion, AnimatePresence } from 'motion/react';
+import { useDispatch } from 'react-redux';
 
 import { Modal } from '../Modal/Modal.jsx';
 import { SelectComponent } from '../Select/Select';
 import { fetchUsers } from '../../api/fetchUsers';
 import { links } from '../../routes/routes.js';
 import { CheckboxSelection } from '../Select/CheckboxSelection.jsx';
+import { axiosInstance } from '../hoc/AxiosInstance.js';
+import { showSuccess, showError } from '../../store/slices/toast.js';
+
+import styles from './Create.module.scss';
 
 const actionsList = {
   AddSigner: 'Добавить подписанта',
@@ -15,7 +20,7 @@ const actionsList = {
   RemoveViewer: 'Убрать просмотрщика',
 };
 
-export const Create = () => {
+export const Create = ({ closeForm }) => {
   const [users, setUsers] = useState([]);
   const [pageNumber, setPageNumber] = useState(1);
   const [actionsModal, setActionsModal] = useState(false);
@@ -31,8 +36,8 @@ export const Create = () => {
     members: [],
     documents: [],
   });
-
   console.log(state.documents[0]);
+  const dispatch = useDispatch();
 
   const docInstance = () => {
     return { id: Date.now(), file: null, members: state.members, signers: [], viewers: [] };
@@ -104,6 +109,70 @@ export const Create = () => {
     setChosen([]);
   };
 
+  const addFile = (e, id) => {
+    setState(prev => ({
+      ...prev,
+      documents: prev.documents.map(doc => {
+        if (doc.id === id) {
+          return { ...doc, file: e.target.files[0] };
+        }
+        return doc;
+      }),
+    }));
+  };
+
+  const sendToServer = async () => {
+    const formData = new FormData();
+    formData.append('title', state.title);
+    formData.append('description', state.description);
+    const membersForUpdate = state.members.map(user => ({ id: user.value, fullName: user.label, companyName: user.companyName, post: user.post }));
+    formData.append('members', JSON.stringify(membersForUpdate));
+    const documentsData = state.documents
+      .filter(doc => doc.file)
+      .map(doc => ({
+        id: doc.id,
+        name: doc.file?.name || null,
+        signer: doc.signers.map(signer => ({
+          id: signer.value,
+          fullName: signer.label,
+          companyName: signer.companyName,
+          post: signer.post,
+        })),
+        viewers: doc.viewers.map(viewer => ({
+          id: viewer.value,
+          fullName: viewer.label,
+          companyName: viewer.companyName,
+          post: viewer.post,
+        })),
+      }));
+
+    formData.append('documents', JSON.stringify(documentsData));
+
+    state.documents.forEach(doc => {
+      if (doc.file) {
+        formData.append(`file[${doc.id}]`, doc.file);
+      }
+    });
+
+    try {
+      const axios = axiosInstance;
+      const token = localStorage.getItem('token');
+
+      await axios.post(links.createRoom(), formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Token ${token}`,
+        },
+      });
+
+      closeForm();
+      dispatch(showSuccess('Комната создана'));
+    } catch (error) {
+      dispatch(showError('Не удалось создать комнату'));
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     const getUsers = async () => {
       try {
@@ -132,7 +201,7 @@ export const Create = () => {
       <AnimatePresence>
         {!actionsModal && (
           <motion.span initial={{ opacity: 0, visibility: 'hidden' }} animate={{ opacity: 1, visibility: 'visible' }}>
-            <Form style={{ opacity: actionsModal ? 0 : 1 }}>
+            <Form>
               {pageNumber === 1 ? (
                 <>
                   <Form.Group className="mb-4">
@@ -142,73 +211,106 @@ export const Create = () => {
 
                   <Form.Group className="mb-4">
                     <Form.Label>Описание</Form.Label>
-                    <Form.Control type="text" value={state.description} onChange={e => textHandler('description', e)} />
+                    <Form.Control
+                      type="text"
+                      as="textarea"
+                      value={state.description}
+                      onChange={e => textHandler('description', e)}
+                      style={{ resize: 'none' }}
+                    />
                   </Form.Group>
 
                   <SelectComponent data={users} selected={state.members} selectHandler={addData} deleteHandler={removeData} />
 
-                  <Button className="mt-5" onClick={pageToggle}>
+                  <Button className="mt-5" onClick={pageToggle} disabled={state.title.length === 0}>
                     Далее
                   </Button>
                 </>
               ) : (
                 <div>
-                  {state.documents.length > 0 &&
-                    state.documents.map(doc => (
-                      <Card key={doc.id}>
-                        <CloseButton style={{ position: 'absolute', top: '0.2rem', right: '0.5rem' }} onClick={() => removeData('documents', doc)} />
-                        <Card.Body>
-                          <Row>
-                            <Col>
-                              <Form.Group>
-                                <Form.Label>
-                                  <Form.Control type="file"></Form.Control>
-                                </Form.Label>
-                              </Form.Group>
-                            </Col>
-                            <Col>
-                              {(doc.members?.length > 0 || doc?.signers.length > 0 || doc?.viewers.length) > 0 && (
-                                <Dropdown>
-                                  <Dropdown.Toggle variant="success" id="dropdown-basic">
-                                    Действия
-                                  </Dropdown.Toggle>
-                                  <Dropdown.Menu>
-                                    {doc.members && doc.members.length > 0 && (
-                                      <Dropdown.Item onClick={() => documentActions(doc.id, actionsList.AddSigner, 'signers')}>
-                                        Добавить подписанта
-                                      </Dropdown.Item>
-                                    )}
-                                    {doc.members && doc.members.length > 0 && (
-                                      <Dropdown.Item onClick={() => documentActions(doc.id, actionsList.AddViewer, 'viewers')}>
-                                        Добавить просмотрщика
-                                      </Dropdown.Item>
-                                    )}
-                                    {doc.signers && doc.signers.length > 0 && (
-                                      <Dropdown.Item onClick={() => documentActions(doc.id, actionsList.RemoveSigner, 'signers')}>
-                                        Убрать подписанта
-                                      </Dropdown.Item>
-                                    )}
-                                    {doc.signers && doc.viewers.length > 0 && (
-                                      <Dropdown.Item onClick={() => documentActions(doc.id, actionsList.RemoveViewer, 'viewers')}>
-                                        Убрать просмотрщика
-                                      </Dropdown.Item>
-                                    )}
-                                  </Dropdown.Menu>
-                                </Dropdown>
-                              )}
-                            </Col>
-                          </Row>
-                        </Card.Body>
-                      </Card>
-                    ))}
+                  <Row className="mb-4 p-3" style={{ maxHeight: '438px', overflow: 'auto' }}>
+                    <Col>
+                      {state.documents.length > 0 &&
+                        state.documents.map(doc => (
+                          <Card key={doc.id} className="mb-3 ">
+                            <CloseButton
+                              style={{ position: 'absolute', top: '0.2rem', right: '0.5rem' }}
+                              onClick={() => removeData('documents', doc)}
+                            />
+                            <Card.Body>
+                              <Row>
+                                <Col className={`${styles.fileUpload}`}>
+                                  <label className={styles.label}>
+                                    <input type="file" className={styles.customFileInput} onChange={e => addFile(e, doc.id)} />
+                                    <span className={styles.customFileButton}>Выберите файл</span>
+                                  </label>
+                                  <span className={styles.fileName} title={doc.file ? doc.file.name : ''}>
+                                    {doc.file ? doc.file.name : 'Файл не выбран'}
+                                  </span>
+                                </Col>
+                                <Col>
+                                  {doc.file && (doc.members?.length > 0 || doc?.signers.length > 0 || doc?.viewers.length) && (
+                                    <Dropdown>
+                                      <Dropdown.Toggle variant="primary" id="dropdown-basic">
+                                        Действия
+                                      </Dropdown.Toggle>
+                                      <Dropdown.Menu>
+                                        {doc.members.length > 0 && doc.file !== null && (
+                                          <Dropdown.Item onClick={() => documentActions(doc.id, actionsList.AddSigner, 'signers')}>
+                                            Добавить подписанта
+                                          </Dropdown.Item>
+                                        )}
+                                        {doc.members.length > 0 && doc.file !== null && (
+                                          <Dropdown.Item onClick={() => documentActions(doc.id, actionsList.AddViewer, 'viewers')}>
+                                            Добавить просмотрщика
+                                          </Dropdown.Item>
+                                        )}
+                                        {doc.signers && doc.signers.length > 0 && (
+                                          <Dropdown.Item onClick={() => documentActions(doc.id, actionsList.RemoveSigner, 'signers')}>
+                                            Убрать подписанта
+                                          </Dropdown.Item>
+                                        )}
+                                        {doc.signers && doc.viewers.length > 0 && (
+                                          <Dropdown.Item onClick={() => documentActions(doc.id, actionsList.RemoveViewer, 'viewers')}>
+                                            Убрать просмотрщика
+                                          </Dropdown.Item>
+                                        )}
+                                      </Dropdown.Menu>
+                                    </Dropdown>
+                                  )}
+                                </Col>
+                              </Row>
+                              <Row>
+                                <Col className="d-flex flex-column mt-2">
+                                  <span style={{ fontSize: '14px' }}>Добавлено подписантов: {doc.signers.length}</span>
+                                  <span style={{ fontSize: '14px' }}>Добавлено просмотрщиков: {doc.viewers.length}</span>
+                                </Col>
+                              </Row>
+                            </Card.Body>
+                          </Card>
+                        ))}
+                    </Col>
+                  </Row>
 
-                  <Button variant="success" onClick={() => addData('documents')}>
-                    Добавить документ
-                  </Button>
+                  <Row>
+                    <Col>
+                      <Button variant="success" onClick={() => addData('documents')}>
+                        Добавить документ
+                      </Button>
+                    </Col>
+                  </Row>
 
-                  <Button className="mt-5" onClick={pageToggle}>
-                    Назад
-                  </Button>
+                  <Row className="mt-5 ">
+                    <Col className="d-flex justify-content-between px-5">
+                      <Button onClick={pageToggle} variant="secondary">
+                        Назад
+                      </Button>
+
+                      <Button variant="success" onClick={sendToServer}>
+                        Создать
+                      </Button>
+                    </Col>
+                  </Row>
                 </div>
               )}
             </Form>

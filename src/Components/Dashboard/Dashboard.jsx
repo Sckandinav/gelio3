@@ -76,8 +76,10 @@ export const Dashboard = ({ isDropdown = false, onCreatedClick, createNew, data 
             )}
 
             <Button variant="primary">
-              <span>Созданные</span>
-              {created?.total_rooms > 0 && <span>{created?.total_rooms}</span>}
+              <span>Созданные </span>
+              {created?.total_rooms > 0 && (
+                <span title={`Созданные комнаты со статусом "Открыта": ${created?.total_rooms}`}>{created?.total_rooms}</span>
+              )}
             </Button>
             <Button variant="success" onClick={creatingToggle}>
               Создать
@@ -87,7 +89,7 @@ export const Dashboard = ({ isDropdown = false, onCreatedClick, createNew, data 
       </Container>
 
       <Modal show={isCreating} close={creatingToggle} title={'Создать комнату'}>
-        <Create />
+        <Create closeForm={creatingToggle} />
       </Modal>
     </>
   );

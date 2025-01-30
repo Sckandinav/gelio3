@@ -11,4 +11,6 @@ export const links = {
   login: () => [apiPath, 'auth/login/'].join('/'),
   sideBar: () => [apiPath, 'edo', 'doc-sidebar/'].join('/'),
   getUsers: () => [apiPath, 'core', 'user-list/'].join('/'),
+  getRooms: () => [apiPath, 'edo', 'inbox/'].join('/'),
+  createRoom: () => [apiPath, 'edo', 'room-detail', 'create-room/'].join('/'),
 };

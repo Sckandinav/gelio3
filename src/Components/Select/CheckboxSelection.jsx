@@ -4,7 +4,6 @@ import { ListGroup, Form, Button } from 'react-bootstrap';
 export const CheckboxSelection = ({ data, actionType, func, actionFunc, chosen, onClose }) => {
   const title = actionType?.action?.split(' ')[0];
   const roll = actionType?.action?.split(' ')[1] === 'подписанта' ? 'signers' : 'viewers';
-  console.log(roll);
 
   return (
     <>
