@@ -41,6 +41,15 @@ const initialMenuList = [
       { title: 'Заявки', to: 'applications/incoming' },
     ],
   },
+
+  {
+    title: 'Тех. поддержка',
+    id: 'support',
+    type: 'link',
+    img: '/icons/support.svg',
+    isActive: false,
+    linkSRC: 'support',
+  },
 ];
 
 export const Menu = () => {
@@ -73,7 +82,7 @@ export const Menu = () => {
               if (el.type === 'link') {
                 return (
                   <NavLink
-                    className="btn btn-outline-success d-flex align-items-center"
+                    className="btn btn-outline-success d-flex align-items-center mt-3"
                     to={el.linkSRC}
                     key={el.id + id}
                     onClick={() => dispatch(menuToggle())}

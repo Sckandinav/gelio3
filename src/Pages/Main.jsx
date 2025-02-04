@@ -1,10 +1,17 @@
 import React from 'react';
+import { Row, Col, Container } from 'react-bootstrap';
 
 export const Main = () => {
   return (
-    <div>
-      Lorem ipsum dolor, sit amet consectetur adipisicing elit. Officia quaerat, optio ad molestiae repudiandae, quisquam qui quas delectus non saepe
-      minus vel nulla nobis harum eum reiciendis minima, sed necessitatibus?
-    </div>
+    <Container className="bg-light-subtle rounded p-3">
+      <Row>
+        <Col>
+          Добро пожаловать на наш новый сайт! Мы рады приветствовать Вас на странице проекта, который сейчас находится в разработке. В скором времени
+          здесь появится множество полезных функций и инструментов, которые упростят вашу работу. В будущем Вас ждет удобный и современный интерфейс,
+          полезный функционал для решения ваших задач, регулярные обновления и новые возможности. Мы усердно работаем над тем, чтобы сделать сайт
+          лучше, и будем рады вашим отзывам и идеям. Следите за обновлениями — самые интересные изменения впереди! Спасибо за ваше терпение!
+        </Col>
+      </Row>
+    </Container>
   );
 };

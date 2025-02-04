@@ -4,10 +4,10 @@ import { NavLink } from 'react-router-dom';
 
 export const NotFound = () => {
   return (
-    <Container fluid className=" vh-100 d-flex flex-column justify-content-center align-items-center">
+    <Container fluid className="d-flex flex-column justify-content-center align-items-center">
       <Row>
         <Col className="bg-body p-3 rounded-4">
-          <h2>Страница не найдет</h2>
+          <h2>Страница не найдена</h2>
           <p>Запрашиваемая страница не найдена.</p>
           <NavLink to="/">
             <Button variant="link">На Главную</Button>

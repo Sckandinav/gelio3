@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Form, Button, Card, CloseButton, Col, Row, Dropdown } from 'react-bootstrap';
 import { motion, AnimatePresence } from 'motion/react';
 import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 import { Modal } from '../Modal/Modal.jsx';
 import { SelectComponent } from '../Select/Select';
 import { fetchUsers } from '../../api/fetchUsers';
-import { links } from '../../routes/routes.js';
+import { getRooms } from '../../api/getRooms.js';
+import { links, url } from '../../routes/routes.js';
 import { CheckboxSelection } from '../Select/CheckboxSelection.jsx';
 import { axiosInstance } from '../hoc/AxiosInstance.js';
 import { showSuccess, showError } from '../../store/slices/toast.js';
@@ -36,8 +38,9 @@ export const Create = ({ closeForm }) => {
     members: [],
     documents: [],
   });
-  console.log(state.documents[0]);
+
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const docInstance = () => {
     return { id: Date.now(), file: null, members: state.members, signers: [], viewers: [] };
@@ -167,6 +170,8 @@ export const Create = ({ closeForm }) => {
 
       closeForm();
       dispatch(showSuccess('Комната создана'));
+      navigate(url.edoCreated());
+      window.location.reload();
     } catch (error) {
       dispatch(showError('Не удалось создать комнату'));
       console.log(error);

@@ -1,16 +1,27 @@
 import React, { useState } from 'react';
-import { Row, Container, Col, Button, Form } from 'react-bootstrap';
+import { Row, Container, Col, Button, Form, Modal, Table } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import { userSelectors } from '../store/selectors/userSelectors';
 
 import { fetchAuth } from '../store/api/fetchAuth';
 import { useNavigate } from 'react-router-dom';
+import styles from './styles/LoginPage.module.scss';
 
 export const Login = () => {
   const [userData, setUserData] = useState({
     username: '',
     password: '',
   });
+  const [isOpenModal, setIsOpenModal] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+
+  const modalToggle = () => {
+    setIsOpenModal(prev => !prev);
+  };
+
+  const passwordVisibleHandler = () => {
+    setIsVisible(prev => !prev);
+  };
   const { error } = useSelector(userSelectors);
 
   const dispatch = useDispatch();
@@ -32,7 +43,7 @@ export const Login = () => {
   };
 
   return (
-    <Container fluid className="bg-secondary  vh-100">
+    <Container fluid className={`bg-secondary ${styles.LogInner}`}>
       <Row className="d-flex justify-content-center align-items-center h-100">
         <Col sm={3} className="bg-body p-3 rounded-4">
           <Form onSubmit={handleSubmit}>
@@ -53,7 +64,7 @@ export const Login = () => {
               <Form.Label>Пароль</Form.Label>
               <Form.Control
                 value={userData.password}
-                type="password"
+                type={isVisible ? 'text' : 'password'}
                 placeholder="Введите пароль"
                 required
                 onChange={e => {
@@ -62,8 +73,27 @@ export const Login = () => {
               />
             </Form.Group>
 
+            <Row className="d-flex justify-content-between">
+              <Col>
+                <Button variant="light" size="sm" onClick={passwordVisibleHandler}>
+                  {isVisible ? 'Скрыть пароль' : 'Показать пароль'}
+                </Button>
+              </Col>
+              <Col className="d-flex justify-content-end">
+                <Button variant="light" size="sm" onClick={modalToggle}>
+                  Не можете войти?
+                </Button>
+              </Col>
+            </Row>
+
             <Row className="mb-3">
-              {error === 'Request failed with status code 401' && <Form.Text className="text-danger ">Неверный логин или пароль</Form.Text>}
+              <div style={{ minHeight: '1.5em' }}>
+                {error === 'Request failed with status code 401' ? (
+                  <Form.Text className="text-danger">Неверный логин или пароль</Form.Text>
+                ) : (
+                  <Form.Text>&nbsp;</Form.Text>
+                )}
+              </div>
             </Row>
             <Button variant="success" type="submit">
               Войти
@@ -71,6 +101,36 @@ export const Login = () => {
           </Form>
         </Col>
       </Row>
+
+      <Modal show={isOpenModal} onHide={modalToggle}>
+        <Modal.Header closeButton>
+          <Modal.Title>Контактная информация</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Table>
+            <thead>
+              <tr>
+                <th>ФИО</th>
+                <th>Телефон</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Ильменский Максим Сергеевич</td>
+                <td>+7 (904) 433-44-20</td>
+              </tr>
+              <tr>
+                <td>Погорелов Егор Андреевич</td>
+                <td>+7 (937) 563-64-28</td>
+              </tr>
+              <tr>
+                <td>Балов Василий Георгиевич</td>
+                <td>+7 (937) 735-89-87</td>
+              </tr>
+            </tbody>
+          </Table>
+        </Modal.Body>
+      </Modal>
     </Container>
   );
 };

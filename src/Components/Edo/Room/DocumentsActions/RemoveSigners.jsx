@@ -1,0 +1,66 @@
+import React, { useState } from 'react';
+
+import { useDispatch } from 'react-redux';
+
+import { roomLinks } from '../../../../routes/routes.js';
+import { showSuccess, showError } from '../../../../store/slices/toast.js';
+import { axiosInstance } from '../../../hoc/AxiosInstance.js';
+import { CheckboxSelection } from '../../../Select/CheckboxSelection.jsx';
+
+export const RemoveSigners = ({ closePopup, updateRoom, document, actionsIDHandler }) => {
+  const [chosen, setChosen] = useState([]);
+  const dispatch = useDispatch();
+
+  const prepareDataForUpdate = () => {
+    return chosen.map(user => ({ signer: user.label, signer_id: user.value }));
+  };
+
+  const chosenToggle = el => {
+    chosen.some(user => user.value === el.value) ? setChosen(prev => prev.filter(user => user.value !== el.value)) : setChosen(prev => [...prev, el]);
+  };
+
+  const userWithTaskCompleted = document.signers_status.reduce((acc, current) => {
+    if (current.is_signed || current.is_signed === null) {
+      acc.push(current.signer_id);
+    }
+    return acc;
+  }, []);
+
+  const updateData = async e => {
+    e.preventDefault();
+
+    try {
+      const token = localStorage.getItem('token');
+      const axInst = axiosInstance;
+      const dataForSend = prepareDataForUpdate();
+
+      await axInst.post(roomLinks.removeSigners(document.id), dataForSend, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Token ${token}`,
+        },
+      });
+      dispatch(showSuccess(`${chosen.length > 1 ? 'Пользователе удалены' : 'Пользователь удален'}`));
+      actionsIDHandler();
+      closePopup();
+      updateRoom();
+    } catch (error) {
+      dispatch(showError('Не удалось выполнить действие'));
+      console.log(error);
+    }
+  };
+
+  return (
+    <div>
+      <CheckboxSelection
+        data={document.signers_status
+          .filter(user => !userWithTaskCompleted.includes(user.signer_id))
+          .map(user => ({ value: user.signer_id, label: user.signer }))}
+        chosen={chosen}
+        func={chosenToggle}
+        titleFromParent="Убрать"
+        removeUser={updateData}
+      />
+    </div>
+  );
+};

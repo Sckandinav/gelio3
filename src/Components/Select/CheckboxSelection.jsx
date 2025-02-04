@@ -1,8 +1,8 @@
 import React from 'react';
 import { ListGroup, Form, Button } from 'react-bootstrap';
 
-export const CheckboxSelection = ({ data, actionType, func, actionFunc, chosen, onClose }) => {
-  const title = actionType?.action?.split(' ')[0];
+export const CheckboxSelection = ({ data, actionType, func, actionFunc, chosen, onClose, titleFromParent = '', removeUser }) => {
+  const title = actionType ? actionType?.action?.split(' ')[0] : titleFromParent;
   const roll = actionType?.action?.split(' ')[1] === 'подписанта' ? 'signers' : 'viewers';
 
   return (
@@ -22,9 +22,13 @@ export const CheckboxSelection = ({ data, actionType, func, actionFunc, chosen, 
       <Button
         disabled={chosen.length === 0}
         variant={title === 'Добавить' ? 'success' : 'danger'}
-        onClick={() => {
-          actionFunc(actionType.id, roll);
-          onClose();
+        onClick={e => {
+          if (actionFunc) {
+            actionFunc(actionType.id, roll);
+            onClose();
+          } else {
+            removeUser(e);
+          }
         }}
       >
         {title}

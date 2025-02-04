@@ -3,20 +3,32 @@ import { Outlet } from 'react-router-dom';
 import { Row, Container, Col } from 'react-bootstrap';
 
 import { Header } from '../Header/Header';
+import { WebSocketListener } from '../hoc/WebSocket/WebSocketListener.js';
+import { NotificationManager } from '../NotificationManager/NotificationManager.jsx';
+import styles from './Layout.module.scss';
 
 export const Layout = () => {
   return (
-    <Container fluid className="p-3">
-      <Row>
-        <Col className="d-flex justify-content-between align-items-center mb-2">
-          <Header />
-        </Col>
-      </Row>
-      <Row>
-        <Col>
-          <Outlet />
-        </Col>
-      </Row>
-    </Container>
+    <>
+      <Container fluid className={`${styles.mainInner} bg-body-secondary`}>
+        <Row className="mb-2">
+          <WebSocketListener />
+          <NotificationManager />
+          <Col>
+            <Header />
+          </Col>
+        </Row>
+
+        <Row className={`${styles.mainContent}`}>
+          <Col className={`pt-2 h-100 ${styles.mainContent}`}>
+            <Outlet />
+          </Col>
+        </Row>
+
+        <Row>
+          <footer></footer>
+        </Row>
+      </Container>
+    </>
   );
 };
