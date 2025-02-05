@@ -11,6 +11,7 @@ import { getRooms } from '../../../api/getRooms';
 import { links } from '../../../routes/routes.js';
 import { Spinner } from '../../Spinner/Spinner.jsx';
 import { utilsSelector } from '../../../store/selectors/utilsSelector.js';
+import { useAxiosInterceptor } from '../../hoc/useAxiosInterceptor';
 
 export const Department = () => {
   const [data, setData] = useState([]);
@@ -18,6 +19,7 @@ export const Department = () => {
   const { id } = useParams();
 
   const { department } = useSelector(utilsSelector);
+  const axiosInstance = useAxiosInterceptor();
 
   const notificationInfo = row => {
     if (row.status === 'closed') {
@@ -68,7 +70,7 @@ export const Department = () => {
   useEffect(() => {
     const fetchRooms = async () => {
       try {
-        const response = await getRooms(links.getDepartmentRooms(), { departament_id: id });
+        const response = await getRooms(links.getDepartmentRooms(), axiosInstance, { departament_id: id });
         setData(response);
         setIsLoading(false);
       } catch (error) {

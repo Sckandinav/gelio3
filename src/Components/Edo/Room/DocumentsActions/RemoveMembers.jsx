@@ -2,13 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { showSuccess, showError } from '../../../../store/slices/toast.js';
-import { axiosInstance } from '../../../hoc/AxiosInstance.js';
+import { useAxiosInterceptor } from '../../../hoc/useAxiosInterceptor';
 import { roomLinks } from '../../../../routes/routes.js';
 import { CheckboxSelection } from '../../../Select/CheckboxSelection.jsx';
 
 export const RemoveMembers = ({ closePopup, updateRoom, roomsDetails }) => {
   const [usersWithCompletedTasks, setUsersWithCompletedTasks] = useState([]);
   const [usersData, setChosen] = useState([]);
+  const axiosInstance = useAxiosInterceptor();
 
   const users = roomsDetails.members;
   const { id } = useParams();
@@ -21,10 +22,9 @@ export const RemoveMembers = ({ closePopup, updateRoom, roomsDetails }) => {
   const removeUser = async e => {
     e.preventDefault();
     const token = localStorage.getItem('token');
-    const axInst = axiosInstance;
 
     try {
-      await axInst.post(
+      await axiosInstance.post(
         roomLinks.removeUser(id),
         { usersData },
         {

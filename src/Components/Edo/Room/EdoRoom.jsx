@@ -23,8 +23,8 @@ import { RemoveViewers } from './DocumentsActions/RemoveViewers';
 import { SignDocument } from './DocumentsActions/SignDocument';
 import { RejectSign } from './DocumentsActions/RejectSign';
 import { ViewDocument } from './DocumentsActions/ViewDocument';
-import { axiosInstance } from '../../hoc/AxiosInstance';
 import { showSuccess, showError } from '../../../store/slices/toast';
+import { useAxiosInterceptor } from '../../hoc/useAxiosInterceptor';
 
 const statusInfo = status => {
   return (
@@ -55,6 +55,7 @@ export const EdoRoom = () => {
   const { id } = useParams();
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const axiosInstance = useAxiosInterceptor();
 
   const currentUserID = useSelector(userSelectors).data?.user.id;
 
@@ -267,9 +268,9 @@ export const EdoRoom = () => {
 
     {
       name: 'Название',
-      selector: row => row.title,
+      selector: row => row.name,
       sortable: true,
-      // cell: row => dowLoadLink(row),
+      cell: row => dowLoadLink(row),
     },
     {
       name: 'Создатель документа',
@@ -280,6 +281,7 @@ export const EdoRoom = () => {
     {
       name: 'Действия с документом',
       selector: row => actionsBtn(row),
+      grow: 2,
     },
 
     {
@@ -291,17 +293,27 @@ export const EdoRoom = () => {
         alignItems: 'flex-start',
         gap: '5px',
         justifyContent: 'center',
+        fontSize: '14px',
       },
     },
 
     {
       name: 'Просмотр файла',
       cell: row => displayUsers(row, 'viewers'),
+      style: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-start',
+        gap: '5px',
+        justifyContent: 'center',
+        fontSize: '14px',
+      },
     },
   ];
 
   const tableData = data?.documents?.map(row => ({
     id: row.id,
+    name: row.name,
     title: dowLoadLink(row),
     creator: row.uploaded_by,
     actions: actionsBtn(row),
@@ -312,7 +324,7 @@ export const EdoRoom = () => {
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const response = await getRoom(roomLinks.room(id));
+      const response = await getRoom(roomLinks.room(id), axiosInstance);
       setData(response);
       setIsLoading(false);
     } catch (error) {

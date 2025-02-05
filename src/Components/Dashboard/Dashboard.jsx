@@ -37,7 +37,7 @@ export const Dashboard = ({ isDropdown = false }) => {
                     {incoming?.total_open_rooms > 0 && (
                       <span
                         title={`${incoming.total_open_rooms > 0 && `Открытых комнат c Вашим участием: ${incoming.total_open_rooms}`}\n${
-                          incoming.total_actions > 0 && `Кол-во документов, ожидающих Вашего взаимодействия: ${incoming.total_actions}`
+                          incoming.total_actions > 0 ? `Кол-во документов, ожидающих Вашего взаимодействия: ${incoming.total_actions}` : ''
                         }`}
                       >
                         {incoming.total_open_rooms}

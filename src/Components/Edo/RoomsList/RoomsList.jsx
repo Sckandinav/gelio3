@@ -8,10 +8,12 @@ import { Table } from '../../Table//Table';
 import { getRooms } from '../../../api/getRooms';
 import { links } from '../../../routes/routes.js';
 import { Spinner } from '../../Spinner/Spinner.jsx';
+import { useAxiosInterceptor } from '../../hoc/useAxiosInterceptor';
 
 export const RoomsList = () => {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const axiosInstance = useAxiosInterceptor();
 
   const notificationInfo = row => {
     if (row.status === 'closed') {
@@ -62,7 +64,7 @@ export const RoomsList = () => {
   useEffect(() => {
     const fetchRooms = async () => {
       try {
-        const response = await getRooms(links.getRooms());
+        const response = await getRooms(links.getRooms(), axiosInstance);
         setData(response);
         setIsLoading(false);
       } catch (error) {

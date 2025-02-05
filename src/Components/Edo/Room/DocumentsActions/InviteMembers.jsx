@@ -5,16 +5,17 @@ import { Button } from 'react-bootstrap';
 
 import { SelectComponent } from '../../../Select/Select';
 import { showSuccess, showError } from '../../../../store/slices/toast.js';
-import { axiosInstance } from '../../../hoc/AxiosInstance.js';
+
 import { roomLinks, links } from '../../../../routes/routes.js';
 import { fetchUsers } from '../../../../api/fetchUsers.js';
+import { useAxiosInterceptor } from '../../../hoc/useAxiosInterceptor';
 
 export const InviteMembers = ({ closePopup, updateRoom, members }) => {
   const { id } = useParams();
   const [users, setUsers] = useState([]);
   const [chosen, setChosen] = useState([]);
   const dispatch = useDispatch();
-
+  const axiosInstance = useAxiosInterceptor();
   const prepareDataForUpdate = () => {
     const result = chosen.map(user => ({
       id: user.value,
@@ -63,7 +64,7 @@ export const InviteMembers = ({ closePopup, updateRoom, members }) => {
   useEffect(() => {
     const getUsers = async () => {
       try {
-        const response = await fetchUsers(links.getUsers());
+        const response = await fetchUsers(links.getUsers(), axiosInstance);
         const options = response.reduce((acc, user) => {
           if (!usersIdInRoom.includes(user.id)) {
             acc.push({

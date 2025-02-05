@@ -4,12 +4,13 @@ import { useDispatch } from 'react-redux';
 
 import { roomLinks } from '../../../../routes/routes.js';
 import { showSuccess, showError } from '../../../../store/slices/toast.js';
-import { axiosInstance } from '../../../hoc/AxiosInstance.js';
+import { useAxiosInterceptor } from '../../../hoc/useAxiosInterceptor';
 import { CheckboxSelection } from '../../../Select/CheckboxSelection.jsx';
 
 export const RemoveViewers = ({ closePopup, updateRoom, document, actionsIDHandler }) => {
   const [chosen, setChosen] = useState([]);
   const dispatch = useDispatch();
+  const axiosInstance = useAxiosInterceptor();
 
   const prepareDataForUpdate = () => {
     return chosen.map(user => ({ viewer: user.label, viewer_id: user.value }));
@@ -31,9 +32,9 @@ export const RemoveViewers = ({ closePopup, updateRoom, document, actionsIDHandl
 
     try {
       const token = localStorage.getItem('token');
-      const axInst = axiosInstance;
+
       const dataForSend = prepareDataForUpdate();
-      await axInst.post(roomLinks.removeViewers(document.id), dataForSend, {
+      await axiosInstance.post(roomLinks.removeViewers(document.id), dataForSend, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Token ${token}`,

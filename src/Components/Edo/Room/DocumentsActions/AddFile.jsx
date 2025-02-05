@@ -4,7 +4,7 @@ import { Button, Col } from 'react-bootstrap';
 import { useDispatch } from 'react-redux';
 
 import { showSuccess, showError } from '../../../../store/slices/toast.js';
-import { axiosInstance } from '../../../hoc/AxiosInstance.js';
+import { useAxiosInterceptor } from '../../../hoc/useAxiosInterceptor';
 import { roomLinks } from '../../../../routes/routes.js';
 import styles from './AddFile.module.scss';
 
@@ -12,6 +12,7 @@ export const AddFile = ({ closePopup, updateRoom }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const { id } = useParams();
   const dispatch = useDispatch();
+  const axiosInstance = useAxiosInterceptor();
 
   const sendFile = async e => {
     e.preventDefault();
@@ -19,10 +20,9 @@ export const AddFile = ({ closePopup, updateRoom }) => {
     formData.append('file', selectedFile);
     formData.append('name', selectedFile.name);
     const token = localStorage.getItem('token');
-    const axInst = axiosInstance;
 
     try {
-      await axInst.post(roomLinks.addFile(id), formData, {
+      await axiosInstance.post(roomLinks.addFile(id), formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Token ${token}`,

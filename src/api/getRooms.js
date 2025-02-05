@@ -1,11 +1,8 @@
-import { axiosInstance } from '../Components/hoc/AxiosInstance';
-
-export const getRooms = async (url, params) => {
+export const getRooms = async (url, axiosInstance, params) => {
   try {
     const token = localStorage.getItem('token');
-    const axios = axiosInstance;
 
-    const res = await axios.get(url, {
+    const res = await axiosInstance.get(url, {
       headers: { 'Content-Type': 'application/json', Authorization: `Token ${token}` },
       params,
     });

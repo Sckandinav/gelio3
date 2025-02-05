@@ -4,12 +4,12 @@ import { Button, Form, Modal } from 'react-bootstrap';
 
 import { roomLinks } from '../../../../routes/routes.js';
 import { showSuccess, showError } from '../../../../store/slices/toast.js';
-import { axiosInstance } from '../../../hoc/AxiosInstance.js';
+import { useAxiosInterceptor } from '../../../hoc/useAxiosInterceptor';
 
 export const RejectSign = ({ show, close, updateRoom, document, actionsIDHandler }) => {
   const dispatch = useDispatch();
   const [comment, setComment] = useState('');
-
+  const axiosInstance = useAxiosInterceptor();
   const commentHandler = e => {
     setComment(e.target.value);
   };
@@ -18,13 +18,9 @@ export const RejectSign = ({ show, close, updateRoom, document, actionsIDHandler
     e.preventDefault();
     console.log(e); // Посмотреть, что за событие
     const token = localStorage.getItem('token');
-    const axInst = axiosInstance;
 
     try {
-      //   await axInst.post(roomLinks.rejectSign(document.id), comment, {
-
-      //   });
-      await axInst.post(
+      await axiosInstance.post(
         roomLinks.rejectSign(document.id),
         { comment },
         {

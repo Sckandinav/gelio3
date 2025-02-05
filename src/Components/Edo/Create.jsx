@@ -7,11 +7,10 @@ import { useNavigate } from 'react-router-dom';
 import { Modal } from '../Modal/Modal.jsx';
 import { SelectComponent } from '../Select/Select';
 import { fetchUsers } from '../../api/fetchUsers';
-import { getRooms } from '../../api/getRooms.js';
 import { links, url } from '../../routes/routes.js';
 import { CheckboxSelection } from '../Select/CheckboxSelection.jsx';
-import { axiosInstance } from '../hoc/AxiosInstance.js';
 import { showSuccess, showError } from '../../store/slices/toast.js';
+import { useAxiosInterceptor } from '../hoc/useAxiosInterceptor';
 
 import styles from './Create.module.scss';
 
@@ -38,7 +37,7 @@ export const Create = ({ closeForm }) => {
     members: [],
     documents: [],
   });
-
+  const axiosInstance = useAxiosInterceptor();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -181,7 +180,7 @@ export const Create = ({ closeForm }) => {
   useEffect(() => {
     const getUsers = async () => {
       try {
-        const res = await fetchUsers(links.getUsers());
+        const res = await fetchUsers(links.getUsers(), axiosInstance);
 
         const options = res.reduce((acc, user) => {
           acc.push({

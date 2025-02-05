@@ -11,6 +11,7 @@ export const url = {
 };
 
 export const links = {
+  checkStatus: () => [apiPath, 'core', 'health/'].join('/'),
   login: () => [apiPath, 'auth/login/'].join('/'),
   sideBar: () => [apiPath, 'edo', 'doc-sidebar/'].join('/'), // сайд бар это
   getUsers: () => [apiPath, 'core', 'user-list/'].join('/'), // список сотрудников

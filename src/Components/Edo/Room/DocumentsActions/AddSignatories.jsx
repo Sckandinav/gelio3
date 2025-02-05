@@ -4,12 +4,13 @@ import { useDispatch } from 'react-redux';
 
 import { roomLinks } from '../../../../routes/routes.js';
 import { showSuccess, showError } from '../../../../store/slices/toast.js';
-import { axiosInstance } from '../../../hoc/AxiosInstance.js';
+import { useAxiosInterceptor } from '../../../hoc/useAxiosInterceptor';
 import { CheckboxSelection } from '../../../Select/CheckboxSelection.jsx';
 
 export const AddSignatories = ({ closePopup, updateRoom, document, members, actionsIDHandler }) => {
   const [chosen, setChosen] = useState([]);
   const dispatch = useDispatch();
+  const axiosInstance = useAxiosInterceptor();
 
   const chosenToggle = el => {
     chosen.some(user => user.value === el.value) ? setChosen(prev => prev.filter(user => user.value !== el.value)) : setChosen(prev => [...prev, el]);
@@ -32,10 +33,10 @@ export const AddSignatories = ({ closePopup, updateRoom, document, members, acti
   const handleSubmit = async e => {
     e.preventDefault();
     const token = localStorage.getItem('token');
-    const axInst = axiosInstance;
+
     const dataForSend = prepareDataForUpdate();
     try {
-      await axInst.post(roomLinks.addSigners(document.id), dataForSend, {
+      await axiosInstance.post(roomLinks.addSigners(document.id), dataForSend, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Token ${token}`,
