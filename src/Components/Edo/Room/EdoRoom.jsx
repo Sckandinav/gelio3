@@ -50,6 +50,7 @@ export const EdoRoom = () => {
   const axiosInstance = useAxiosInterceptor();
 
   const currentUserID = useSelector(userSelectors).data?.user.id;
+  console.log(data);
 
   const navigate = useNavigate();
 
@@ -107,7 +108,7 @@ export const EdoRoom = () => {
   };
 
   const isCurrentUserInRoom = () => {
-    return data.members?.some(user => Number(user.user_id) === Number(currentUserID));
+    return data.members?.some(user => Number(user.user_id) === Number(currentUserID)) || Number(currentUserID) === Number(data.creator_id);
   };
 
   const actionsBtn = row => {

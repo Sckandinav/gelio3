@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Container, Row, Col, Dropdown, DropdownButton } from 'react-bootstrap';
+import { Button, Container, Row, Col, Dropdown, DropdownButton, Badge } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -33,16 +33,20 @@ export const Dashboard = ({ isDropdown = false }) => {
               {isDropdown ? (
                 <Dropdown>
                   <Dropdown.Toggle variant="primary" id="dropdown-basic">
-                    <span>Входящие </span>
+                    <span>Входящие</span>
                     {incoming?.total_open_rooms > 0 && (
-                      <span
+                      <Badge
+                        pill
+                        bg="light"
+                        text="primary"
+                        className="mx-1"
                         title={`${incoming.total_open_rooms > 0 && `Открытых комнат c Вашим участием: ${incoming.total_open_rooms}`}\n${
                           incoming.total_actions > 0 ? `Кол-во документов, ожидающих Вашего взаимодействия: ${incoming.total_actions}` : ''
                         }`}
                       >
                         {incoming.total_open_rooms}
                         {incoming.total_actions > 0 && `/${incoming.total_actions}`}
-                      </span>
+                      </Badge>
                     )}
                   </Dropdown.Toggle>
 
@@ -55,7 +59,25 @@ export const Dashboard = ({ isDropdown = false }) => {
                           id={`dropdown-company-${company.id}`}
                           title={
                             <>
-                              <span>{company.name}</span>
+                              <span>
+                                {company.name}
+                                {incoming.total_open_rooms > 0 && (
+                                  <Badge
+                                    pill
+                                    bg="light"
+                                    text="primary"
+                                    className="mx-1"
+                                    title={`${incoming.total_open_rooms > 0 && `Открытых комнат c Вашим участием: ${incoming.total_open_rooms}`}\n${
+                                      incoming.total_actions > 0
+                                        ? `Кол-во документов, ожидающих Вашего взаимодействия: ${incoming.total_actions}`
+                                        : ''
+                                    }`}
+                                  >
+                                    {incoming.total_open_rooms}
+                                    {incoming.total_actions > 0 && `/${incoming.total_actions}`}
+                                  </Badge>
+                                )}
+                              </span>
                             </>
                           }
                           variant="primary"
@@ -70,14 +92,21 @@ export const Dashboard = ({ isDropdown = false }) => {
                               >
                                 <span>{dept.name} </span>
                               </Link>
-                              <span
-                                title={`${dept.open_rooms > 0 && `Открытых комнат c Вашим участием: ${dept.open_rooms}`}\n${
-                                  dept.total_actions > 0 ? `Кол-во документов, ожидающих Вашего взаимодействия: ${dept.total_actions}` : ''
-                                }`}
-                              >
-                                {dept.open_rooms > 0 && dept.open_rooms}
-                                {dept.total_actions > 0 && `/${dept.total_actions}`}
-                              </span>
+
+                              {dept.open_rooms > 0 && (
+                                <Badge
+                                  pill
+                                  bg="primary"
+                                  text="light"
+                                  className="mx-2"
+                                  title={`${dept.open_rooms > 0 && `Открытых комнат c Вашим участием: ${dept.open_rooms}`}\n${
+                                    dept.total_actions > 0 ? `Кол-во документов, ожидающих Вашего взаимодействия: ${dept.total_actions}` : ''
+                                  }`}
+                                >
+                                  {dept.open_rooms}
+                                  {dept.total_actions > 0 ? `/${dept.total_actions}` : ''}
+                                </Badge>
+                              )}
                             </Dropdown.Item>
                           ))}
                         </DropdownButton>

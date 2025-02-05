@@ -1,20 +1,22 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
 import { IoIosLogOut } from 'react-icons/io';
-import { Row, Col, OverlayTrigger, Popover, Button, Badge } from 'react-bootstrap';
+import { Row, Col, OverlayTrigger, Popover, Button, Badge, Dropdown } from 'react-bootstrap';
 import { IoNotificationsOutline } from 'react-icons/io5';
 import { notificationsSelector } from '../../store/selectors/notificationsSelector';
 
 import { logOut } from '../../store/slices/userAuth';
 import { Menu } from '../Menu/Menu';
-import { url } from '../../routes/routes.js';
+import { userSelectors } from '../../store/selectors/userSelectors';
+
+import styles from './Header.module.scss';
 
 export const Header = () => {
   const dispatch = useDispatch();
   const { notifications, unreadCount } = useSelector(notificationsSelector);
   const [show, setShow] = useState(false);
-  const target = useRef(null); // Ссылка на кнопку
+  const user = useSelector(userSelectors).data.user;
+  const target = useRef(null);
 
   const lastNotifications = notifications?.slice(-1)[0]?.notifications;
 
@@ -33,7 +35,7 @@ export const Header = () => {
       <Col className="d-flex justify-content-between align-items-center">
         <Menu />
 
-        <div>
+        <div className="d-flex">
           <OverlayTrigger
             show={show}
             trigger="click"
@@ -45,21 +47,7 @@ export const Header = () => {
                 <Popover.Body>
                   {lastNotifications && lastNotifications.length > 0
                     ? lastNotifications?.map((notification, id) => {
-                        if (notification.object_type === 'document_viewer') {
-                          return (
-                            <span key={id} className="d-block mb-1">
-                              Вам нужно подтвердить просмотр <Link to={url.edo()}>{notification.count}</Link> документ(-ов).
-                            </span>
-                          );
-                        }
-                        if (notification.object_type === 'document_signer') {
-                          return (
-                            <span key={id} className="d-block mb-1">
-                              Вам необходимо подписать <Link to={url.edo()}>{notification.count}</Link> документ(-ов).
-                            </span>
-                          );
-                        }
-                        return null;
+                        return <div key={id}>{notification.readable_message}</div>;
                       })
                     : 'Нет новых уведомлений'}
                 </Popover.Body>
@@ -76,15 +64,24 @@ export const Header = () => {
             </Button>
           </OverlayTrigger>
 
-          <Button
-            className="mx-4"
-            variant="light"
-            onClick={() => {
-              dispatch(logOut());
-            }}
-          >
-            <IoIosLogOut /> Выход
-          </Button>
+          <Dropdown>
+            <Dropdown.Toggle variant="light" id="dropdown-basic" className={styles.dropdownToggle}>
+              {user.full_name}
+            </Dropdown.Toggle>
+            <Dropdown.Menu className={styles.dropdownMenu}>
+              <Dropdown.Item as="div" className={styles.dropdownItem} variant="light">
+                <Button
+                  className={styles.logoutButton}
+                  variant="light"
+                  onClick={() => {
+                    dispatch(logOut());
+                  }}
+                >
+                  <IoIosLogOut /> Выход
+                </Button>
+              </Dropdown.Item>
+            </Dropdown.Menu>
+          </Dropdown>
         </div>
       </Col>
     </Row>

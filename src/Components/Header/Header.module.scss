@@ -1,0 +1,47 @@
+// Dropdown.module.scss
+.dropdownToggle {
+  background-color: transparent;
+  border: none;
+  color: inherit;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.dropdownMenu {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dropdownItem {
+  padding: 0;
+
+  &:focus,
+  &:active {
+    background-color: transparent !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+}
+
+.logoutButton {
+  width: 100%;
+  text-align: left;
+  padding: 0.5rem 1rem;
+  background-color: transparent;
+  border: none;
+  color: #333;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #f8f9fa;
+  }
+
+  &:focus,
+  &:active {
+    background-color: transparent !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+}
