@@ -19,6 +19,8 @@ export const Dashboard = ({ isDropdown = false }) => {
     setIsCreating(prev => !prev);
   };
 
+  console.log(data);
+
   const created = data?.data?.created || {};
   const incoming = data?.data?.incoming || {};
   const dispatch = useDispatch();
@@ -61,20 +63,18 @@ export const Dashboard = ({ isDropdown = false }) => {
                             <>
                               <span>
                                 {company.name}
-                                {incoming.total_open_rooms > 0 && (
+                                {company.open_rooms > 0 && (
                                   <Badge
                                     pill
                                     bg="light"
                                     text="primary"
                                     className="mx-1"
-                                    title={`${incoming.total_open_rooms > 0 && `Открытых комнат c Вашим участием: ${incoming.total_open_rooms}`}\n${
-                                      incoming.total_actions > 0
-                                        ? `Кол-во документов, ожидающих Вашего взаимодействия: ${incoming.total_actions}`
-                                        : ''
+                                    title={`${company.open_rooms > 0 && `Открытых комнат c Вашим участием: ${company.open_rooms}`}\n${
+                                      company.total_actions > 0 ? `Кол-во документов, ожидающих Вашего взаимодействия: ${company.total_actions}` : ''
                                     }`}
                                   >
-                                    {incoming.total_open_rooms}
-                                    {incoming.total_actions > 0 && `/${incoming.total_actions}`}
+                                    {company.open_rooms}
+                                    {company.total_actions > 0 ? `/${company.total_actions}` : ''}
                                   </Badge>
                                 )}
                               </span>
@@ -98,7 +98,7 @@ export const Dashboard = ({ isDropdown = false }) => {
                                   pill
                                   bg="primary"
                                   text="light"
-                                  className="mx-2"
+                                  className="mx-1"
                                   title={`${dept.open_rooms > 0 && `Открытых комнат c Вашим участием: ${dept.open_rooms}`}\n${
                                     dept.total_actions > 0 ? `Кол-во документов, ожидающих Вашего взаимодействия: ${dept.total_actions}` : ''
                                   }`}
@@ -120,8 +120,11 @@ export const Dashboard = ({ isDropdown = false }) => {
 
               <Link className="btn btn-primary" to="created">
                 <span>Созданные </span>
+
                 {created?.total_rooms > 0 && (
-                  <span title={`Созданные комнаты со статусом "Открыта": ${created?.total_rooms}`}>{created?.total_rooms}</span>
+                  <Badge pill bg="light" text="primary" className="mx-1" title={`Созданные комнаты со статусом "Открыта": ${created?.total_rooms}`}>
+                    {created?.total_rooms}
+                  </Badge>
                 )}
               </Link>
               <Button variant="success" onClick={creatingToggle}>
