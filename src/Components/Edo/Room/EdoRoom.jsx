@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Button, Row, Col, Stack, Badge, ListGroup, ButtonGroup } from 'react-bootstrap';
 import { motion, AnimatePresence } from 'motion/react';
 import { useSelector } from 'react-redux';
@@ -39,14 +39,6 @@ const statusInfo = status => {
         </Badge>
       )}
     </Stack>
-  );
-};
-
-const dowLoadLink = row => {
-  return (
-    <a href={row.file} download>
-      {row.name}
-    </a>
   );
 };
 
@@ -259,6 +251,14 @@ export const EdoRoom = () => {
     });
   };
 
+  const dowLoadLink = row => {
+    return (
+      <a href={row.file} download>
+        {row.name}
+      </a>
+    );
+  };
+
   const columns = [
     {
       name: '',
@@ -269,13 +269,10 @@ export const EdoRoom = () => {
     {
       name: 'Название',
       selector: row => row.name,
-      sortable: true,
-      cell: row => dowLoadLink(row),
     },
     {
       name: 'Создатель документа',
       selector: row => row.creator,
-      sortable: true,
     },
 
     {
@@ -313,8 +310,7 @@ export const EdoRoom = () => {
 
   const tableData = data?.documents?.map(row => ({
     id: row.id,
-    name: row.name,
-    title: dowLoadLink(row),
+    name: dowLoadLink(row),
     creator: row.uploaded_by,
     actions: actionsBtn(row),
     signers_status: row.signers_status,
@@ -463,12 +459,12 @@ export const EdoRoom = () => {
         </Row>
         <Row>
           <Col className="p-0 ">
-            <Table selectableRows={true} columns={columns} data={tableData} SelectFunc={addFileToRemove} />
+            <Table selectableRows={true} columns={columns} data={tableData} SelectFunc={addFileToRemove} hasSearch={false} />
           </Col>
         </Row>
         <Row>
           <Col>
-            <Accordion defaultActiveKey="0">
+            <Accordion defaultActiveKey="0" className="mb-3">
               <Accordion.Item>
                 <Accordion.Header>Протокол комнаты</Accordion.Header>
                 <Accordion.Body>

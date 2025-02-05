@@ -38,7 +38,7 @@ const initialMenuList = [
     linkSRC: '/',
     subMenuLists: [
       { title: 'Обмен документами', to: 'edo' },
-      // { title: 'Заявки', to: 'applications/incoming' },
+      { title: 'Заявки', to: 'applications/incoming' },
     ],
   },
 

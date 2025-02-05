@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import DataTable from 'react-data-table-component';
 
-export const Table = ({ title = '', selectableRows = true, data, columns, SelectFunc }) => {
+export const Table = ({ title = '', selectableRows = true, data, columns, SelectFunc, hasSearch = true }) => {
   const [searchText, setSearchText] = useState('');
 
   const paginationOptions = {
@@ -14,7 +14,9 @@ export const Table = ({ title = '', selectableRows = true, data, columns, Select
 
   const customStyles = {
     rows: {
-      style: {},
+      style: {
+        padding: '10px 0',
+      },
     },
     headCells: {
       style: {
@@ -41,11 +43,13 @@ export const Table = ({ title = '', selectableRows = true, data, columns, Select
   return (
     <div>
       <h2>{title}</h2>
-      <div className="input-group mb-3">
-        <label>
-          <input className="form-control" type="search" placeholder="Поиск..." value={searchText} onChange={e => setSearchText(e.target.value)} />
-        </label>
-      </div>
+      {hasSearch && (
+        <div className="input-group mb-3">
+          <label>
+            <input className="form-control" type="search" placeholder="Поиск..." value={searchText} onChange={e => setSearchText(e.target.value)} />
+          </label>
+        </div>
+      )}
       <DataTable
         style={{ fontSize: '16px' }}
         columns={columns}
