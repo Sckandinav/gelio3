@@ -6,8 +6,8 @@ export const useAxiosInterceptor = () => {
   const navigate = useNavigate();
 
   const axiosInstance = axios.create({
-    baseURL: process.env.NODE_ENV === 'development' ? process.env.REACT_APP_DEV_API_URL + '/api' : process.env.REACT_APP_PROD_API_URL + '/api',
-    timeout: 5000,
+    // baseURL: process.env.NODE_ENV === 'development' ? process.env.REACT_APP_DEV_API_URL + '/api' : process.env.REACT_APP_PROD_API_URL + '/api',
+    // timeout: 5000,
   });
 
   axiosInstance.interceptors.response.use(
