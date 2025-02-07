@@ -11,6 +11,7 @@ import { links, url } from '../../routes/routes.js';
 import { CheckboxSelection } from '../Select/CheckboxSelection.jsx';
 import { showSuccess, showError } from '../../store/slices/toast.js';
 import { useAxiosInterceptor } from '../hoc/useAxiosInterceptor';
+import { isSignableDocument } from '../../utils/signableFormats.js';
 
 import styles from './Create.module.scss';
 
@@ -21,7 +22,7 @@ const actionsList = {
   RemoveViewer: 'Убрать просмотрщика',
 };
 
-export const Create = ({ closeForm }) => {
+export const Create = () => {
   const [users, setUsers] = useState([]);
   const [pageNumber, setPageNumber] = useState(1);
   const [actionsModal, setActionsModal] = useState(false);
@@ -157,17 +158,15 @@ export const Create = ({ closeForm }) => {
     });
 
     try {
-      const axios = axiosInstance;
       const token = localStorage.getItem('token');
 
-      await axios.post(links.createRoom(), formData, {
+      await axiosInstance.post(links.createRoom(), formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Token ${token}`,
         },
       });
 
-      closeForm();
       dispatch(showSuccess('Комната создана'));
       navigate(url.edoCreated());
       window.location.reload();
@@ -259,7 +258,7 @@ export const Create = ({ closeForm }) => {
                                         Действия
                                       </Dropdown.Toggle>
                                       <Dropdown.Menu>
-                                        {doc.members.length > 0 && doc.file !== null && (
+                                        {isSignableDocument(doc.file.name) && doc.members.length > 0 && doc.file !== null && (
                                           <Dropdown.Item onClick={() => documentActions(doc.id, actionsList.AddSigner, 'signers')}>
                                             Добавить подписанта
                                           </Dropdown.Item>

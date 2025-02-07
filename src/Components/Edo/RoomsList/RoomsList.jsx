@@ -79,13 +79,12 @@ export const RoomsList = () => {
   const columns = [
     {
       name: '',
-      selector: row => row.id,
-      omit: true,
-    },
-    {
-      name: '',
       selector: row => row.notifications,
       width: '50px',
+    },
+    {
+      name: '№ комнаты',
+      selector: row => row.id,
     },
     {
       name: 'Название',

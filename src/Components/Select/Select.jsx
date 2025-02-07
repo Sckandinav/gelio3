@@ -8,9 +8,13 @@ export const SelectComponent = ({ data, placeholder = 'Выберите поль
   const [selectedUser, setSelectedUser] = useState(null);
 
   const updateListOnAdd = selectedOption => {
-    setSelectedUser(selectedUser);
-    setInitialList(prev => prev.filter(item => item.value !== selectedOption.value));
-    setSelectedUser(null);
+    if ((multiSelection = true)) {
+      setSelectedUser(selectedUser);
+      setInitialList(prev => prev.filter(item => item.value !== selectedOption.value));
+      setSelectedUser(null);
+    } else {
+      setSelectedUser(selectedOption);
+    }
   };
 
   const updateListonRemove = selectedOption => {
@@ -56,7 +60,7 @@ export const SelectComponent = ({ data, placeholder = 'Выберите поль
         }}
       />
 
-      {selected.length > 0 && (
+      {multiSelection && selected.length > 0 && (
         <div className={`mt-3  ${styles.listBlock}`}>
           <ListGroup>
             {selected.map(user => (

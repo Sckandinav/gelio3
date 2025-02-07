@@ -1,8 +1,16 @@
 import React, { useState } from 'react';
-import DataTable from 'react-data-table-component';
+import DataTable, { defaultThemes } from 'react-data-table-component';
+import { useSelector, useDispatch } from 'react-redux';
+
+import { setCurrentPage, setRowsPerPage } from '../../store/slices/utils.js';
+import { utilsSelector } from '../../store/selectors/utilsSelector.js';
+import './styles.css';
 
 export const Table = ({ title = '', selectableRows = true, data, columns, SelectFunc, hasSearch = true }) => {
   const [searchText, setSearchText] = useState('');
+
+  const { rowsPerPage, currentPage } = useSelector(utilsSelector).pagination;
+  const dispatch = useDispatch();
 
   const paginationOptions = {
     rowsPerPageText: 'Строк на странице:',
@@ -21,11 +29,20 @@ export const Table = ({ title = '', selectableRows = true, data, columns, Select
     headCells: {
       style: {
         fontSize: '16px',
+        padding: '10px',
       },
     },
     cells: {
       style: {
         fontSize: '16px',
+        whiteSpace: 'normal',
+        wordWrap: 'break-word',
+        padding: '10px',
+        '&:not(:last-of-type)': {
+          borderRightStyle: 'solid',
+          borderRightWidth: '1px',
+          borderRightColor: defaultThemes.default.divider.default,
+        },
       },
     },
   };
@@ -39,6 +56,15 @@ export const Table = ({ title = '', selectableRows = true, data, columns, Select
   const filteredData = data.filter(item => {
     return Object.keys(item).some(key => item[key]?.toString().toLowerCase().includes(searchText.toLowerCase()));
   });
+
+  const handlePageChange = page => {
+    dispatch(setCurrentPage(page));
+  };
+
+  const handlePerRowsChange = (newPerPage, page) => {
+    dispatch(setRowsPerPage(newPerPage));
+    dispatch(setCurrentPage(page));
+  };
 
   return (
     <div>
@@ -61,6 +87,10 @@ export const Table = ({ title = '', selectableRows = true, data, columns, Select
         customStyles={customStyles}
         onSelectedRowsChange={SelectFunc}
         selectableRowDisabled={isRowDisabled}
+        paginationPerPage={rowsPerPage}
+        paginationDefaultPage={currentPage}
+        onChangePage={handlePageChange}
+        onChangeRowsPerPage={handlePerRowsChange}
       />
     </div>
   );

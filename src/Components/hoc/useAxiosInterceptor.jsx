@@ -24,8 +24,6 @@ export const useAxiosInterceptor = () => {
 
         if (status === 401) {
           navigate(url.login());
-        } else if (status >= 500) {
-          navigate(url.error());
         } else if (status === 404) {
           navigate(url.notFound());
         }

@@ -1,0 +1,12 @@
+.cyOdnA {
+  overflow: hidden;
+  white-space: break-spaces !important;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+
+.hmVlQg div:first-child {
+  white-space: break-spaces !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

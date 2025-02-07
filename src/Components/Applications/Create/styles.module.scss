@@ -1,0 +1,31 @@
+.input {
+  max-width: 130px;
+  &::placeholder {
+    font-size: 12px;
+    font-style: italic;
+  }
+}
+
+.textarea {
+  width: 200px;
+  &::placeholder {
+    font-size: 12px;
+    font-style: italic;
+  }
+}
+
+.tableBtn {
+  padding: 0.25rem;
+  border: none;
+  background-color: transparent;
+
+  .editIcon {
+    color: inherit; // Наследует цвет от кнопки
+  }
+
+  &:hover {
+    .editIcon {
+      color: #ff0000; // Цвет иконки при наведении
+    }
+  }
+}

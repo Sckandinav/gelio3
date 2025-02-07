@@ -7,7 +7,8 @@ export const url = {
   edo: () => '/edo',
   edoCreated: () => 'created',
   notFound: () => '/not-found',
-  support: () => 'support',
+  support: () => '/support',
+  applications: () => '/applications',
 };
 
 export const links = {
@@ -16,7 +17,7 @@ export const links = {
   sideBar: () => [apiPath, 'edo', 'doc-sidebar/'].join('/'), // сайд бар это
   getUsers: () => [apiPath, 'core', 'user-list/'].join('/'), // список сотрудников
   getRooms: () => [apiPath, 'edo', 'inbox/'].join('/'), // комнаты эдо
-  getDepartmentRooms: () => [apiPath, 'edo', 'inbox', 'departament'].join('/'), // комнаты эдо
+  getDepartmentRooms: () => [apiPath, 'edo', 'inbox'].join('/'), // комнаты эдо
 
   createRoom: () => [apiPath, 'edo', 'room-detail', 'create-room/'].join('/'), // создание комнаты
 };
@@ -35,4 +36,18 @@ export const roomLinks = {
   rejectSign: id => [apiPath, 'edo', 'document', id, 'reject-sign/'].join('/'),
   removeFile: id => [apiPath, 'edo', 'room-detail', id, 'remove-file/'].join('/'),
   toggleStatus: id => [apiPath, 'edo', 'room-detail', id, 'toggle-status/'].join('/'),
+  downloadOriginal: id => [apiPath, 'edo', 'document', id, 'download-original/'].join('/'),
+  downloadSigned: id => [apiPath, 'edo', 'document', id, 'download-signed/'].join('/'),
+};
+
+export const applicationUrl = {
+  sideBar: () => [apiPath, 'edo', 'application', 'incoming/'].join('/'),
+  sideBarCreated: () => [apiPath, 'edo', 'application', 'created/'].join('/'),
+  createApplication: () => [apiPath, 'edo', 'application/'].join('/'),
+  sideBarIncoming: () => [apiPath, 'edo', 'application-sidebar/'].join('/'),
+  getTask: id => [apiPath, 'edo', 'application', `${id}/`].join('/'),
+  expensesUrl: () => [apiPath, 'edo', 'application-cost-items/'].join('/'),
+  approve: id => [apiPath, 'edo', 'application', id, 'approve/'].join('/'),
+  actionsWithRow: () => [apiPath, 'edo', 'application-items/'].join('/'),
+  approveByCeo: id => [apiPath, 'edo', 'application', id, 'approve-ceo/'].join('/'),
 };

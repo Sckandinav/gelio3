@@ -13,6 +13,7 @@ import { RoomsList } from './Components/Edo/RoomsList/RoomsList.jsx';
 import { EdoRoom } from './Components/Edo/Room/EdoRoom.jsx';
 import { Department } from './Components/Edo/RoomsList/Department.jsx';
 import { Support } from './Pages/Support.jsx';
+import { Applications } from './Pages/Applications.jsx';
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
           <Route path="department/:id" element={<Department />} />
           <Route path="room/:id" element={<EdoRoom />} />
         </Route>
+        <Route path={url.applications()} element={<Applications />}></Route>
         <Route path={url.error()} element={<ErrorPage />} />
         <Route path={url.notFound()} element={<NotFound />} />
         <Route path={url.support()} element={<Support />} />

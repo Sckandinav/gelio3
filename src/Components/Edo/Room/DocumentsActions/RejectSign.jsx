@@ -16,7 +16,7 @@ export const RejectSign = ({ show, close, updateRoom, document, actionsIDHandler
 
   const rejectSignDocument = async e => {
     e.preventDefault();
-    console.log(e); // Посмотреть, что за событие
+
     const token = localStorage.getItem('token');
 
     try {

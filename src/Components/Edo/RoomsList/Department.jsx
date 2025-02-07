@@ -85,13 +85,18 @@ export const Department = () => {
   const columns = [
     {
       name: '',
-      selector: row => row.id,
-      omit: true,
-    },
-    {
-      name: '',
       selector: row => row.notifications,
       width: '50px',
+    },
+    {
+      name: '№ комнаты',
+      selector: row => row.id,
+
+      style: {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+      },
     },
     {
       name: 'Название',
@@ -99,6 +104,7 @@ export const Department = () => {
       sortable: true,
       cell: row => <Link to={`/edo/room/${row.id}`}>{row.title}</Link>,
     },
+
     {
       name: 'Создатель комнаты',
       selector: row => row.creator,
@@ -114,6 +120,11 @@ export const Department = () => {
       selector: row => row.status,
       sortable: true,
       sortFunction: (a, b) => a.statusValue.localeCompare(b.statusValue),
+      style: {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+      },
     },
 
     {

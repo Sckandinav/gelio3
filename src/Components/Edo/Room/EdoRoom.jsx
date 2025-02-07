@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Button, Row, Col, Stack, Badge, ListGroup, ButtonGroup } from 'react-bootstrap';
+import { Button, Row, Col, Stack, Badge, ListGroup, ButtonGroup, Accordion, Spinner as BSSpinner } from 'react-bootstrap';
 import { motion, AnimatePresence } from 'motion/react';
 import { useSelector } from 'react-redux';
 import { GoQuestion } from 'react-icons/go';
 import { useDispatch } from 'react-redux';
-import Accordion from 'react-bootstrap/Accordion';
 
 import { getRoom } from '../../../api/getRoom';
 import { roomLinks, url } from '../../../routes/routes';
@@ -25,6 +24,7 @@ import { RejectSign } from './DocumentsActions/RejectSign';
 import { ViewDocument } from './DocumentsActions/ViewDocument';
 import { showSuccess, showError } from '../../../store/slices/toast';
 import { useAxiosInterceptor } from '../../hoc/useAxiosInterceptor';
+import { isSignableDocument } from '../../../utils/signableFormats.js';
 
 const statusInfo = status => {
   return (
@@ -47,10 +47,10 @@ export const EdoRoom = () => {
   const { id } = useParams();
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [downloadLoading, setDownloadLoading] = useState(false);
   const axiosInstance = useAxiosInterceptor();
 
   const currentUserID = useSelector(userSelectors).data?.user.id;
-  console.log(data);
 
   const navigate = useNavigate();
 
@@ -70,11 +70,17 @@ export const EdoRoom = () => {
   const [isCompletedRoom, setIsCompletedRoom] = useState(false);
 
   const [actionsID, setActionsID] = useState('');
+  const [downloadID, setDownloadID] = useState('');
   const [fileIdsToRemove, setFileIdsToRemove] = useState([]);
 
   const actionsIDHandler = (val = null) => {
     actionsID === val || val === null ? setActionsID('') : setActionsID(val);
   };
+
+  const downloadIDHandler = (val = null) => {
+    downloadID === val || val === null ? setDownloadID('') : setDownloadID(val);
+  };
+
   const [actionsOnDocument, setActionsOnDocument] = useState([]);
 
   const modalToggle = key => {
@@ -158,7 +164,7 @@ export const EdoRoom = () => {
                   </Button>
                 )}
 
-                {isFreeUsers(row) && (
+                {isSignableDocument(row.name) && isFreeUsers(row) && (
                   <Button
                     variant="secondary"
                     className="text-start"
@@ -217,6 +223,47 @@ export const EdoRoom = () => {
     );
   };
 
+  const fileNameEdit = str => {
+    const name = str.slice(0, str.lastIndexOf('.'));
+    return `${name} подписанный.pdf`;
+  };
+
+  const downloadBtn = row => {
+    return row.signers_status.some(user => user.is_signed) ? (
+      <>
+        <Button variant="warning" onClick={() => downloadIDHandler(row.id)} className="mb-1" disabled={data.status === 'closed'}>
+          Скачать
+        </Button>
+
+        <AnimatePresence>
+          {downloadID === row.id && (
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
+              <ButtonGroup vertical>
+                <Button variant="warning" className="text-start p-2" onClick={() => downloadFile(roomLinks.downloadOriginal(row.id), row.name)}>
+                  Скачать оригинал
+                </Button>
+                <Button
+                  variant="warning"
+                  className="text-start p-2 pe-4 position-relative"
+                  onClick={() => {
+                    downloadFile(roomLinks.downloadSigned(row.id), fileNameEdit(row.name), true);
+                  }}
+                >
+                  Скачать подписанный
+                  {downloadLoading && <BSSpinner animation="border" size="sm" className="position-absolute " />}
+                </Button>
+              </ButtonGroup>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </>
+    ) : (
+      <Button variant="warning" onClick={() => downloadFile(roomLinks.downloadOriginal(row.id), row.name)} className="p-2">
+        Скачать
+      </Button>
+    );
+  };
+
   const displayUsers = (row, role) => {
     const users = role === 'signers' ? row.signers_status : row.viewers_status || [];
 
@@ -252,14 +299,6 @@ export const EdoRoom = () => {
     });
   };
 
-  const dowLoadLink = row => {
-    return (
-      <a href={row.file} download>
-        {row.name}
-      </a>
-    );
-  };
-
   const columns = [
     {
       name: '',
@@ -275,11 +314,16 @@ export const EdoRoom = () => {
       name: 'Создатель документа',
       selector: row => row.creator,
     },
+    {
+      name: 'Скачать файл',
+      selector: row => downloadBtn(row),
+      //grow: 2,
+    },
 
     {
       name: 'Действия с документом',
       selector: row => actionsBtn(row),
-      grow: 2,
+      //grow: 2,
     },
 
     {
@@ -311,7 +355,7 @@ export const EdoRoom = () => {
 
   const tableData = data?.documents?.map(row => ({
     id: row.id,
-    name: dowLoadLink(row),
+    name: row.name,
     creator: row.uploaded_by,
     actions: actionsBtn(row),
     signers_status: row.signers_status,
@@ -332,10 +376,10 @@ export const EdoRoom = () => {
 
   const deleteFileFromRoom = async () => {
     const token = localStorage.getItem('token');
-    const axInst = axiosInstance;
+
     const filesID = fileIdsToRemove.map(file => file.id);
     try {
-      await axInst.post(
+      await axiosInstance.post(
         roomLinks.removeFile(id),
         { documents: filesID },
         {
@@ -355,9 +399,9 @@ export const EdoRoom = () => {
 
   const closingRoom = async () => {
     const token = localStorage.getItem('token');
-    const axInst = axiosInstance;
+
     try {
-      await axInst.post(
+      await axiosInstance.post(
         roomLinks.toggleStatus(id),
         { status: `${data.status === 'closed' ? 'open' : 'closed'}` },
         {
@@ -378,6 +422,35 @@ export const EdoRoom = () => {
     } catch (error) {
       dispatch(showError('Не удалось выполнить действие'));
       console.log(error);
+    }
+  };
+
+  const downloadFile = async (url, title, showSpinner = false) => {
+    try {
+      if (showSpinner) {
+        setDownloadLoading(true);
+      }
+      const token = localStorage.getItem('token');
+      const response = await axiosInstance.get(url, {
+        headers: {
+          Authorization: `Token ${token}`,
+        },
+        responseType: 'blob',
+      });
+
+      const blob = new Blob([response.data], { type: response.headers['content-type'] });
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.setAttribute('download', title);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setDownloadLoading(false);
+    } catch (error) {
+      console.error('Ошибка при скачивании файла:', error);
+      setDownloadLoading(false);
+    } finally {
+      setDownloadLoading(false);
     }
   };
 
@@ -415,9 +488,9 @@ export const EdoRoom = () => {
       <>
         <Row className="p-0 d-flex align-items-center mb-3">
           <Col className="p-0">
-            <div style={{ maxWidth: '200px' }} className="d-flex align-items-center mb-2">
-              <span className="mx-1 d-block">Комната:</span>
-              {statusInfo(data.status)}
+            <div className="d-flex align-items-center mb-2">
+              <span className="me-2 d-block fs-5 fw-bold">Комната №{id}</span>
+              <span>{statusInfo(data.status)}</span>
             </div>
             <div>
               <p className="m-0">

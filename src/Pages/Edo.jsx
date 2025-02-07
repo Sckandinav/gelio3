@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Container, Row, Col } from 'react-bootstrap';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { Dashboard } from '../Components/Dashboard/Dashboard';
 import { Spinner } from '../Components/Spinner/Spinner';
+import { WebSocketMenuListener } from '../Components/hoc/WebSocket/WebSocketMenuListener';
+import { notificationsSelector } from '../store/selectors/notificationsSelector';
+import { Create } from '../Components/Edo/Create';
 
 import styles from './styles/Edo.module.scss';
 
@@ -14,15 +18,14 @@ export const Edo = () => {
     data: [],
   });
 
-  if (state.isLoading) {
-    return <Spinner />;
-  }
+  const { data } = useSelector(notificationsSelector)?.sideBar || {};
 
   return (
     <Container fluid className={`bg-light-subtle rounded pt-3  ${styles.edoInner}`}>
       <Row className="mb-5">
         <Col>
-          <Dashboard isDropdown={true} />
+          <WebSocketMenuListener />
+          <Dashboard isDropdown={true} data={data} create={<Create />} />
         </Col>
       </Row>
       <Row>

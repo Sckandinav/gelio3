@@ -8,6 +8,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { utilsSelector } from '../../store/selectors/utilsSelector.js';
 
 import { menuToggle } from '../../store/slices/utils.js';
+import { url } from '../../routes/routes.js';
 
 const initialMenuList = [
   {
@@ -38,7 +39,7 @@ const initialMenuList = [
     linkSRC: '/',
     subMenuLists: [
       { title: 'Обмен документами', to: 'edo' },
-      // { title: 'Заявки', to: 'applications/incoming' },
+      { title: 'Заявки', to: url.applications() },
     ],
   },
 
