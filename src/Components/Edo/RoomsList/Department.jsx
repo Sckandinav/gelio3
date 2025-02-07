@@ -91,6 +91,7 @@ export const Department = () => {
     {
       name: '№ комнаты',
       selector: row => row.id,
+      sortable: true,
 
       style: {
         display: 'flex',

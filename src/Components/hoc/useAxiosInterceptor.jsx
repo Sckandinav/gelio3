@@ -5,10 +5,7 @@ import { useNavigate } from 'react-router-dom';
 export const useAxiosInterceptor = () => {
   const navigate = useNavigate();
 
-  const axiosInstance = axios.create({
-    // baseURL: process.env.NODE_ENV === 'development' ? process.env.REACT_APP_DEV_API_URL + '/api' : process.env.REACT_APP_PROD_API_URL + '/api',
-    // timeout: 5000,
-  });
+  const axiosInstance = axios.create({});
 
   axiosInstance.interceptors.response.use(
     response => response,
@@ -26,6 +23,8 @@ export const useAxiosInterceptor = () => {
           navigate(url.login());
         } else if (status === 404) {
           navigate(url.notFound());
+        } else {
+          navigate(url.error());
         }
       } else {
         navigate(url.error());
