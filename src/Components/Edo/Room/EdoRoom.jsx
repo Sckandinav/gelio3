@@ -49,7 +49,6 @@ export const EdoRoom = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [downloadLoading, setDownloadLoading] = useState(false);
   const axiosInstance = useAxiosInterceptor();
-  console.log('data from room', data);
 
   const currentUserID = useSelector(userSelectors).data?.user.id;
 

@@ -11,14 +11,14 @@ import { menuToggle } from '../../store/slices/utils.js';
 import { url } from '../../routes/routes.js';
 
 const initialMenuList = [
-  {
-    title: 'Главная',
-    id: 'main',
-    type: 'link',
-    img: '/icons/home.svg',
-    isActive: false,
-    linkSRC: '/',
-  },
+  // {
+  //   title: 'Главная',
+  //   id: 'main',
+  //   type: 'link',
+  //   img: '/icons/home.svg',
+  //   isActive: false,
+  //   linkSRC: '/',
+  // },
 
   {
     title: 'ЭДО',

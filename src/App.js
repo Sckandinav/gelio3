@@ -27,7 +27,8 @@ function App() {
           </PrivateRoute>
         }
       >
-        <Route index element={<Main />} />
+        {/* <Route index element={<Main />} /> */}
+        <Route index element={<Navigate to={url.edo()} />} />
         <Route path={url.edo()} element={<Edo />}>
           <Route index element={<Navigate to={url.edoCreated()} />} />
           <Route path="created" element={<RoomsList />} />

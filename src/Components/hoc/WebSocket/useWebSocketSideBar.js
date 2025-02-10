@@ -14,7 +14,6 @@ export const useWebSocket = url => {
 
     socket.onmessage = event => {
       const data = JSON.parse(event.data);
-      console.log('консоль с WebSocket:', data);
       dispatch(setWebSocketData(data));
     };
 
