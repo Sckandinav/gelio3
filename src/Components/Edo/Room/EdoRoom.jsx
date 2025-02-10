@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Button, Row, Col, Stack, Badge, ListGroup, ButtonGroup, Accordion, Spinner as BSSpinner } from 'react-bootstrap';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Button, Row, Col, Stack, Badge, ListGroup, ButtonGroup, Accordion, Spinner as BSSpinner, Container, Alert } from 'react-bootstrap';
 import { motion, AnimatePresence } from 'motion/react';
 import { useSelector } from 'react-redux';
 import { GoQuestion } from 'react-icons/go';
@@ -49,6 +49,7 @@ export const EdoRoom = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [downloadLoading, setDownloadLoading] = useState(false);
   const axiosInstance = useAxiosInterceptor();
+  console.log('data from room', data);
 
   const currentUserID = useSelector(userSelectors).data?.user.id;
 
@@ -111,10 +112,6 @@ export const EdoRoom = () => {
 
   const addFileToRemove = data => {
     setFileIdsToRemove(data.selectedRows);
-  };
-
-  const isCurrentUserInRoom = () => {
-    return data.members?.some(user => Number(user.user_id) === Number(currentUserID)) || Number(currentUserID) === Number(data.creator_id);
   };
 
   const actionsBtn = row => {
@@ -317,13 +314,11 @@ export const EdoRoom = () => {
     {
       name: 'Скачать файл',
       selector: row => downloadBtn(row),
-      //grow: 2,
     },
 
     {
       name: 'Действия с документом',
       selector: row => actionsBtn(row),
-      //grow: 2,
     },
 
     {
@@ -454,6 +449,10 @@ export const EdoRoom = () => {
     }
   };
 
+  const isCurrentUserInRoom = () => {
+    return data.members?.some(user => Number(user.user_id) === Number(currentUserID)) || Number(currentUserID) === Number(data.creator_id);
+  };
+
   useEffect(() => {
     fetchData();
   }, [id]);
@@ -479,25 +478,47 @@ export const EdoRoom = () => {
     return <Spinner />;
   }
 
-  if (!isLoading && !isCurrentUserInRoom()) {
+  if (!isLoading && data.hasOwnProperty('access')) {
+    return (
+      <Container className="d-flex justify-content-center align-items-center">
+        <div className="text-center">
+          <Alert variant="danger">
+            <Alert.Heading>Доступ запрещен</Alert.Heading>
+            <p>Вы не являетесь участником комнаты</p>
+          </Alert>
+        </div>
+      </Container>
+    );
+  }
+
+  if (!isLoading && !data.hasOwnProperty('access') && !isCurrentUserInRoom()) {
     navigate(url.notFound());
   }
 
-  if (!isLoading) {
+  if (!isLoading && !data.hasOwnProperty('access')) {
     return (
       <>
         <Row className="p-0 d-flex align-items-center mb-3">
           <Col className="p-0">
+            <Button variant="outline-primary" onClick={() => navigate(-1)}>
+              Назад
+            </Button>
             <div className="d-flex align-items-center mb-2">
               <span className="me-2 d-block fs-5 fw-bold">Комната №{id}</span>
               <span>{statusInfo(data.status)}</span>
             </div>
             <div>
               <p className="m-0">
+                Название комнаты: <span>{data.title}</span>
+              </p>
+              <p className="m-0">
                 Описание комнаты: <span>{data.description}</span>
               </p>
               <p className="m-0">
-                Создатель комнаты: <span>{data.creator}</span>
+                Комнату создал:{' '}
+                <span>
+                  {data.creator}, {new Date(data.created_at).toLocaleDateString()}
+                </span>
               </p>
             </div>
           </Col>

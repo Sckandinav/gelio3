@@ -14,7 +14,7 @@ export const useWebSocket = url => {
 
     socket.onmessage = event => {
       const data = JSON.parse(event.data);
-      dispatch(addNotification({ ...data, read: false }));
+      dispatch(addNotification(data));
     };
 
     socket.onerror = error => {
