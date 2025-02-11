@@ -12,6 +12,7 @@ import { links } from '../../../routes/routes.js';
 import { Spinner } from '../../Spinner/Spinner.jsx';
 import { utilsSelector } from '../../../store/selectors/utilsSelector.js';
 import { useAxiosInterceptor } from '../../hoc/useAxiosInterceptor';
+import { surnameFormatter } from '../../../utils/surnameFormatter.js';
 
 export const Department = () => {
   const [data, setData] = useState([]);
@@ -132,6 +133,7 @@ export const Department = () => {
       name: 'Создано',
       selector: row => row.date,
       sortable: true,
+      cell: row => row.date,
     },
   ];
 
@@ -139,11 +141,11 @@ export const Department = () => {
     id: row.id,
     notifications: notificationInfo(row),
     title: row.title,
-    creator: row.creator,
+    creator: surnameFormatter(row.creator),
     description: row.description,
     status: statusInfo(row),
     statusValue: row.status,
-    date: `${new Date(row.created_at).toLocaleString()}`,
+    date: new Date(row.created_at).toLocaleString(),
   }));
 
   if (isLoading) {

@@ -9,6 +9,7 @@ import { getRooms } from '../../../api/getRooms';
 import { links } from '../../../routes/routes.js';
 import { Spinner } from '../../Spinner/Spinner.jsx';
 import { useAxiosInterceptor } from '../../hoc/useAxiosInterceptor';
+import { surnameFormatter } from '../../../utils/surnameFormatter.js';
 
 export const RoomsList = () => {
   const [data, setData] = useState([]);
@@ -83,8 +84,10 @@ export const RoomsList = () => {
       width: '50px',
     },
     {
-      name: '№ комнаты',
+      name: '№',
       selector: row => row.id,
+      sortable: true,
+      width: '80px',
     },
     {
       name: 'Название',
@@ -107,12 +110,15 @@ export const RoomsList = () => {
       selector: row => row.status,
       sortable: true,
       sortFunction: (a, b) => a.statusValue.localeCompare(b.statusValue),
+      width: '100px',
     },
 
     {
       name: 'Создано',
       selector: row => row.date,
       sortable: true,
+      cell: row => row.date,
+      width: '150px',
     },
   ];
 
@@ -120,11 +126,11 @@ export const RoomsList = () => {
     id: row.id,
     notifications: notificationInfo(row),
     title: row.title,
-    creator: row.creator,
+    creator: surnameFormatter(row.creator),
     description: row.description,
     status: statusInfo(row),
     statusValue: row.status,
-    date: `${new Date(row.created_at).toLocaleString()}`,
+    date: new Date(row.created_at).toLocaleString(),
   }));
 
   if (isLoading) {

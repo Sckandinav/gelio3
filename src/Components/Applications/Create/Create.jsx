@@ -16,9 +16,8 @@ export const Create = () => {
   const [editedRow, setEditedRow] = useState({});
   const [btnState, setBtnState] = useState({
     addPosition: false,
+    addApproving: false,
   });
-
-
 
   const btnToggle = key => {
     setBtnState(prev => ({ ...prev, [key]: !prev[key] }));
