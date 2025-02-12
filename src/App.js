@@ -11,7 +11,6 @@ import { ErrorPage } from './Pages/ErrorPage.jsx';
 import { Edo } from './Pages/Edo.jsx';
 import { RoomsList } from './Components/Edo/RoomsList/RoomsList.jsx';
 import { EdoRoom } from './Components/Edo/Room/EdoRoom.jsx';
-import { Department } from './Components/Edo/RoomsList/Department.jsx';
 import { Support } from './Pages/Support.jsx';
 import { Applications } from './Pages/Applications.jsx';
 
@@ -32,9 +31,8 @@ function App() {
         <Route path={url.edo()} element={<Edo />}>
           <Route index element={<Navigate to={url.edoCreated()} />} />
           <Route path="created" element={<RoomsList />} />
-          <Route path="department/:id" element={<Department />} />
-          <Route path="room/:id" element={<EdoRoom />} />
         </Route>
+        <Route path="room/:id" element={<EdoRoom />} />
         <Route path={url.applications()} element={<Applications />}></Route>
         <Route path={url.error()} element={<ErrorPage />} />
         <Route path={url.notFound()} element={<NotFound />} />

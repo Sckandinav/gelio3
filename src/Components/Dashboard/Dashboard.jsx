@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Button, Container, Row, Col, Dropdown, DropdownButton, Badge } from 'react-bootstrap';
-import { Link, useLocation } from 'react-router-dom';
+import { Button, Container, Row, Col, Dropdown, Badge, ButtonGroup } from 'react-bootstrap';
+import { useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 
 import { Modal } from '../Modal/Modal';
@@ -8,7 +8,16 @@ import { setDepartment } from '../../store/slices/utils';
 
 import styles from './Dashboard.module.scss';
 
-export const Dashboard = ({ isDropdown = false, data, handlerFunc, create, modalTitle = 'Создать комнату', fullScreen = false }) => {
+export const Dashboard = ({
+  isDropdown = false,
+  data,
+  handlerFunc,
+  create,
+  modalTitle = 'Создать комнату',
+  fullScreen = false,
+  setParamsFunc,
+  removeParam,
+}) => {
   const [isCreating, setIsCreating] = useState(false);
 
   const creatingToggle = () => {
@@ -24,11 +33,20 @@ export const Dashboard = ({ isDropdown = false, data, handlerFunc, create, modal
     <>
       <Container>
         <Row>
-          <Col className="d-flex justify-content-center column-gap-3">
+          <Col className="d-flex justify-content-start column-gap-3">
             {isDropdown ? (
-              <Dropdown>
-                <Dropdown.Toggle variant="primary" id="dropdown-basic">
-                  <span>Входящие</span>
+              <Dropdown as={ButtonGroup}>
+                <Button
+                  variant="primary"
+                  onClick={() => {
+                    removeParam('agro_id');
+                    removeParam('departament_id');
+                    setParamsFunc('mode', 'incoming');
+                  }}
+                >
+                  Входящие
+                </Button>
+                <Dropdown.Toggle variant="outline-primary" id="dropdown-basic">
                   {incoming?.total_open_rooms > 0 && (
                     <Badge
                       pill
@@ -48,61 +66,74 @@ export const Dashboard = ({ isDropdown = false, data, handlerFunc, create, modal
                 {incoming?.companies?.length > 0 && (
                   <Dropdown.Menu className="border-0">
                     {incoming.companies.map(company => (
-                      <DropdownButton
-                        className={`mb-1 border-0 ${styles.dropdownButton}`}
+                      <Dropdown
+                        as={ButtonGroup}
                         key={company.id}
                         id={`dropdown-company-${company.id}`}
-                        title={
-                          <>
-                            <span>
-                              {company.name}
-                              {company.open_rooms > 0 && (
-                                <Badge
-                                  pill
-                                  bg="light"
-                                  text="primary"
-                                  className="mx-1"
-                                  title={`${company.open_rooms > 0 && `Открытых комнат c Вашим участием: ${company.open_rooms}`}\n${
-                                    company.total_actions > 0 ? `Кол-во документов, ожидающих Вашего взаимодействия: ${company.total_actions}` : ''
-                                  }`}
-                                >
-                                  {company.open_rooms}
-                                  {company.total_actions > 0 ? `/${company.total_actions}` : ''}
-                                </Badge>
-                              )}
-                            </span>
-                          </>
-                        }
                         variant="primary"
                         drop="end"
+                        className={`mb-1 border-0 ${styles.dropdownButton}`}
                       >
-                        {company.departaments.map(dept => (
-                          <Dropdown.Item key={dept.id} as="div" className={`btn btn-link d-flex align-items-center p-0 px-3 ${styles.custom}`}>
-                            <Link
-                              className="btn btn-link p-0 me-1"
-                              to={`department/${dept.id}`}
-                              onClick={() => dispatch(setDepartment(`${company.name}, ${dept.name}`))}
+                        <Button
+                          variant="primary"
+                          className={styles.titleButton}
+                          onClick={() => {
+                            removeParam('mode');
+                            removeParam('departament_id');
+                            setParamsFunc('agro_id', company.id);
+                          }}
+                        >
+                          {company.name}
+                        </Button>
+                        <Dropdown.Toggle variant="outline-primary" className={styles.count}>
+                          {company.open_rooms > 0 && (
+                            <Badge
+                              pill
+                              bg="light"
+                              text="primary"
+                              className="mx-1"
+                              title={`${company.open_rooms > 0 && `Открытых комнат c Вашим участием: ${company.open_rooms}`}\n${
+                                company.total_actions > 0 ? `Кол-во документов, ожидающих Вашего взаимодействия: ${company.total_actions}` : ''
+                              }`}
                             >
-                              <span>{dept.name} </span>
-                            </Link>
-
-                            {dept.open_rooms > 0 && (
-                              <Badge
-                                pill
-                                bg="primary"
-                                text="light"
-                                className="mx-1"
-                                title={`${dept.open_rooms > 0 && `Открытых комнат c Вашим участием: ${dept.open_rooms}`}\n${
-                                  dept.total_actions > 0 ? `Кол-во документов, ожидающих Вашего взаимодействия: ${dept.total_actions}` : ''
-                                }`}
+                              {company.open_rooms}
+                              {company.total_actions > 0 ? `/${company.total_actions}` : ''}
+                            </Badge>
+                          )}
+                        </Dropdown.Toggle>
+                        <Dropdown.Menu className="border-0">
+                          {company.departaments.map(dept => (
+                            <Dropdown.Item key={dept.id} as="div" className={`border rounded d-flex align-items-center p-1 px-3 ${styles.custom}`}>
+                              <Button
+                                variant="link"
+                                className="p-0 me-1"
+                                onClick={() => {
+                                  dispatch(setDepartment(`${company.name}, ${dept.name}`));
+                                  removeParam('mode');
+                                  setParamsFunc('agro_id', company.id);
+                                  setParamsFunc('departament_id', dept.id);
+                                }}
                               >
-                                {dept.open_rooms}
-                                {dept.total_actions > 0 ? `/${dept.total_actions}` : ''}
-                              </Badge>
-                            )}
-                          </Dropdown.Item>
-                        ))}
-                      </DropdownButton>
+                                <span>{dept.name} </span>
+                              </Button>
+                              {dept.open_rooms > 0 && (
+                                <Badge
+                                  pill
+                                  bg="primary"
+                                  text="light"
+                                  className="mx-1"
+                                  title={`${dept.open_rooms > 0 && `Открытых комнат c Вашим участием: ${dept.open_rooms}`}\n${
+                                    dept.total_actions > 0 ? `Кол-во документов, ожидающих Вашего взаимодействия: ${dept.total_actions}` : ''
+                                  }`}
+                                >
+                                  {dept.open_rooms}
+                                  {dept.total_actions > 0 ? `/${dept.total_actions}` : ''}
+                                </Badge>
+                              )}
+                            </Dropdown.Item>
+                          ))}
+                        </Dropdown.Menu>
+                      </Dropdown>
                     ))}
                   </Dropdown.Menu>
                 )}
@@ -114,7 +145,14 @@ export const Dashboard = ({ isDropdown = false, data, handlerFunc, create, modal
             )}
 
             {pathname.includes('edo') ? (
-              <Link className="btn btn-primary" to="created">
+              <Button
+                className="btn-primary"
+                onClick={() => {
+                  removeParam('agro_id');
+                  removeParam('departament_id');
+                  setParamsFunc('mode', 'created');
+                }}
+              >
                 <span>Созданные </span>
 
                 {created?.total_rooms > 0 && (
@@ -122,7 +160,7 @@ export const Dashboard = ({ isDropdown = false, data, handlerFunc, create, modal
                     {created?.total_rooms}
                   </Badge>
                 )}
-              </Link>
+              </Button>
             ) : (
               <Button variant="primary" onClick={handlerFunc} id="created">
                 Созданные
@@ -137,7 +175,6 @@ export const Dashboard = ({ isDropdown = false, data, handlerFunc, create, modal
       </Container>
 
       <Modal show={isCreating} close={creatingToggle} title={modalTitle} fullscreen={fullScreen}>
-        {/* <Create closeForm={creatingToggle} /> */}
         {create}
       </Modal>
     </>

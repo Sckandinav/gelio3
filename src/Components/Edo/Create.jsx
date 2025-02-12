@@ -12,6 +12,7 @@ import { CheckboxSelection } from '../Select/CheckboxSelection.jsx';
 import { showSuccess, showError } from '../../store/slices/toast.js';
 import { useAxiosInterceptor } from '../hoc/useAxiosInterceptor';
 import { isSignableDocument } from '../../utils/signableFormats.js';
+import { getData } from '../../api/getData.js';
 
 import styles from './Create.module.scss';
 
@@ -24,6 +25,7 @@ const actionsList = {
 
 export const Create = () => {
   const [users, setUsers] = useState([]);
+  const [roomType, setRoomType] = useState([]);
   const [pageNumber, setPageNumber] = useState(1);
   const [actionsModal, setActionsModal] = useState(false);
   const [chosen, setChosen] = useState([]);
@@ -35,6 +37,7 @@ export const Create = () => {
   const [state, setState] = useState({
     title: '',
     description: '',
+    roomType: '',
     members: [],
     documents: [],
   });
@@ -127,6 +130,7 @@ export const Create = () => {
   const sendToServer = async () => {
     const formData = new FormData();
     formData.append('title', state.title);
+    formData.append('room_type', state.roomType);
     formData.append('description', state.description);
     const membersForUpdate = state.members.map(user => ({ id: user.value, fullName: user.label, companyName: user.companyName, post: user.post }));
     formData.append('members', JSON.stringify(membersForUpdate));
@@ -176,28 +180,42 @@ export const Create = () => {
     }
   };
 
+  const getUsers = async () => {
+    try {
+      const res = await fetchUsers(links.getUsers(), axiosInstance);
+
+      const options = res.reduce((acc, user) => {
+        acc.push({
+          value: user.id,
+          label: user.full_name,
+          companyName: user.user_post_departament.length > 0 ? user.user_post_departament[0].company_name : null,
+          post: user.user_post_departament.length > 0 ? user.user_post_departament[0].post_name : null,
+        });
+        return acc;
+      }, []);
+
+      setUsers(options);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getRoomsTypes = async () => {
+    try {
+      const res = await getData(links.roomType(), axiosInstance);
+      const options = res.map(el => ({
+        value: el.id,
+        label: el.name,
+      }));
+      setRoomType(options);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
-    const getUsers = async () => {
-      try {
-        const res = await fetchUsers(links.getUsers(), axiosInstance);
-
-        const options = res.reduce((acc, user) => {
-          acc.push({
-            value: user.id,
-            label: user.full_name,
-            companyName: user.user_post_departament.length > 0 ? user.user_post_departament[0].company_name : null,
-            post: user.user_post_departament.length > 0 ? user.user_post_departament[0].post_name : null,
-          });
-          return acc;
-        }, []);
-
-        setUsers(options);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
     getUsers();
+    getRoomsTypes();
   }, []);
   return (
     <>
@@ -208,7 +226,7 @@ export const Create = () => {
               {pageNumber === 1 ? (
                 <>
                   <Form.Group className="mb-4">
-                    <Form.Label>Название</Form.Label>
+                    <Form.Label>Название *</Form.Label>
                     <Form.Control type="text" required value={state.title} onChange={e => textHandler('title', e)} />
                   </Form.Group>
 
@@ -223,9 +241,29 @@ export const Create = () => {
                     />
                   </Form.Group>
 
+                  <Form.Group className="mb-4" style={{ width: '250px' }}>
+                    <Form.Select
+                      onChange={e => {
+                        textHandler('roomType', e);
+                      }}
+                      value={state.roomType}
+                    >
+                      <option value="">Выберите категорию *</option>
+                      {roomType.map(el => (
+                        <option key={el.value} value={el.value}>
+                          {el.label}
+                        </option>
+                      ))}
+                    </Form.Select>
+                  </Form.Group>
+
                   <SelectComponent data={users} selected={state.members} selectHandler={addData} deleteHandler={removeData} />
 
-                  <Button className="mt-5" onClick={pageToggle} disabled={state.title.length === 0}>
+                  <p className="mt-3 mb-0 fst-italic text-body-tertiary" style={{ fontSize: '14px' }}>
+                    Поля с * обязательны к заполнению
+                  </p>
+
+                  <Button className="mt-5" onClick={pageToggle} disabled={state.title.length === 0 || state.roomType.length === 0}>
                     Далее
                   </Button>
                 </>

@@ -18,6 +18,7 @@ export const links = {
   getUsers: () => [apiPath, 'core', 'user-list/'].join('/'), // список сотрудников
   getRooms: () => [apiPath, 'edo', 'inbox/'].join('/'), // комнаты эдо
   getDepartmentRooms: () => [apiPath, 'edo', 'inbox'].join('/'), // комнаты эдо
+  roomType: () => [apiPath, 'edo', 'room-type/'].join('/'),
 
   createRoom: () => [apiPath, 'edo', 'room-detail', 'create-room/'].join('/'), // создание комнаты
 };

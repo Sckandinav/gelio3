@@ -10,3 +10,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.kmvUTK {
+  z-index: 0;
+}

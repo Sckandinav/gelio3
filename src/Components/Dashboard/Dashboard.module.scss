@@ -1,9 +1,15 @@
 .dropdownButton {
-  // width: 300px !important;
+  width: 300px !important;
+  padding: 0;
 
-  button {
-    width: 100%;
+  .titleButton {
+    width: 130px;
     text-align: left !important;
+  }
+
+  .count {
+    width: 0;
+    padding: 0;
   }
 }
 

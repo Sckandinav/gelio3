@@ -1,4 +1,4 @@
-export const getRoom = async (url, axiosInstance) => {
+export const getRoom = async (url, axiosInstance, params) => {
   try {
     const token = localStorage.getItem('token');
 
@@ -7,6 +7,7 @@ export const getRoom = async (url, axiosInstance) => {
         'Content-Type': 'application/json',
         Authorization: `Token ${token}`,
       },
+      params,
     });
 
     return response.data;

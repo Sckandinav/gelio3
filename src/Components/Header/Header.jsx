@@ -30,14 +30,14 @@ export const Header = () => {
     if ((closeModal = false)) {
       return (
         <span>
-          {action} <Link to={`/edo/room/${notification.room_key}`}>{title}</Link> в комнате {notification.room_name}
+          {action} <Link to={`/room/${notification.room_key}`}>{title}</Link> в комнате {notification.room_name}
         </span>
       );
     } else {
       return (
         <span>
           {action}
-          <Link to={`/edo/room/${notification.room_key}`} onClick={closeFunc}>
+          <Link to={`/room/${notification.room_key}`} onClick={closeFunc}>
             {title}
           </Link>{' '}
           в комнате {`"${notification.room_name}"`}

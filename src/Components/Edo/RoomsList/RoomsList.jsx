@@ -1,21 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { BsCheck2Circle } from 'react-icons/bs';
 import { FaExclamation, FaEye } from 'react-icons/fa';
 import { Badge, Stack } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'motion/react';
 
 import { Table } from '../../Table//Table';
-import { getRooms } from '../../../api/getRooms';
-import { links } from '../../../routes/routes.js';
-import { Spinner } from '../../Spinner/Spinner.jsx';
-import { useAxiosInterceptor } from '../../hoc/useAxiosInterceptor';
 import { surnameFormatter } from '../../../utils/surnameFormatter.js';
+import { getData } from '../../../api/getData.js';
+import { useAxiosInterceptor } from '../../hoc/useAxiosInterceptor';
+import { links } from '../../../routes/routes.js';
 
-export const RoomsList = () => {
-  const [data, setData] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+export const RoomsList = ({ data }) => {
+  const { search } = useLocation();
+  const [roomsType, setRoomsType] = useState([]);
+  const [selectedType, setSelectedType] = useState('');
   const axiosInstance = useAxiosInterceptor();
 
+  const setSelected = e => {
+    setSelectedType(e.target.value);
+  };
   const notificationInfo = row => {
     if (row.status === 'closed') {
       return null;
@@ -62,20 +67,15 @@ export const RoomsList = () => {
     );
   };
 
-  useEffect(() => {
-    const fetchRooms = async () => {
-      try {
-        const response = await getRooms(links.getRooms(), axiosInstance);
-        setData(response);
-        setIsLoading(false);
-      } catch (error) {
-        console.log(error);
-        setIsLoading(false);
-      }
-    };
-
-    fetchRooms();
-  }, []);
+  const chekFrom = row => {
+    if (search.includes('departament_id')) {
+      return row.departament;
+    } else if (search.includes('agro_id')) {
+      return row.departament;
+    } else {
+      return row.company;
+    }
+  };
 
   const columns = [
     {
@@ -93,7 +93,7 @@ export const RoomsList = () => {
       name: 'Название',
       selector: row => row.title,
       sortable: true,
-      cell: row => <Link to={`/edo/room/${row.id}`}>{row.title}</Link>,
+      cell: row => <Link to={`/room/${row.id}`}>{row.title}</Link>,
     },
     {
       name: 'Создатель комнаты',
@@ -103,6 +103,17 @@ export const RoomsList = () => {
     {
       name: 'Описание',
       selector: row => row.description,
+      sortable: true,
+    },
+    {
+      name: 'Отправитель',
+      selector: row => row.from,
+      sortable: true,
+    },
+    {
+      name: 'Категория',
+      selector: row => row.room_type_name,
+      width: '140px',
       sortable: true,
     },
     {
@@ -122,26 +133,49 @@ export const RoomsList = () => {
     },
   ];
 
-  const tableData = data.map(row => ({
+  const tableData = data?.map(row => ({
     id: row.id,
     notifications: notificationInfo(row),
     title: row.title,
     creator: surnameFormatter(row.creator),
     description: row.description,
+    from: chekFrom(row),
+    room_type_name: row.room_type_name,
     status: statusInfo(row),
     statusValue: row.status,
     date: new Date(row.created_at).toLocaleString(),
+    roomType: row.room_type,
   }));
 
-  if (isLoading) {
-    return <Spinner />;
-  }
-
-  if (!isLoading) {
-    return (
-      <div>
-        <Table columns={columns} data={tableData} title="Созданные" selectableRows={false} />
-      </div>
-    );
-  }
+  useEffect(() => {
+    const getCategory = async () => {
+      try {
+        const res = await getData(links.roomType(), axiosInstance);
+        const option = res.map(el => ({
+          value: el.id,
+          label: el.name,
+        }));
+        setRoomsType(option);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getCategory();
+  }, []);
+  return (
+    <AnimatePresence>
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+        <Table
+          columns={columns}
+          data={tableData}
+          title={!search || search === '?mode=created' ? 'Созданные' : 'Входящие'}
+          selectableRows={false}
+          sortingOptions={roomsType}
+          selectedType={selectedType}
+          onChangeSortingOptions={setSelected}
+          dateFilter
+        />
+      </motion.div>
+    </AnimatePresence>
+  );
 };

@@ -227,7 +227,7 @@ export const EdoRoom = () => {
   const downloadBtn = row => {
     return row.signers_status.some(user => user.is_signed) ? (
       <>
-        <Button variant="warning" onClick={() => downloadIDHandler(row.id)} className="mb-1" disabled={data.status === 'closed'}>
+        <Button variant="warning" onClick={() => downloadIDHandler(row.id)} className="mb-1">
           Скачать
         </Button>
 
@@ -432,13 +432,20 @@ export const EdoRoom = () => {
         responseType: 'blob',
       });
 
+      const contentType = response.headers['content-type'];
       const blob = new Blob([response.data], { type: response.headers['content-type'] });
-      const link = document.createElement('a');
-      link.href = window.URL.createObjectURL(blob);
-      link.setAttribute('download', title);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const fileURL = window.URL.createObjectURL(blob);
+
+      if (contentType === 'application/pdf') {
+        window.open(fileURL, '_blank');
+      } else {
+        const link = document.createElement('a');
+        link.href = fileURL;
+        link.setAttribute('download', title);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
       setDownloadLoading(false);
     } catch (error) {
       console.error('Ошибка при скачивании файла:', error);
@@ -496,7 +503,7 @@ export const EdoRoom = () => {
 
   if (!isLoading && !data.hasOwnProperty('access')) {
     return (
-      <>
+      <Container fluid className="bg-light-subtle rounded p-4">
         <Row className="p-0 d-flex align-items-center mb-3">
           <Col className="p-0">
             <Button variant="outline-primary" onClick={() => navigate(-1)}>
@@ -508,16 +515,16 @@ export const EdoRoom = () => {
             </div>
             <div>
               <p className="m-0">
+                Комнату создал:{' '}
+                <span>
+                  {data.creator} {new Date(data.created_at).toLocaleDateString()}. {data.company}, {data.departament}
+                </span>
+              </p>
+              <p className="m-0">
                 Название комнаты: <span>{data.title}</span>
               </p>
               <p className="m-0">
                 Описание комнаты: <span>{data.description}</span>
-              </p>
-              <p className="m-0">
-                Комнату создал:{' '}
-                <span>
-                  {data.creator}, {new Date(data.created_at).toLocaleDateString()}
-                </span>
               </p>
             </div>
           </Col>
@@ -657,7 +664,7 @@ export const EdoRoom = () => {
             actionsIDHandler={actionsIDHandler}
           />
         )}
-      </>
+      </Container>
     );
   }
 };

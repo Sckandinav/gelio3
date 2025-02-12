@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useSearchParams, useLocation } from 'react-router-dom';
 import { Container, Row, Col } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -8,31 +8,65 @@ import { Spinner } from '../Components/Spinner/Spinner';
 import { WebSocketMenuListener } from '../Components/hoc/WebSocket/WebSocketMenuListener';
 import { notificationsSelector } from '../store/selectors/notificationsSelector';
 import { Create } from '../Components/Edo/Create';
+import { getRoom } from '../api/getRoom';
+import { useAxiosInterceptor } from '../Components/hoc/useAxiosInterceptor';
+import { links } from '../routes/routes.js';
+import { RoomsList } from '../Components/Edo/RoomsList/RoomsList.jsx';
 
 import styles from './styles/Edo.module.scss';
 
 export const Edo = () => {
-  const [state, setState] = useState({
-    isLoading: false,
-    error: null,
-    data: [],
-  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [rooms, setRooms] = useState([]);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const axiosInstance = useAxiosInterceptor();
+  const { pathname } = useLocation();
 
   const { data } = useSelector(notificationsSelector)?.sideBar || {};
 
-  return (
-    <Container fluid className={`bg-light-subtle rounded pt-3  ${styles.edoInner}`}>
-      <Row className="mb-5">
-        <Col>
-          <WebSocketMenuListener />
-          <Dashboard isDropdown={true} data={data} create={<Create />} />
-        </Col>
-      </Row>
-      <Row>
-        <Col className="px-4">
-          <Outlet />
-        </Col>
-      </Row>
-    </Container>
-  );
+  const addParam = (key, value) => {
+    searchParams.set(key, value);
+    setSearchParams(searchParams);
+  };
+
+  const removeParam = key => {
+    searchParams.delete(key);
+    setSearchParams(searchParams);
+  };
+
+  const getRoomsList = async () => {
+    setIsLoading(true);
+    try {
+      const response = await getRoom(links.getRooms(), axiosInstance, searchParams);
+      setRooms(response);
+      setIsLoading(false);
+    } catch (error) {
+      console.log(error);
+      setIsLoading(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getRoomsList();
+  }, [searchParams]);
+
+  if (isLoading) {
+    return <Spinner />;
+  } else {
+    return (
+      <Container fluid className={`bg-light-subtle rounded pt-3  ${styles.edoInner}`}>
+        <Row className="mb-5">
+          <Col>
+            <WebSocketMenuListener />
+            <Dashboard isDropdown={true} data={data} create={<Create />} setParamsFunc={addParam} removeParam={removeParam} />
+          </Col>
+        </Row>
+        <Row>
+          <Col className="px-4">{pathname.includes('/edo/room/') ? <Outlet /> : <RoomsList data={rooms} />}</Col>
+        </Row>
+      </Container>
+    );
+  }
 };

@@ -12,35 +12,14 @@ import { userSelectors } from '../../../store/selectors/userSelectors';
 export const ApplicationsList = ({ data, title }) => {
   const currentUsersGroup = useSelector(userSelectors).data.user.groups_names;
 
-  // информация по назначению посмотреть первый столбец
-  //   const notificationCheck = data => {
-  //     if (data.approved_by_ceo) {
-  //       return null;
-  //     }
-  //     if (currentUsersGroup?.includes('Заявки')) {
-  //       if (data.notifications?.lacks_assigned_item_approvers) {
-  //         return 'Ожидает назначения';
-  //       }
-  //       if (data.notifications?.lacks_assigned_ceo) {
-  //         return 'Ожидает назначения';
-  //       }
-  //       return 'Выполнили действия';
-  //     }
-  //     if (!data.notification?.has_approved_anything) {
-  //       return 'Ожидает согласования';
-  //     }
-  //   };
-
   const notificationCheck = row => {
     if (row.approved_by_ceo) {
       return null;
     }
     if (currentUsersGroup.includes('Заявки')) {
       if (row.notifications.lacks_assigned_item_approvers || row.notifications.lacks_assigned_ceo) {
-        // return 'Ожидает назначения';
         <FaExclamation title="Все действия выполнили" size={20} style={{ color: 'red' }} />;
       }
-      // return 'Выполнили действия';
       return <BsCheck2Circle title="Выполнили действия" size={20} style={{ color: 'green' }} />;
     }
   };
@@ -62,6 +41,7 @@ export const ApplicationsList = ({ data, title }) => {
     {
       name: 'Статус назначения',
       selector: row => row.appointment,
+      maxWidth: '150px',
     },
     {
       name: 'Предприятие',
@@ -81,6 +61,7 @@ export const ApplicationsList = ({ data, title }) => {
     {
       name: `Одобрена агропредприятием`,
       selector: row => row.agro,
+      maxWidth: '200px',
       style: {
         display: 'flex',
         alignItems: 'center',
@@ -90,6 +71,7 @@ export const ApplicationsList = ({ data, title }) => {
     {
       name: 'Одобрена УК',
       selector: row => row.mc,
+      maxWidth: '200px',
       style: {
         display: 'flex',
         alignItems: 'center',
@@ -99,6 +81,7 @@ export const ApplicationsList = ({ data, title }) => {
     {
       name: 'Одобрена генеральным директором',
       selector: row => row.ceo,
+      maxWidth: '200px',
       style: {
         display: 'flex',
         alignItems: 'center',
