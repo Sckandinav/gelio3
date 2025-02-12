@@ -4,7 +4,7 @@ import { notificationsSelector } from '../../store/selectors/notificationsSelect
 
 export const NotificationManager = () => {
   const { notifications } = useSelector(notificationsSelector);
-  const unreadCount = notifications[0]?.notifications.length || 0;
+  const unreadCount = notifications?.slice(-1)[0]?.notifications.length || 0;
   const blinkIntervalRef = useRef(null);
   const originalTitleRef = useRef(document.title);
   const originalFaviconRef = useRef(document.querySelector("link[rel~='icon']")?.href);
