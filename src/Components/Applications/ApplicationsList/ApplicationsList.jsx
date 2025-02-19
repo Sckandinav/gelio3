@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { FaExclamation } from 'react-icons/fa';
 import { BsCheck2Circle } from 'react-icons/bs';
 import { IoMdTimer } from 'react-icons/io';
@@ -9,16 +10,34 @@ import { userSelectors } from '../../../store/selectors/userSelectors';
 
 // mc = Managing Сompany - управляющая компания
 
-export const ApplicationsList = ({ data, title }) => {
+export const ApplicationsList = ({ data, title, company }) => {
   const currentUsersGroup = useSelector(userSelectors).data.user.groups_names;
+  const [selectedType, setSelectedType] = useState('');
+
+  const setSelected = e => {
+    setSelectedType(e.target.value);
+  };
+
+  const dateFormate = dateStr => {
+    const [datePart, timePart] = dateStr.split(', ');
+    const [day, month, year] = datePart.split('.');
+    const [hours, minutes, seconds] = timePart.split(':');
+    const date = new Date(year, month - 1, day, hours, minutes, seconds);
+    return date.getTime();
+  };
 
   const notificationCheck = row => {
     if (row.approved_by_ceo) {
       return null;
     }
+
     if (currentUsersGroup.includes('Заявки')) {
-      if (row.notifications.lacks_assigned_item_approvers || row.notifications.lacks_assigned_ceo) {
-        <FaExclamation title="Все действия выполнили" size={20} style={{ color: 'red' }} />;
+      if (row.notifications.lacks_assigned_item_approvers && row.fully_approved_by_users) {
+        return <FaExclamation title="Ожидает назначения" size={20} style={{ color: 'red' }} />;
+      }
+
+      if (row.fully_approved_by_users === true && row.fully_approved_by_items === true && row.notifications.lacks_assigned_ceo === true) {
+        return <FaExclamation title="Ожидает назначения" size={20} style={{ color: 'red' }} />;
       }
       return <BsCheck2Circle title="Выполнили действия" size={20} style={{ color: 'green' }} />;
     }
@@ -41,12 +60,18 @@ export const ApplicationsList = ({ data, title }) => {
     {
       name: 'Статус назначения',
       selector: row => row.appointment,
-      maxWidth: '150px',
+      width: '150px',
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      },
     },
     {
       name: 'Предприятие',
       selector: row => row.title,
       sortable: true,
+      cell: row => <Link to={`/application/${row.id}`}>{row.title}</Link>,
     },
     {
       name: 'Создал',
@@ -55,13 +80,14 @@ export const ApplicationsList = ({ data, title }) => {
     },
     {
       name: 'Дата создания',
-      selector: row => row.date,
+      selector: row => dateFormate(row.date),
       sortable: true,
+      cell: row => row.date,
     },
     {
       name: `Одобрена агропредприятием`,
       selector: row => row.agro,
-      maxWidth: '200px',
+      width: '200px',
       style: {
         display: 'flex',
         alignItems: 'center',
@@ -71,7 +97,7 @@ export const ApplicationsList = ({ data, title }) => {
     {
       name: 'Одобрена УК',
       selector: row => row.mc,
-      maxWidth: '200px',
+      width: '200px',
       style: {
         display: 'flex',
         alignItems: 'center',
@@ -81,7 +107,7 @@ export const ApplicationsList = ({ data, title }) => {
     {
       name: 'Одобрена генеральным директором',
       selector: row => row.ceo,
-      maxWidth: '200px',
+      width: '200px',
       style: {
         display: 'flex',
         alignItems: 'center',
@@ -95,16 +121,27 @@ export const ApplicationsList = ({ data, title }) => {
     appointment: notificationCheck(row),
     title: row.agro,
     creator: row.creator_name,
-    date: `${new Date(row.created_at).toLocaleString()}`,
+    date: new Date(row.created_at).toLocaleString(),
     agro: statusCheck(row.fully_approved_by_users),
     mc: statusCheck(row.fully_approved_by_items),
     ceo: statusCheck(row.approved_by_ceo),
+    agroID: row.agroid,
   }));
 
   return (
     <div>
       <h2>{title}</h2>
-      <Table selectableRows={false} columns={columns} data={tableData} />
+      <Table
+        selectableRows={false}
+        columns={columns}
+        data={tableData}
+        dateFilter={true}
+        sortingOptions={company}
+        onChangeSortingOptions={setSelected}
+        selectedType={selectedType}
+        selectionkey="agroID"
+        firstOptionTitle="Все предприятия"
+      />
     </div>
   );
 };

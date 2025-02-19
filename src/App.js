@@ -13,6 +13,10 @@ import { RoomsList } from './Components/Edo/RoomsList/RoomsList.jsx';
 import { EdoRoom } from './Components/Edo/Room/EdoRoom.jsx';
 import { Support } from './Pages/Support.jsx';
 import { Applications } from './Pages/Applications.jsx';
+import { Application } from './Components/Applications/Application/Application.jsx';
+import { Payment } from './Pages/Payment.jsx';
+import { Chemistry } from './Pages/Chemistry.jsx';
+import { CreationPesticide } from './Components/Pesticide/CreationPesticide.jsx';
 
 function App() {
   return (
@@ -33,7 +37,11 @@ function App() {
           <Route path="created" element={<RoomsList />} />
         </Route>
         <Route path="room/:id" element={<EdoRoom />} />
-        <Route path={url.applications()} element={<Applications />}></Route>
+        <Route path={url.applications()} element={<Applications />} />
+        <Route path="application/:id" element={<Application />} />
+        <Route path={url.payment()} element={<Payment />} />
+        <Route path={url.chemistry()} element={<Chemistry />} />
+        <Route path={url.chemistryAdd()} element={<CreationPesticide />} />
         <Route path={url.error()} element={<ErrorPage />} />
         <Route path={url.notFound()} element={<NotFound />} />
         <Route path={url.support()} element={<Support />} />

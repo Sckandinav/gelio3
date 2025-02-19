@@ -1,27 +1,38 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Container, Row, Col, Table, Form, Modal } from 'react-bootstrap';
+import { Button, Container, Row, Col, Table, Form, Modal, ListGroup, CloseButton } from 'react-bootstrap';
 import { FaEdit, FaRegSave } from 'react-icons/fa';
 import { MdDeleteForever } from 'react-icons/md';
-
 import { MdOutlineCancel } from 'react-icons/md';
+import { useSelector, useDispatch } from 'react-redux';
 
 import { InputElem } from './InputElem';
+import { fetchUsers } from '../../../api/fetchUsers.js';
 import { getData } from '../../../api/getData.js';
 import { useAxiosInterceptor } from '../../hoc/useAxiosInterceptor';
-import { links } from '../../../routes/routes.js';
+import { links, applicationUrl } from '../../../routes/routes.js';
 import { SelectComponent } from '../../Select/Select.jsx';
+import { userSelectors } from '../../../store/selectors/userSelectors.js';
+import { showSuccess, showError } from '../../../store/slices/toast.js';
 
-export const Create = () => {
-  const usersIdInRoom = [];
+export const Create = ({ close, update }) => {
   const [appData, setAppData] = useState([]);
   const [agloList, setAgloList] = useState([]);
   const [users, setUsers] = useState([]);
+  const [company, setCompany] = useState('');
+  const [members, setMembers] = useState([]);
+  const [chosen, setChosen] = useState([]);
   const [editingRowId, setEditingRowId] = useState(null);
   const [editedRow, setEditedRow] = useState({});
   const [btnState, setBtnState] = useState({
     addPosition: false,
     addApproving: false,
+    showMembers: false,
   });
+
+  const { data } = useSelector(userSelectors);
+  const dispatch = useDispatch();
+
+  const axiosInstance = useAxiosInterceptor();
 
   const btnToggle = key => {
     setBtnState(prev => ({ ...prev, [key]: !prev[key] }));
@@ -63,6 +74,105 @@ export const Create = () => {
     setEditingRowId(id);
     setEditedRow(rowToEdit);
   };
+
+  const addChosen = (...prop) => {
+    const user = prop[1];
+    setChosen(prev => [...prev, user]);
+    setUsers(prev => prev.filter(el => el.value !== user.value));
+  };
+
+  const addUsers = () => {
+    setMembers(prev => [...prev, ...chosen]);
+    setChosen([]);
+  };
+
+  const removeUser = (...prop) => {
+    const user = prop[1];
+    setChosen(prev => prev.filter(el => el.value !== user.value));
+    setUsers(prev => [...prev, user]);
+  };
+
+  const removeMember = selected => {
+    setMembers(prev => prev.filter(user => user.value !== selected.value));
+    setUsers(prev => [...prev, selected]);
+  };
+
+  const setCompanyData = chosen => {
+    setCompany(chosen.target.value);
+  };
+
+  const prepareServerData = () => ({
+    users: members,
+    items: appData.map(({ files, ...rest }) => rest),
+    created: {
+      id: data.user.id,
+      companyName: data.user.user_post_departament[0].company_name,
+    },
+    forCompany: company,
+  });
+
+  const getUsers = async () => {
+    try {
+      const res = await fetchUsers(links.getUsers(), axiosInstance);
+
+      const options = res.reduce((acc, user) => {
+        acc.push({
+          value: user.id,
+          label: user.full_name,
+          companyName: user.user_post_departament.length > 0 ? user.user_post_departament[0].company_name : null,
+          post: user.user_post_departament.length > 0 ? user.user_post_departament[0].post_name : null,
+        });
+        return acc;
+      }, []);
+
+      setUsers(options);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getAgroList = async () => {
+    try {
+      const res = await getData(links.getAgro(), axiosInstance);
+      setAgloList(res);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const CreateTask = async () => {
+    const token = localStorage.getItem('token');
+    const preparedData = prepareServerData();
+
+    const formData = new FormData();
+    formData.append('data', JSON.stringify(preparedData));
+
+    appData.forEach(item => {
+      item.files.forEach(file => {
+        formData.append(`files[${item.id}]`, file);
+      });
+    });
+
+    try {
+      await axiosInstance.post(applicationUrl.createApplication(), formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Token ${token}`,
+        },
+      });
+      dispatch(showSuccess('Заявка создана'));
+      close();
+      update();
+    } catch (error) {
+      dispatch(showError('Не удалось создать заявку'));
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getUsers();
+    getAgroList();
+  }, []);
 
   return (
     <Container fluid>
@@ -214,13 +324,30 @@ export const Create = () => {
           >
             Добавить позицию
           </Button>
-          <Button size="sm" className="rounded" variant="outline-success">
+          <Button size="sm" className="rounded" variant="outline-success" onClick={() => btnToggle('addApproving')}>
             Добавить согласующего
           </Button>
-          <Button size="sm" className="rounded" variant="outline-success">
+          <Button size="sm" className="rounded" variant="outline-success" onClick={() => btnToggle('showMembers')}>
             Список согласующих
           </Button>
-          <Button size="sm" className="rounded" variant="outline-success">
+
+          <div>
+            <Form.Select value={company} onChange={setCompanyData}>
+              <option value="">Выберите предприятие</option>
+              {agloList.map(el => (
+                <option key={el.id} value={el.id}>
+                  {el.name}
+                </option>
+              ))}
+            </Form.Select>
+          </div>
+          <Button
+            size="sm"
+            className="rounded"
+            variant="outline-success"
+            disabled={members.length === 0 || appData.length === 0 || company === ''}
+            onClick={CreateTask}
+          >
             Отправить
           </Button>
         </Col>
@@ -232,6 +359,58 @@ export const Create = () => {
           </Col>
         </Row>
       )}
+
+      {btnState.addApproving && (
+        <Modal show={btnState.addApproving} onHide={() => btnToggle('addApproving')}>
+          <Modal.Header closeButton>
+            <Modal.Title>Добавить согласующего</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <SelectComponent data={users} selected={chosen} selectHandler={addChosen} deleteHandler={removeUser} />
+          </Modal.Body>
+
+          <Modal.Footer>
+            <Button
+              disabled={chosen.length === 0}
+              variant="primary"
+              onClick={() => {
+                addUsers();
+                btnToggle('addApproving');
+              }}
+            >
+              Добавить
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      )}
+      <Modal show={btnState.showMembers} onHide={() => btnToggle('showMembers')}>
+        <Modal.Header closeButton>
+          <Modal.Title>Список согласующих</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {members.length > 0 ? (
+            <ListGroup>
+              {members.map(member => (
+                <ListGroup.Item key={member.value} className="d-flex justify-content-between align-items-center">
+                  {member.label} <CloseButton onClick={() => removeMember(member)} />
+                </ListGroup.Item>
+              ))}
+            </ListGroup>
+          ) : (
+            <span>Нет пользователей для согласования</span>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="primary"
+            onClick={() => {
+              btnToggle('showMembers');
+            }}
+          >
+            Закрыть
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 };

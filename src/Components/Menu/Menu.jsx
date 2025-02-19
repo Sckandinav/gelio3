@@ -39,7 +39,32 @@ const initialMenuList = [
     linkSRC: '/',
     subMenuLists: [
       { title: 'Обмен документами', to: 'edo' },
-      // { title: 'Заявки', to: url.applications() },
+      { title: 'Заявки', to: url.applications() },
+      { title: 'Заявка на оплату', to: url.payment() },
+    ],
+  },
+
+  {
+    title: 'Аграрий',
+    id: 'Agrarian',
+    type: 'blogTitle',
+    img: '/icons/lab-profile.svg',
+    isActive: false,
+    linkSRC: '/',
+    subMenuLists: [],
+  },
+
+  {
+    title: 'Справочники',
+    id: 'Справочники',
+    type: 'subMenu',
+    img: '/icons/lab-profile.svg',
+    isActive: false,
+    linkSRC: '/',
+    subMenuLists: [
+      { title: 'Химия', to: 'chemistry' },
+      // { title: 'Семена', to: '/' },
+      // { title: 'Препараты', to: '/' },
     ],
   },
 

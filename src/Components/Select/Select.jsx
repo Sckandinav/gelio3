@@ -8,7 +8,7 @@ export const SelectComponent = ({ data, placeholder = 'Выберите поль
   const [selectedUser, setSelectedUser] = useState(null);
 
   const updateListOnAdd = selectedOption => {
-    if ((multiSelection = true)) {
+    if (multiSelection === true) {
       setSelectedUser(selectedUser);
       setInitialList(prev => prev.filter(item => item.value !== selectedOption.value));
       setSelectedUser(null);

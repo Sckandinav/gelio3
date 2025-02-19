@@ -9,6 +9,9 @@ export const url = {
   notFound: () => '/not-found',
   support: () => '/support',
   applications: () => '/applications',
+  payment: () => '/payment',
+  chemistry: () => '/chemistry',
+  chemistryAdd: () => '/chemistry/add',
 };
 
 export const links = {
@@ -19,7 +22,8 @@ export const links = {
   getRooms: () => [apiPath, 'edo', 'inbox/'].join('/'), // комнаты эдо
   getDepartmentRooms: () => [apiPath, 'edo', 'inbox'].join('/'), // комнаты эдо
   roomType: () => [apiPath, 'edo', 'room-type/'].join('/'),
-
+  getAgro: () => [apiPath, 'core', 'agro-list/'].join('/'),
+  ceoList: () => [apiPath, 'core', 'ceo-user-list/'].join('/'), // Список CEO
   createRoom: () => [apiPath, 'edo', 'room-detail', 'create-room/'].join('/'), // создание комнаты
 };
 
@@ -51,4 +55,31 @@ export const applicationUrl = {
   approve: id => [apiPath, 'edo', 'application', id, 'approve/'].join('/'),
   actionsWithRow: () => [apiPath, 'edo', 'application-items/'].join('/'),
   approveByCeo: id => [apiPath, 'edo', 'application', id, 'approve-ceo/'].join('/'),
+};
+
+export const applicationActionsUrl = {
+  addApprover: id => [apiPath, 'edo', 'application-items', id, 'add-approver/'].join('/'),
+  removeUser: id => [apiPath, 'edo', 'application-items', id, 'remove-approver/'].join('/'),
+  approveRow: id => [apiPath, 'edo', 'application-items', id, 'approve/'].join('/'),
+  approveCeo: id => [apiPath, 'edo', 'application', id, 'assign-ceo/'].join('/'),
+  removeCeo: id => [apiPath, 'edo', 'application', id, 'remove-ceo/'].join('/'),
+};
+
+//Складской учёт
+export const warehousingApi = {
+  warehousing: () => [apiPath, 'chemicals/'].join('/'),
+  pesticideNames: () => [apiPath, 'chemicals', 'pestecide-names/'].join('/'),
+  pesticideNamesChange: id => [apiPath, 'chemicals', 'pestecide-names', `${id}/`].join('/'),
+  pesticideNamesDelete: () => [apiPath, 'chemicals', 'pestecide-names', 'bulk-delete/'].join('/'),
+  pesticides: () => [apiPath, 'chemicals', 'pestecides/'].join('/'),
+  deletePesticides: () => [apiPath, 'chemicals', 'pestecides', 'bulk-delete/'].join('/'),
+  pesticidesPUT: id => [apiPath, 'chemicals', 'pestecides', `${id}/`].join('/'),
+  pesticideGroup: () => [apiPath, 'chemicals', 'pesticide-groups/'].join('/'),
+  pesticideGroupChange: id => [apiPath, 'chemicals', 'pesticide-groups', `${id}/`].join('/'),
+  pesticideGroupDelete: () => [apiPath, 'chemicals', 'pesticide-groups', 'bulk-delete/'].join('/'),
+  disposalCulture: () => [apiPath, 'maps', 'crops/'].join('/'),
+  disposalCultureChange: id => [apiPath, 'maps', 'crops', `${id}/`].join('/'),
+  substance: () => [apiPath, 'chemicals', 'substances/'].join('/'),
+  substanceChange: id => [apiPath, 'chemicals', 'substances', `${id}/`].join('/'),
+  substanceDelete: () => [apiPath, 'chemicals', 'substances', 'bulk-delete/'].join('/'),
 };

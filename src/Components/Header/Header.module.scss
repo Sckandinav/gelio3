@@ -45,3 +45,31 @@
     box-shadow: none !important;
   }
 }
+
+.videoInner {
+  height: 50px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  gap: 10px;
+
+  object-fit: cover;
+  background-repeat: no-repeat;
+  video {
+    height: 95%;
+  }
+
+  .text {
+    padding: 0;
+    margin: 0;
+    font-size: 40px;
+    font-style: italic;
+    font-weight: bold;
+    background: linear-gradient(45deg, #ff8c00 33%, #000000 60%, #ff8c00);
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: #0b2349;
+    display: table;
+    margin: 20px auto;
+  }
+}

@@ -17,6 +17,7 @@ export const Dashboard = ({
   fullScreen = false,
   setParamsFunc,
   removeParam,
+  updateList,
 }) => {
   const [isCreating, setIsCreating] = useState(false);
 
@@ -26,8 +27,14 @@ export const Dashboard = ({
 
   const created = data?.data?.created || {};
   const incoming = data?.data?.incoming || {};
+
   const dispatch = useDispatch();
   const { pathname } = useLocation();
+
+  const createWithProps = React.cloneElement(create, {
+    close: creatingToggle,
+    update: updateList,
+  });
 
   return (
     <>
@@ -139,8 +146,18 @@ export const Dashboard = ({
                 )}
               </Dropdown>
             ) : (
-              <Button variant="primary" onClick={handlerFunc} id="incoming">
+              <Button
+                variant="primary"
+                onClick={handlerFunc}
+                id="incoming"
+                className="d-flex justify-content-between align-items-center column-gap-1"
+              >
                 Входящие
+                {incoming > 0 && (
+                  <Badge pill bg="light" text="primary" style={{ top: 0 }}>
+                    {incoming}
+                  </Badge>
+                )}
               </Button>
             )}
 
@@ -153,17 +170,22 @@ export const Dashboard = ({
                   setParamsFunc('mode', 'created');
                 }}
               >
-                <span>Созданные </span>
+                <span>Исходящие </span>
 
                 {created?.total_rooms > 0 && (
-                  <Badge pill bg="light" text="primary" className="mx-1" title={`Созданные комнаты со статусом "Открыта": ${created?.total_rooms}`}>
+                  <Badge pill bg="light" text="primary" className="mx-1" title={`Исходящие комнаты со статусом "Открыта": ${created?.total_rooms}`}>
                     {created?.total_rooms}
                   </Badge>
                 )}
               </Button>
             ) : (
               <Button variant="primary" onClick={handlerFunc} id="created">
-                Созданные
+                <span>Исходящие</span>
+                {created > 0 && (
+                  <Badge pill bg="light" text="primary" className="mx-1" title={`Исходящие комнаты со статусом "Открыта": ${created?.total_rooms}`}>
+                    {created}
+                  </Badge>
+                )}
               </Button>
             )}
 
@@ -175,7 +197,7 @@ export const Dashboard = ({
       </Container>
 
       <Modal show={isCreating} close={creatingToggle} title={modalTitle} fullscreen={fullScreen}>
-        {create}
+        {createWithProps}
       </Modal>
     </>
   );

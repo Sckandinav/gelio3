@@ -1,0 +1,94 @@
+.table {
+  font-size: 14px;
+  word-wrap: break-word;
+  vertical-align: middle;
+  text-overflow: ellipsis;
+  border-collapse: collapse;
+
+  thead {
+    th {
+      font-weight: bold;
+      background: #efefef;
+      text-align: center;
+      border: 1px solid #0000007e;
+    }
+  }
+
+  tbody {
+    border: 1px solid #0000007e;
+    tr {
+      page-break-inside: avoid;
+    }
+    td {
+      padding: 5px;
+      border: 1px solid #0000007e;
+      &:nth-child(7) {
+        width: 100px;
+      }
+    }
+  }
+}
+
+.agroTable {
+  border-collapse: collapse;
+  thead {
+    th {
+      font-weight: bold;
+      text-align: center;
+      border: 1px solid #0000007e;
+    }
+  }
+
+  tbody td {
+    border: 1px solid #0000007e;
+    &:nth-child(2) {
+      text-align: center;
+      vertical-align: middle;
+    }
+  }
+}
+
+.edit {
+  position: relative;
+  cursor: cell;
+
+  .cellsForm {
+    position: absolute;
+    top: 0%;
+    left: 0;
+
+    background-color: #fff;
+    z-index: 10;
+
+    input {
+      width: 100%;
+    }
+
+    .btnsGroup {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 0.5rem;
+
+      .accept,
+      .cancel {
+        transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
+        &:hover {
+          transform: scale(1.1);
+        }
+        &:disabled {
+          opacity: 0.2;
+          pointer-events: none;
+        }
+      }
+    }
+  }
+
+  &:hover {
+    box-shadow: inset 0px 0px 2px 0px rgba(66, 68, 90, 1);
+  }
+}
+
+.hide {
+  display: none;
+}

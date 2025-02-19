@@ -19,45 +19,77 @@ export const Header = () => {
   const [notificationModal, setNotificationModal] = useState(false);
   const user = useSelector(userSelectors).data.user;
   const target = useRef(null);
+  const videoRef = useRef(null);
+
+  const lastNotifications = notifications?.slice(-1)[0]?.notifications;
+  const unreadCount = notifications?.slice(-1)[0]?.notifications.length;
 
   const notificationModalToggle = () => {
     setNotificationModal(prev => !prev);
   };
 
-  const stringFormatter = (notification, closeFunc, closeModal = false) => {
-    const [action, title] = notification.message.split(':');
+  const notificationFormatter = (notification, closeFunc = null) => {
+    switch (notification.object_type) {
+      case 'document_signer':
+        return (
+          <span>
+            Новый запрос на подписание документа в комнате
+            <Link onClick={closeFunc} to={`/room/${notification.object_id}`}>
+              {notification.object_id}
+            </Link>
+          </span>
+        );
 
-    if ((closeModal = false)) {
-      return (
-        <span>
-          {action} <Link to={`/room/${notification.room_key}`}>{title}</Link> в комнате {notification.room_name}
-        </span>
-      );
-    } else {
-      return (
-        <span>
-          {action}
-          <Link to={`/room/${notification.room_key}`} onClick={closeFunc}>
-            {title}
-          </Link>{' '}
-          в комнате {`"${notification.room_name}"`}
-        </span>
-      );
+      case 'document_viewer':
+        return (
+          <span>
+            Новый запрос на просмотр документа в комнате{' '}
+            <Link onClick={closeFunc} to={`/room/${notification.object_id}`}>
+              {notification.object_id}
+            </Link>
+          </span>
+        );
+
+      case 'application_user_approval':
+        return (
+          <span>
+            Новый запрос на согласование расходов в заявке{' '}
+            <Link onClick={closeFunc} to={`/application/${notification.object_id}`}>
+              {notification.object_id}
+            </Link>
+          </span>
+        );
+      case 'application_item_approval':
+        return (
+          <span>
+            Новый запрос на согласование расходов в заявке{' '}
+            <Link onClick={closeFunc} to={`/application/${notification.object_id}`}>
+              {notification.object_id}
+            </Link>
+          </span>
+        );
+      case 'application_ceo_approval':
+        return (
+          <span>
+            Новый запрос на согласование расходов в заявке{' '}
+            <Link onClick={closeFunc} to={`/application/${notification.object_id}`}>
+              {notification.object_id}
+            </Link>
+          </span>
+        );
+
+      default:
+        return <span>"Неизвестный запрос, обратитесь в поддержку"</span>;
     }
   };
 
-  const lastNotifications = notifications?.slice(-1)[0]?.notifications;
-  const unreadCount = notifications?.slice(-1)[0]?.notifications.length;
-
-  useEffect(() => {
-    const handleClickOutside = event => {
-      if (target.current && !target.current.contains(event.target)) {
-        setShow(false);
-      }
-    };
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
-  }, []);
+  const stringFormatter = (notification, closeFunc, closeModal = false) => {
+    if (closeModal === false) {
+      return notificationFormatter(notification);
+    } else {
+      return notificationFormatter(notification, closeFunc);
+    }
+  };
 
   const showNotification = lastNotifications => {
     if (lastNotifications?.length === 0) {
@@ -73,9 +105,9 @@ export const Header = () => {
     if (lastNotifications?.length > 2) {
       return (
         <>
-          {lastNotifications.slice(0, 2).map(notification => {
+          {lastNotifications.slice(0, 2)?.map(notification => {
             return (
-              <div className="mb-3" key={notification.id}>
+              <div className="mb-2" key={notification.id}>
                 {stringFormatter(notification)}
               </div>
             );
@@ -91,11 +123,35 @@ export const Header = () => {
     }
   };
 
+  useEffect(() => {
+    const handleClickOutside = event => {
+      if (target.current && !target.current.contains(event.target)) {
+        setShow(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.play();
+    }
+  }, []);
+
   return (
     <>
       <Row className="p-3 bg-body">
         <Col className="d-flex justify-content-between align-items-center">
           <Menu />
+
+          <div className={styles.videoInner}>
+            <video ref={videoRef} loop muted autoPlay playsInline className={styles.video}>
+              <source src="./vecteezy_russia-flag-seamless-looping-background-looped-bump-texture_21086329.mp4" />
+            </video>
+
+            <p className={styles.text}>С Днем Защитника Отечества!</p>
+          </div>
 
           <div className="d-flex">
             <OverlayTrigger

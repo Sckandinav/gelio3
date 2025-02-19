@@ -17,7 +17,9 @@ export const Table = ({
   hasSearch = true,
   sortingOptions,
   onChangeSortingOptions,
+  selectionkey,
   selectedType,
+  firstOptionTitle,
   dateFilter = false,
 }) => {
   const [searchText, setSearchText] = useState('');
@@ -27,7 +29,6 @@ export const Table = ({
   const [endDate, setEndDate] = useState(null);
   const [appliedStartDate, setAppliedStartDate] = useState(null);
   const [appliedEndDate, setAppliedEndDate] = useState(null);
-
   const { rowsPerPage, currentPage } = useSelector(utilsSelector).pagination;
   const dispatch = useDispatch();
 
@@ -110,7 +111,7 @@ export const Table = ({
       if (!selectedType) {
         return item;
       }
-      return item.roomType === Number(selectedType);
+      return item[selectionkey] === Number(selectedType);
     })
     .filter(item => {
       return Object.keys(item).some(key => item[key]?.toString().toLowerCase().includes(searchText.toLowerCase()));
@@ -156,7 +157,7 @@ export const Table = ({
         {sortingOptions && sortingOptions.length > 0 && (
           <div style={{ width: '200px' }}>
             <Form.Select onChange={onChangeSortingOptions}>
-              <option value="">Все категории</option>
+              <option value="">{firstOptionTitle}</option>
               {sortingOptions?.map(el => (
                 <option key={el.value} value={el.value}>
                   {el.label}

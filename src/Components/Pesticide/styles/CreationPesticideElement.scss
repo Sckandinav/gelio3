@@ -1,0 +1,34 @@
+.actionBtn {
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+
+  svg {
+    transition: all 0.2s ease-in-out;
+  }
+
+  &:hover,
+  &:active,
+  &:disabled {
+    background-color: transparent !important;
+    color: transparent;
+  }
+  &:disabled {
+    opacity: 0.3;
+  }
+
+  &:hover svg {
+    transform: scale(1.1);
+  }
+}
+
+.custom-modal {
+  z-index: 1060; /* Убедитесь, что второе окно поверх первого */
+}
+.modal-backdrop.show {
+  opacity: 0.5; /* Темный фон */
+}
+.modal-backdrop + .modal-backdrop {
+  z-index: 1055; /* Убедитесь, что второй бэкдроп поверх первого */
+}

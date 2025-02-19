@@ -24,7 +24,6 @@ export const NotificationManager = () => {
     let isChanged = false;
 
     blinkIntervalRef.current = setInterval(() => {
-      // if (document.hidden) return;
       document.title = isChanged ? `(${unreadCount}) Уведомление!` : originalTitleRef.current;
       updateFavicon(isChanged);
 

@@ -77,6 +77,14 @@ export const RoomsList = ({ data }) => {
     }
   };
 
+  const dateFormate = dateStr => {
+    const [datePart, timePart] = dateStr.split(', ');
+    const [day, month, year] = datePart.split('.');
+    const [hours, minutes, seconds] = timePart.split(':');
+    const date = new Date(year, month - 1, day, hours, minutes, seconds);
+    return date.getTime();
+  };
+
   const columns = [
     {
       name: '',
@@ -126,7 +134,7 @@ export const RoomsList = ({ data }) => {
 
     {
       name: 'Создано',
-      selector: row => row.date,
+      selector: row => dateFormate(row.date),
       sortable: true,
       cell: row => row.date,
       width: '150px',
@@ -174,6 +182,8 @@ export const RoomsList = ({ data }) => {
           selectedType={selectedType}
           onChangeSortingOptions={setSelected}
           dateFilter
+          selectionkey="roomType"
+          firstOptionTitle="Все категории"
         />
       </motion.div>
     </AnimatePresence>
