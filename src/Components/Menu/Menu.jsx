@@ -69,6 +69,16 @@ const initialMenuList = [
   },
 
   {
+    title: 'Карты',
+    id: 'map',
+    type: 'subMenu',
+    img: '/icons/map.svg',
+    isActive: false,
+    linkSRC: '/',
+    subMenuLists: [{ title: 'Карта полей', to: 'maps' }],
+  },
+
+  {
     title: 'Тех. поддержка',
     id: 'support',
     type: 'link',

@@ -12,6 +12,7 @@ export const url = {
   payment: () => '/payment',
   chemistry: () => '/chemistry',
   chemistryAdd: () => '/chemistry/add',
+  maps: () => '/maps',
 };
 
 export const links = {

@@ -215,7 +215,7 @@ export const Chemistry = () => {
   }
 
   return (
-    <Container fluid>
+    <Container fluid className="bg-light rounded-3">
       <Row>
         <Col>
           <Tabs defaultActiveKey={activeTab} transition={true} id="noanim-tab-example" justify className="mb-3" onSelect={handleTabSelect}>
@@ -240,7 +240,6 @@ export const Chemistry = () => {
               />
             </Tab>
             <Tab eventKey="group" title="Группы пестицидов">
-              Группы пестицидов
               <PesticideTable
                 data={dataTable}
                 columns={columns}
@@ -251,7 +250,6 @@ export const Chemistry = () => {
               />
             </Tab>
             <Tab eventKey="substances" title="Действующие вещества">
-              Действующие вещества
               <PesticideTable
                 data={dataTable}
                 columns={columns}

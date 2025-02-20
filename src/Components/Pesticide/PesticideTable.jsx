@@ -23,7 +23,7 @@ export const PesticideTable = ({ columns, data, addBtnClick, deleteBtnClick, han
 
   return (
     <>
-      <Row className="mb-3">
+      <Row className="mb-3 ">
         <Col>
           <Form>
             <Form.Group>

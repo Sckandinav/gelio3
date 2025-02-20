@@ -17,6 +17,7 @@ import { Application } from './Components/Applications/Application/Application.j
 import { Payment } from './Pages/Payment.jsx';
 import { Chemistry } from './Pages/Chemistry.jsx';
 import { CreationPesticide } from './Components/Pesticide/CreationPesticide.jsx';
+import { Maps } from './Pages/Maps.jsx';
 
 function App() {
   return (
@@ -42,9 +43,10 @@ function App() {
         <Route path={url.payment()} element={<Payment />} />
         <Route path={url.chemistry()} element={<Chemistry />} />
         <Route path={url.chemistryAdd()} element={<CreationPesticide />} />
+        <Route path={url.maps()} element={<Maps />} />
+        <Route path={url.support()} element={<Support />} />
         <Route path={url.error()} element={<ErrorPage />} />
         <Route path={url.notFound()} element={<NotFound />} />
-        <Route path={url.support()} element={<Support />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
