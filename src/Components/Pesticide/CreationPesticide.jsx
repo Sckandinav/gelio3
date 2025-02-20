@@ -44,8 +44,6 @@ export const CreationPesticide = () => {
   const axiosInstance = useAxiosInterceptor();
   const token = useUserToken();
 
-  console.log('unitsOfApplication', unitsOfApplication);
-
   const prepareDate = () => {
     return {
       pestecide_name_id: selectedPesticide?.value || '',

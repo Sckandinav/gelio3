@@ -10,17 +10,16 @@ const paginationOptions = {
   selectAllRowsItemText: 'Все',
 };
 
-export const PesticideTable = ({ columns, data, addBtnClick }) => {
+export const PesticideTable = ({ columns, data, addBtnClick, deleteBtnClick, handleSelectedRowsChange, selectedRows }) => {
   const [searchText, setSearchText] = useState('');
-  const [selectedRows, setSelectedRows] = useState([]);
+  // const [selectedRows, setSelectedRows] = useState([]);
+  // const handleSelectedRowsChange = ({ selectedRows }) => {
+  //   setSelectedRows(selectedRows);
+  // };
 
   const filteredData = data.filter(item => {
     return Object.keys(item).some(key => item[key]?.toString().toLowerCase().includes(searchText.toLowerCase()));
   });
-
-  const handleSelectedRowsChange = ({ selectedRows }) => {
-    setSelectedRows(selectedRows);
-  };
 
   return (
     <>
@@ -39,7 +38,7 @@ export const PesticideTable = ({ columns, data, addBtnClick }) => {
           <Button className="me-3" variant="outline-success" size="sm" onClick={addBtnClick}>
             Добавить
           </Button>
-          <Button variant="outline-danger" size="sm" disabled={selectedRows.length === 0}>
+          <Button variant="outline-danger" size="sm" disabled={selectedRows.length === 0} onClick={deleteBtnClick}>
             Удалить
           </Button>
         </Col>

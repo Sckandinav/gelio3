@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Tabs, Tab, Container, Row, Col, Modal } from 'react-bootstrap';
+import { Tabs, Tab, Container, Row, Col, Modal, Button, Form } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 
 import { useAxiosInterceptor } from '../Components/hoc/useAxiosInterceptor';
-import { warehousingApi } from '../routes/routes.js';
 import { getData } from '../api/getData';
 import { Spinner } from '../Components/Spinner/Spinner.jsx';
-import { url } from '../routes/routes.js';
-// import { CreationPesticide } from '../Components/Pesticide/CreationPesticide.jsx';
+import { url, warehousingApi } from '../routes/routes.js';
+import { useUserToken } from '../Components/hoc/useUserToken.js';
+import { showSuccess, showError } from '../store/slices/toast.js';
 
 import { PesticideTable } from '../Components/Pesticide/PesticideTable.jsx';
 
@@ -22,18 +23,28 @@ export const Chemistry = () => {
     substances: false,
   });
 
-  const navigate = useNavigate();
+  const [newElement, setNewElement] = useState('');
 
-  const modalToggle = (key = null) => {
-    setPopupState(prevState => {
-      if (key === null) {
-        return Object.fromEntries(Object.keys(prevState).map(k => [k, false]));
-      }
-      return {
-        ...prevState,
-        [key]: !prevState[key],
-      };
+  const popupToggle = (key = null) => {
+    setPopupState(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+  const resetPopup = () => {
+    setNewElement('');
+    setPopupState({
+      pesticide: false,
+      title: false,
+      group: false,
+      substances: false,
     });
+  };
+
+  const navigate = useNavigate();
+  const token = useUserToken();
+  const dispatch = useDispatch();
+
+  const [selectedRows, setSelectedRows] = useState([]);
+  const handleSelectedRowsChange = ({ selectedRows }) => {
+    setSelectedRows(selectedRows);
   };
 
   const axiosInstance = useAxiosInterceptor();
@@ -120,6 +131,24 @@ export const Chemistry = () => {
     approximate: row.approximate_terms || null,
   }));
 
+  const columns = [
+    {
+      name: '',
+      selector: row => row.id,
+      omit: true,
+    },
+    {
+      name: 'Наименование',
+      selector: row => row.name,
+      sortable: true,
+    },
+  ];
+
+  const dataTable = data.map(row => ({
+    id: row.id,
+    name: row.name,
+  }));
+
   const fetchData = async () => {
     try {
       setIsLoading(true);
@@ -130,6 +159,50 @@ export const Chemistry = () => {
       console.log(error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const addRow = async e => {
+    e.preventDefault();
+    try {
+      const apiMethod = apiMethods[activeTab];
+      await axiosInstance.post(
+        apiMethod(),
+        { name: newElement },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Token ${token}`,
+          },
+        },
+      );
+      dispatch(showSuccess('Элемент добавлен'));
+      fetchData();
+      resetPopup();
+    } catch (error) {
+      dispatch(showError('Не удалось добавить элемент'));
+      console.log(error);
+    }
+  };
+
+  const deleteRow = async url => {
+    try {
+      const selected = selectedRows.map(row => row.id);
+      console.log('selected', selected);
+      await axiosInstance.delete(url, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Token ${token}`,
+        },
+        data: { ids: selected },
+      });
+
+      dispatch(showSuccess('Запись удалена'));
+      setSelectedRows([]);
+      fetchData();
+    } catch (error) {
+      dispatch(showError('Не удалось выполнить действие'));
+      console.log(error);
     }
   };
 
@@ -147,20 +220,70 @@ export const Chemistry = () => {
         <Col>
           <Tabs defaultActiveKey={activeTab} transition={true} id="noanim-tab-example" justify className="mb-3" onSelect={handleTabSelect}>
             <Tab eventKey="pesticideNames" title="Применение препаратов">
-              <PesticideTable data={tableData} columns={pesticideNamesColumns} addBtnClick={() => navigate(url.chemistryAdd())} />
+              <PesticideTable
+                data={tableData}
+                columns={pesticideNamesColumns}
+                addBtnClick={() => navigate(url.chemistryAdd())}
+                deleteBtnClick={() => deleteRow(warehousingApi.deletePesticides())}
+                handleSelectedRowsChange={handleSelectedRowsChange}
+                selectedRows={selectedRows}
+              />
             </Tab>
             <Tab eventKey="title" title="Названия пестицидов">
-              Названия пестицидов
+              <PesticideTable
+                data={dataTable}
+                columns={columns}
+                addBtnClick={() => popupToggle('title')}
+                deleteBtnClick={() => deleteRow(warehousingApi.pesticideNamesDelete())}
+                handleSelectedRowsChange={handleSelectedRowsChange}
+                selectedRows={selectedRows}
+              />
             </Tab>
             <Tab eventKey="group" title="Группы пестицидов">
               Группы пестицидов
+              <PesticideTable
+                data={dataTable}
+                columns={columns}
+                addBtnClick={() => popupToggle('group')}
+                deleteBtnClick={() => deleteRow(warehousingApi.pesticideGroupDelete())}
+                handleSelectedRowsChange={handleSelectedRowsChange}
+                selectedRows={selectedRows}
+              />
             </Tab>
             <Tab eventKey="substances" title="Действующие вещества">
               Действующие вещества
+              <PesticideTable
+                data={dataTable}
+                columns={columns}
+                addBtnClick={() => popupToggle('substances')}
+                deleteBtnClick={() => deleteRow(warehousingApi.substanceDelete())}
+                handleSelectedRowsChange={handleSelectedRowsChange}
+                selectedRows={selectedRows}
+              />
             </Tab>
           </Tabs>
         </Col>
       </Row>
+
+      <Modal show={Object.values(popupState).some(value => value === true)} onHide={resetPopup}>
+        <Modal.Header closeButton>
+          <Modal.Title>Добавить элемент</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Label></Form.Label>
+            <Form.Control type="text" value={newElement} onChange={e => setNewElement(e.target.value)} required></Form.Control>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="outline-danger" onClick={resetPopup}>
+            Отменить
+          </Button>
+          <Button variant="outline-success" disabled={newElement.length === 0} onClick={addRow}>
+            Добавить
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 };
