@@ -84,3 +84,7 @@ export const warehousingApi = {
   substanceChange: id => [apiPath, 'chemicals', 'substances', `${id}/`].join('/'),
   substanceDelete: () => [apiPath, 'chemicals', 'substances', 'bulk-delete/'].join('/'),
 };
+
+export const mapsUrls = {
+  getPolygonCoordinates: () => [apiPath, 'maps', 'fieldshape'].join('/'),
+};
