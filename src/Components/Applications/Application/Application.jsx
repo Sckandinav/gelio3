@@ -14,6 +14,7 @@ import { SelectComponent } from '../../Select/Select.jsx';
 import { fetchUsers } from '../../../api/fetchUsers.js';
 import { links, applicationActionsUrl, applicationUrl } from '../../../routes/routes.js';
 import { Spinner } from '../../Spinner/Spinner.jsx';
+import { useUserToken } from '../../hoc/useUserToken.js';
 
 import styles from './Application.module.scss';
 
@@ -33,6 +34,7 @@ export const Application = () => {
   const [selectedUser, setSelectedUser] = useState([]);
   const [print, setPrint] = useState(false);
   const [loading, setLoading] = useState(false);
+  const token = useUserToken();
 
   const dispatch = useDispatch();
   const axiosInstance = useAxiosInterceptor();
@@ -48,6 +50,16 @@ export const Application = () => {
 
   const selectedHandler = (...props) => {
     setSelectedUser(props[1]);
+  };
+
+  const multiSelectedHandler = (...props) => {
+    setSelectedUser(prev => [...prev, props[1]]);
+  };
+
+  const managerSelectHandler = data => {
+    selectedUser.some(user => user.id === data.id)
+      ? setSelectedUser(prev => prev.filter(user => user.id !== data.id))
+      : setSelectedUser(prev => [...prev, data]);
   };
 
   const contentRef = useRef(null);
@@ -109,7 +121,6 @@ export const Application = () => {
 
   const addRowApprover = async () => {
     try {
-      const token = localStorage.getItem('token');
       await axiosInstance.post(
         applicationActionsUrl.addApprover(rowData.id),
         { selectedApprover: selectedUser.value },
@@ -125,6 +136,75 @@ export const Application = () => {
       fetchData();
     } catch (error) {
       dispatch(showError('Не удалось назначить сотрудника'));
+      console.log(error);
+    }
+  };
+
+  const canInviteManagers = () => {
+    const managersInApp = data.managers_approvals?.map(user => user.manager_id);
+    return users.filter(user => !managersInApp?.includes(`${user.value}`));
+  };
+
+  const addManagers = async () => {
+    try {
+      await axiosInstance.post(
+        applicationActionsUrl.addManagers(id),
+        { selectedManagers: selectedUser },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Token ${token}`,
+          },
+        },
+      );
+
+      dispatch(showSuccess('Руководители назначены'));
+      setSelectedUser([]);
+      fetchData();
+    } catch (error) {
+      dispatch(showError('Не удалось назначить руководителя'));
+      console.log(error);
+    }
+  };
+
+  const removeManagers = async () => {
+    try {
+      await axiosInstance.post(
+        applicationActionsUrl.removeManagers(id),
+        { selectedManagers: selectedUser },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Token ${token}`,
+          },
+        },
+      );
+
+      dispatch(showSuccess('Руководитель убран'));
+      setSelectedUser([]);
+      fetchData();
+    } catch (error) {
+      dispatch(showError('Не удалось убрать руководителя'));
+      console.log(error);
+    }
+  };
+
+  const approveManagers = async () => {
+    try {
+      await axiosInstance.post(
+        applicationActionsUrl.approveManagers(id),
+        {},
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Token ${token}`,
+          },
+        },
+      );
+      dispatch(showSuccess('Расходы согласованы'));
+      fetchData();
+    } catch (error) {
+      dispatch(showError('Не удалось согласовать расходы'));
       console.log(error);
     }
   };
@@ -246,7 +326,6 @@ export const Application = () => {
 
   const approveRowFunc = async data => {
     try {
-      const token = localStorage.getItem('token');
       await axiosInstance.patch(applicationActionsUrl.approveRow(data.id), data, {
         headers: {
           'Content-Type': 'application/json',
@@ -314,12 +393,36 @@ export const Application = () => {
     }
   };
 
+  const verificationOfManager = user => {
+    if (user.approved) {
+      return (
+        <div className="p-0 m-0">
+          <p className="p-0 m-0 text-success fst-italic">Согласована</p>
+          <span className="p-0 m-0 text-success fst-italic">{new Date(user.updated_at).toLocaleDateString()}</span>
+        </div>
+      );
+    }
+
+    if (+currentUserID === +user.manager_id) {
+      return (
+        <Button size="sm" variant="outline-success" onClick={() => approveManagers('approveManagers')}>
+          Утвердить
+        </Button>
+      );
+    } else {
+      return (
+        <div>
+          <p>На согласовании</p>
+        </div>
+      );
+    }
+  };
+
   const costChangeChek = row => {
     return row.item_approvals.length > 0 && +row.item_approvals[0].approver === +currentUserID;
   };
 
   const removeApprove = async (rowID, userID) => {
-    const token = localStorage.getItem('token');
     try {
       await axiosInstance.delete(applicationActionsUrl.removeUser(rowID), {
         headers: {
@@ -341,7 +444,6 @@ export const Application = () => {
 
   const ceoApprove = async () => {
     try {
-      const token = localStorage.getItem('token');
       await axiosInstance.post(
         applicationUrl.approveByCeo(id),
         {},
@@ -366,7 +468,6 @@ export const Application = () => {
       return;
     }
     try {
-      const token = localStorage.getItem('token');
       const response = await axiosInstance.get(links.ceoList(), {
         headers: {
           'Content-Type': 'application/json',
@@ -382,7 +483,6 @@ export const Application = () => {
 
   const fetchSelectedCeo = async () => {
     try {
-      const token = localStorage.getItem('token');
       await axiosInstance.post(
         applicationActionsUrl.approveCeo(id),
         {
@@ -406,7 +506,6 @@ export const Application = () => {
 
   const fetchRemoveCeo = async () => {
     try {
-      const token = localStorage.getItem('token');
       await axiosInstance.delete(applicationActionsUrl.removeCeo(id), {
         headers: {
           'Content-Type': 'application/json',
@@ -455,6 +554,12 @@ export const Application = () => {
         amount_without_nds: newConst,
       }));
     }
+  };
+
+  const deleteHandler = (...props) => {
+    const selectedUser = props[1];
+    setSelectedUser(prev => prev.filter(user => user.value !== selectedUser.value));
+    console.log(selectedUser);
   };
 
   useEffect(() => {
@@ -813,6 +918,51 @@ export const Application = () => {
                 </tbody>
               </Table>
             </Col>
+
+            <Col sm={4}>
+              {data.managers_approvals ? (
+                <Table className={styles.agroTable} style={{ fontSize: `${print ? '10px' : '14px'}` }}>
+                  <thead>
+                    <tr>
+                      <th>Руководители отделов</th>
+                      <th>Информация</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.managers_approvals.map(user => (
+                      <tr key={user.id}>
+                        <td>
+                          <span> {user?.manager_name}</span>
+                          <span className="d-block">{user.manager_post}</span>
+                        </td>
+                        <td>{verificationOfManager(user)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              ) : null}
+            </Col>
+            <Col sm={2} className={print ? styles.hide : ''}>
+              <Button
+                className="mb-2"
+                variant="outline-success"
+                onClick={() => setAction('addManagers')}
+                size="sm"
+                style={{ width: '175px', textAlign: 'left' }}
+                disabled={data.approved_by_ceo}
+              >
+                Добавить руководителя
+              </Button>
+              <Button
+                variant="outline-danger"
+                onClick={() => setAction('removeManagers')}
+                size="sm"
+                style={{ width: '175px', textAlign: 'left' }}
+                disabled={data.managers_approvals?.every(managers => managers.approved)}
+              >
+                Убрать руководителя
+              </Button>
+            </Col>
           </Row>
         </div>
         {data?.items?.some(item => {
@@ -902,6 +1052,84 @@ export const Application = () => {
       </Modal>
 
       <Modal
+        show={action === 'addManagers'}
+        onHide={() => {
+          setAction('');
+          setSelectedUser([]);
+        }}
+      >
+        <Modal.Header>
+          <Modal.Title>Добавить руководителей отделов</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <SelectComponent
+            data={canInviteManagers()}
+            multiSelection={true}
+            selectHandler={multiSelectedHandler}
+            selected={selectedUser}
+            deleteHandler={deleteHandler}
+          />
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            disabled={selectedUser.length === 0}
+            onClick={() => {
+              addManagers();
+              setAction('');
+              setSelectedUser([]);
+            }}
+          >
+            Добавить
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal
+        show={action === 'removeManagers'}
+        onHide={() => {
+          setAction('');
+          setSelectedUser([]);
+        }}
+      >
+        <Modal.Header>
+          <Modal.Title>Убрать руководителя отдела</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <ListGroup>
+            {data?.managers_approvals
+              ?.filter(user => !user.approved)
+              ?.map(user => (
+                <ListGroup.Item key={user.id} className="p-0">
+                  <Form>
+                    <Form.Label
+                      className="d-flex align-items-center m-0 p-2 column-gap-2"
+                      style={{ cursor: 'pointer' }}
+                      onChange={() => managerSelectHandler(user)}
+                    >
+                      <Form.Check />
+                      <span>{user.manager_name}</span>
+                    </Form.Label>
+                  </Form>
+                </ListGroup.Item>
+              ))}
+          </ListGroup>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="outline-danger"
+            disabled={selectedUser.length === 0}
+            onClick={() => {
+              removeManagers();
+              setAction('');
+              setSelectedUser([]);
+            }}
+          >
+            Убрать
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal
         show={action === 'Убрать согласующего'}
         onHide={() => {
           setAction('');
@@ -948,6 +1176,42 @@ export const Application = () => {
             Отменить
           </Button>
           <Button variant="outline-success" onClick={() => ceoApprove()}>
+            Согласовать
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal
+        show={action === 'Согласовать'}
+        onHide={() => {
+          setAction('');
+          setSelectedUser([]);
+        }}
+      >
+        <Modal.Header>
+          <Modal.Title>Подтверждение согласования</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>Вы действительно хотите согласовать расходы?</Modal.Body>
+        <Modal.Footer>
+          <Button variant="outline-danger" onClick={() => setAction('')}>
+            Отменить
+          </Button>
+          <Button variant="outline-success" onClick={() => approveRowFunc(rowData)}>
+            Согласовать
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal show={action === 'approveManagers'}>
+        <Modal.Header>
+          <Modal.Title>Подтверждение согласования</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>Вы действительно хотите согласовать расходы?</Modal.Body>
+        <Modal.Footer>
+          <Button variant="outline-danger" onClick={() => setAction('')}>
+            Отменить
+          </Button>
+          <Button variant="outline-success" onClick={() => approveManagers()}>
             Согласовать
           </Button>
         </Modal.Footer>

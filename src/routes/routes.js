@@ -47,23 +47,26 @@ export const roomLinks = {
 };
 
 export const applicationUrl = {
-  sideBar: () => [apiPath, 'edo', 'application', 'incoming/'].join('/'),
-  sideBarCreated: () => [apiPath, 'edo', 'application', 'created/'].join('/'),
-  createApplication: () => [apiPath, 'edo', 'application/'].join('/'),
+  sideBar: () => [apiPath, 'edo', 'applications/'].join('/'),
+  sideBarCreated: () => [apiPath, 'edo', 'applications', 'created/'].join('/'),
+  createApplication: () => [apiPath, 'edo', 'applications/'].join('/'),
   sideBarIncoming: () => [apiPath, 'edo', 'application-sidebar/'].join('/'),
-  getTask: id => [apiPath, 'edo', 'application', `${id}/`].join('/'),
+  getTask: id => [apiPath, 'edo', 'applications', `${id}/`].join('/'),
   expensesUrl: () => [apiPath, 'edo', 'application-cost-items/'].join('/'),
-  approve: id => [apiPath, 'edo', 'application', id, 'approve/'].join('/'),
+  approve: id => [apiPath, 'edo', 'applications', id, 'approve/'].join('/'),
   actionsWithRow: () => [apiPath, 'edo', 'application-items/'].join('/'),
-  approveByCeo: id => [apiPath, 'edo', 'application', id, 'approve-ceo/'].join('/'),
+  approveByCeo: id => [apiPath, 'edo', 'applications', id, 'approve-ceo/'].join('/'),
 };
 
 export const applicationActionsUrl = {
   addApprover: id => [apiPath, 'edo', 'application-items', id, 'add-approver/'].join('/'),
   removeUser: id => [apiPath, 'edo', 'application-items', id, 'remove-approver/'].join('/'),
   approveRow: id => [apiPath, 'edo', 'application-items', id, 'approve/'].join('/'),
-  approveCeo: id => [apiPath, 'edo', 'application', id, 'assign-ceo/'].join('/'),
-  removeCeo: id => [apiPath, 'edo', 'application', id, 'remove-ceo/'].join('/'),
+  approveCeo: id => [apiPath, 'edo', 'applications', id, 'assign-ceo/'].join('/'),
+  removeCeo: id => [apiPath, 'edo', 'applications', id, 'remove-ceo/'].join('/'),
+  addManagers: id => [apiPath, 'edo', 'applications', id, 'add-managers/'].join('/'),
+  removeManagers: id => [apiPath, 'edo', 'applications', id, 'remove-managers/'].join('/'),
+  approveManagers: id => [apiPath, 'edo', 'applications', id, 'approve-manager/'].join('/'),
 };
 
 //Складской учёт

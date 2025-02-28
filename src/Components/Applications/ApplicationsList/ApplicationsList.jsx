@@ -40,6 +40,12 @@ export const ApplicationsList = ({ data, title, company }) => {
         return <FaExclamation title="Ожидает назначения" size={20} style={{ color: 'red' }} />;
       }
       return <BsCheck2Circle title="Выполнили действия" size={20} style={{ color: 'green' }} />;
+    } else {
+      if (row.notifications.already_approved) {
+        return <BsCheck2Circle title="Выполнили действия" size={20} style={{ color: 'green' }} />;
+      } else {
+        return <FaExclamation title="Ожидает согласования" size={20} style={{ color: 'red' }} />;
+      }
     }
   };
 
@@ -58,9 +64,9 @@ export const ApplicationsList = ({ data, title, company }) => {
       omit: true,
     },
     {
-      name: 'Статус назначения',
+      name: 'Статус',
       selector: row => row.appointment,
-      width: '150px',
+      width: '80px',
       style: {
         display: 'flex',
         alignItems: 'center',

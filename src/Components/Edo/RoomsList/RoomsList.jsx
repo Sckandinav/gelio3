@@ -28,7 +28,7 @@ export const RoomsList = ({ data }) => {
 
     if (row.notifications === true) {
       return (
-        <span title={`Необходимо выполнить действий: ${row.actions}`}>
+        <span title={`${row.actions ? `Необходимо выполнить действий: ${row.actions}` : 'Не все пользователи выполнили свои действия'}`}>
           <FaExclamation size={16} style={{ color: 'red' }} />
         </span>
       );
@@ -176,7 +176,7 @@ export const RoomsList = ({ data }) => {
         <Table
           columns={columns}
           data={tableData}
-          title={!search || search === '?mode=created' ? 'Созданные' : 'Входящие'}
+          title={!search || search === '?mode=created' ? 'Обмен документами, исходящие' : 'Обмен документами, входящие'}
           selectableRows={false}
           sortingOptions={roomsType}
           selectedType={selectedType}

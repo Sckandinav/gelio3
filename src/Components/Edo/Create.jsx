@@ -23,7 +23,7 @@ const actionsList = {
   RemoveViewer: 'Убрать просмотрщика',
 };
 
-export const Create = () => {
+export const Create = ({ close, update }) => {
   const [users, setUsers] = useState([]);
   const [roomType, setRoomType] = useState([]);
   const [pageNumber, setPageNumber] = useState(1);
@@ -171,9 +171,10 @@ export const Create = () => {
         },
       });
 
+      update();
       dispatch(showSuccess('Комната создана'));
+      close();
       navigate(url.edoCreated());
-      window.location.reload();
     } catch (error) {
       dispatch(showError('Не удалось создать комнату'));
       console.log(error);

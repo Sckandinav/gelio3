@@ -9,6 +9,7 @@ import { notificationsSelector } from '../../store/selectors/notificationsSelect
 import { logOut } from '../../store/slices/userAuth';
 import { Menu } from '../Menu/Menu';
 import { userSelectors } from '../../store/selectors/userSelectors';
+import { Congratulations } from '../Congratulations/Congratulations';
 
 import styles from './Header.module.scss';
 
@@ -33,7 +34,7 @@ export const Header = () => {
       case 'document_signer':
         return (
           <span>
-            Новый запрос на подписание документа в комнате
+            Новый запрос на подписание документа в комнате{' '}
             <Link onClick={closeFunc} to={`/room/${notification.object_id}`}>
               {notification.object_id}
             </Link>
@@ -145,13 +146,7 @@ export const Header = () => {
         <Col className="d-flex justify-content-between align-items-center">
           <Menu />
 
-          <div className={styles.videoInner}>
-            <video ref={videoRef} loop muted autoPlay playsInline className={styles.video}>
-              <source src="./vecteezy_russia-flag-seamless-looping-background-looped-bump-texture_21086329.mp4" />
-            </video>
-
-            <p className={styles.text}>С Днем Защитника Отечества!</p>
-          </div>
+          <Congratulations />
 
           <div className="d-flex">
             <OverlayTrigger

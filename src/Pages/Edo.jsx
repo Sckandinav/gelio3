@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, useSearchParams, useLocation } from 'react-router-dom';
 import { Container, Row, Col } from 'react-bootstrap';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 import { Dashboard } from '../Components/Dashboard/Dashboard';
 import { Spinner } from '../Components/Spinner/Spinner';
@@ -60,7 +60,14 @@ export const Edo = () => {
         <Row className="mb-5">
           <Col>
             <WebSocketMenuListener />
-            <Dashboard isDropdown={true} data={data} create={<Create />} setParamsFunc={addParam} removeParam={removeParam} />
+            <Dashboard
+              isDropdown={true}
+              data={data}
+              create={<Create />}
+              setParamsFunc={addParam}
+              removeParam={removeParam}
+              updateList={getRoomsList}
+            />
           </Col>
         </Row>
         <Row>

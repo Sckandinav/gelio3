@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import { useSelector } from 'react-redux';
+import { useSearchParams } from 'react-router-dom';
 
 import { Dashboard } from '../Components/Dashboard/Dashboard';
 import { fetchApplicationMenu } from '../api/fetchApplicationMenu';
@@ -14,22 +15,24 @@ import { notificationsSelector } from '../store/selectors/notificationsSelector.
 export const Applications = () => {
   const [data, setData] = useState([]);
   const [company, setCompany] = useState([]);
-  const [type, setType] = useState('incoming');
+  const [searchParams, setSearchParams] = useSearchParams();
   const axiosInstance = useAxiosInterceptor();
 
   const notificationsCounter = useSelector(notificationsSelector).applicationMenu || {};
-
-  const typeToggle = e => {
-    if (type !== e.target.id) {
-      setType(e.target.id);
-    }
+  const type = searchParams.get('application_type');
+  const addParam = (key, value) => {
+    searchParams.set(key, value);
+    setSearchParams(searchParams);
   };
 
-  const currentUrl = type === 'incoming' ? applicationUrl.sideBar() : applicationUrl.sideBarCreated();
+  const removeParam = key => {
+    searchParams.delete(key);
+    setSearchParams(searchParams);
+  };
 
   const getApplicationsList = async () => {
     try {
-      const response = await fetchApplicationMenu(currentUrl, axiosInstance);
+      const response = await fetchApplicationMenu(applicationUrl.sideBar(), axiosInstance, searchParams);
       const companyResponse = await getData(links.getAgro(), axiosInstance);
       const option = companyResponse.map(el => ({
         value: el.id,
@@ -45,7 +48,7 @@ export const Applications = () => {
 
   useEffect(() => {
     getApplicationsList();
-  }, [currentUrl]);
+  }, [searchParams]);
 
   return (
     <Container fluid className={`bg-light-subtle rounded pt-3`}>
@@ -53,17 +56,18 @@ export const Applications = () => {
         <Col>
           <Dashboard
             data={notificationsCounter.data}
-            handlerFunc={typeToggle}
             create={<Create />}
             modalTitle="Создать заявку"
             fullScreen={true}
             updateList={getApplicationsList}
+            setParamsFunc={addParam}
+            removeParam={removeParam}
           />
         </Col>
       </Row>
       <Row>
         <Col className="px-4">
-          <ApplicationsList data={data} title={type === 'incoming' ? 'Заявки, входящие' : 'Заявки, созданные'} company={company} />
+          <ApplicationsList data={data} title={type === 'created' ? 'Заявки, созданные' : 'Заявки, входящие'} company={company} />
         </Col>
       </Row>
     </Container>

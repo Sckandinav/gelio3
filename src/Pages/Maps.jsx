@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Tabs, Tab, Container, Row, Col, Modal, Button, Form } from 'react-bootstrap';
+import { Container, Row, Col, Form, Spinner } from 'react-bootstrap';
 
 import { useAxiosInterceptor } from '../Components/hoc/useAxiosInterceptor';
 import { getData } from '../api/getData';
@@ -48,39 +48,51 @@ export const Maps = () => {
   }, [params]);
 
   return (
-    <Container>
-      <Row>
+    <Container fluid className="bg-light-subtle rounded p-2">
+      <Row className="mb-3 justify-content-start">
         <Col>
-          <Form.Select name="agroid" onChange={setDataParams} value={params.agroid}>
-            <option value="">Выберите предприятие</option>
-            {agro.map(el => (
-              <option value={el.id} key={el.id}>
-                {el.name}
-              </option>
-            ))}
-          </Form.Select>
+          <Form.Group className="d-flex column-gap-3 align-items-center">
+            <Form.Label className="m-0">
+              <span class="fw-semibold">Укажите предприятие</span>
+            </Form.Label>
+            <Col>
+              <Form.Select name="agroid" onChange={setDataParams} value={params.agroid} style={{ maxWidth: '200px' }}>
+                <option value="">Все</option>
+                {agro.map(el => (
+                  <option value={el.id} key={el.id}>
+                    {el.name}
+                  </option>
+                ))}
+              </Form.Select>
+            </Col>
+          </Form.Group>
         </Col>
         <Col>
-          <Form.Select name="year" onChange={setDataParams} value={params.year}>
-            {yearsList.map(year => (
-              <option key={year} value={year}>
-                {year}
-              </option>
-            ))}
-          </Form.Select>
+          <Form.Group className="d-flex column-gap-3 align-items-center">
+            <Form.Label>
+              <span class="fw-semibold">Укажите год</span>
+            </Form.Label>
+            <Col>
+              <Form.Select name="year" onChange={setDataParams} value={params.year} style={{ maxWidth: '200px' }}>
+                {yearsList.map(year => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </Form.Select>
+            </Col>
+          </Form.Group>
         </Col>
       </Row>
 
       {loading ? (
         <Row>
-          <Col>Загрузка...</Col>
-        </Row>
-      ) : (
-        <Row>
-          <Col style={{ height: '600px' }}>
-            <MapsComponent data={agroFields.features} />
+          <Col className="d-flex justify-content-center align-items-center" style={{ height: 'calc(100vh - 250px)' }}>
+            <Spinner animation="border" variant="primary" />
           </Col>
         </Row>
+      ) : (
+        <MapsComponent data={agroFields.features?.filter(el => el.id !== 21060)} />
       )}
 
       <MapsComponent />

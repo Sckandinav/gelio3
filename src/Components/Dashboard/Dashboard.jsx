@@ -11,7 +11,6 @@ import styles from './Dashboard.module.scss';
 export const Dashboard = ({
   isDropdown = false,
   data,
-  handlerFunc,
   create,
   modalTitle = 'Создать комнату',
   fullScreen = false,
@@ -148,7 +147,9 @@ export const Dashboard = ({
             ) : (
               <Button
                 variant="primary"
-                onClick={handlerFunc}
+                onClick={() => {
+                  setParamsFunc('application_type', 'incoming');
+                }}
                 id="incoming"
                 className="d-flex justify-content-between align-items-center column-gap-1"
               >
@@ -179,7 +180,7 @@ export const Dashboard = ({
                 )}
               </Button>
             ) : (
-              <Button variant="primary" onClick={handlerFunc} id="created">
+              <Button variant="primary" onClick={() => setParamsFunc('application_type', 'created')} id="created">
                 <span>Исходящие</span>
                 {created > 0 && (
                   <Badge pill bg="light" text="primary" className="mx-1" title={`Исходящие комнаты со статусом "Открыта": ${created?.total_rooms}`}>
