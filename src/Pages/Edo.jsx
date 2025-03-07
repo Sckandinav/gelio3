@@ -18,6 +18,7 @@ import styles from './styles/Edo.module.scss';
 export const Edo = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [rooms, setRooms] = useState([]);
+  const [title, setTitle] = useState('входящие');
   const [searchParams, setSearchParams] = useSearchParams();
   const axiosInstance = useAxiosInterceptor();
   const { pathname } = useLocation();
@@ -57,7 +58,7 @@ export const Edo = () => {
   } else {
     return (
       <Container fluid className={`bg-light-subtle rounded pt-3  ${styles.edoInner}`}>
-        <Row className="mb-5">
+        <Row className="mb-3">
           <Col>
             <WebSocketMenuListener />
             <Dashboard
@@ -67,11 +68,12 @@ export const Edo = () => {
               setParamsFunc={addParam}
               removeParam={removeParam}
               updateList={getRoomsList}
+              setTitle={setTitle}
             />
           </Col>
         </Row>
         <Row>
-          <Col className="px-4">{pathname.includes('/edo/room/') ? <Outlet /> : <RoomsList data={rooms} />}</Col>
+          <Col className="px-4">{pathname.includes('/edo/room/') ? <Outlet /> : <RoomsList data={rooms} title={title} />}</Col>
         </Row>
       </Container>
     );

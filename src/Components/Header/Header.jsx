@@ -79,6 +79,16 @@ export const Header = () => {
           </span>
         );
 
+      case 'payment_request_signature':
+        return (
+          <span>
+            Новый запрос на согласование расходов в заявке{' '}
+            <Link onClick={closeFunc} to={`/payment/${notification.object_id}`}>
+              {notification.object_id}
+            </Link>
+          </span>
+        );
+
       default:
         return <span>"Неизвестный запрос, обратитесь в поддержку"</span>;
     }

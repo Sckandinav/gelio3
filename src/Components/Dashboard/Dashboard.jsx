@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button, Container, Row, Col, Dropdown, Badge, ButtonGroup } from 'react-bootstrap';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 
 import { Modal } from '../Modal/Modal';
@@ -17,6 +17,9 @@ export const Dashboard = ({
   setParamsFunc,
   removeParam,
   updateList,
+  linkUrl,
+  searchProps,
+  setTitle,
 }) => {
   const [isCreating, setIsCreating] = useState(false);
 
@@ -48,6 +51,7 @@ export const Dashboard = ({
                     removeParam('agro_id');
                     removeParam('departament_id');
                     setParamsFunc('mode', 'incoming');
+                    setTitle('входящие');
                   }}
                 >
                   Входящие
@@ -87,6 +91,7 @@ export const Dashboard = ({
                             removeParam('mode');
                             removeParam('departament_id');
                             setParamsFunc('agro_id', company.id);
+                            setTitle(`входящие, ${company.name}`);
                           }}
                         >
                           {company.name}
@@ -118,6 +123,7 @@ export const Dashboard = ({
                                   removeParam('mode');
                                   setParamsFunc('agro_id', company.id);
                                   setParamsFunc('departament_id', dept.id);
+                                  setTitle(`входящие, ${company.name}, ${dept.name}`);
                                 }}
                               >
                                 <span>{dept.name} </span>
@@ -148,7 +154,8 @@ export const Dashboard = ({
               <Button
                 variant="primary"
                 onClick={() => {
-                  setParamsFunc('application_type', 'incoming');
+                  removeParam(searchProps.created.key);
+                  setParamsFunc(searchProps.incoming.key, searchProps.incoming.value);
                 }}
                 id="incoming"
                 className="d-flex justify-content-between align-items-center column-gap-1"
@@ -169,6 +176,7 @@ export const Dashboard = ({
                   removeParam('agro_id');
                   removeParam('departament_id');
                   setParamsFunc('mode', 'created');
+                  setTitle('исходящие');
                 }}
               >
                 <span>Исходящие </span>
@@ -180,7 +188,14 @@ export const Dashboard = ({
                 )}
               </Button>
             ) : (
-              <Button variant="primary" onClick={() => setParamsFunc('application_type', 'created')} id="created">
+              <Button
+                variant="primary"
+                onClick={() => {
+                  removeParam(searchProps.incoming.key);
+                  setParamsFunc(searchProps.created.key, searchProps.created.value);
+                }}
+                id="created"
+              >
                 <span>Исходящие</span>
                 {created > 0 && (
                   <Badge pill bg="light" text="primary" className="mx-1" title={`Исходящие комнаты со статусом "Открыта": ${created?.total_rooms}`}>
@@ -190,9 +205,15 @@ export const Dashboard = ({
               </Button>
             )}
 
-            <Button variant="success" onClick={creatingToggle}>
-              Создать
-            </Button>
+            {pathname.includes('applications') || pathname.includes('payment') ? (
+              <Link to={linkUrl()}>
+                <Button variant="success">Создать</Button>
+              </Link>
+            ) : (
+              <Button variant="success" onClick={creatingToggle}>
+                Создать
+              </Button>
+            )}
           </Col>
         </Row>
       </Container>

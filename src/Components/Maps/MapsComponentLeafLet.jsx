@@ -8,10 +8,6 @@ import 'react-leaflet-fullscreen/styles.css';
 import { FitBoundsControl } from './FitBoundsControl';
 
 export const MapsComponent = ({ data }) => {
-  if (data) {
-    console.log(JSON.stringify(data[0]));
-  }
-
   const getStyle = feature => {
     return {
       fillColor: feature.properties ? feature.properties.color || '#3388ff' : '#3388ff', // Можно задать разные цвета

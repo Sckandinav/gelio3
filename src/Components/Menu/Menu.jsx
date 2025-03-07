@@ -6,9 +6,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AnimatePresence, motion } from 'motion/react';
 
 import { utilsSelector } from '../../store/selectors/utilsSelector.js';
+import { userSelectors } from '../../store/selectors/userSelectors.js';
 
 import { menuToggle } from '../../store/slices/utils.js';
 import { url } from '../../routes/routes.js';
+
+const groupTitle = ['Агрономы, Главный агроном, Заявки, Охрана, ЭДО, Химия'];
 
 const initialMenuList = [
   // {
@@ -28,6 +31,7 @@ const initialMenuList = [
     isActive: false,
     linkSRC: '/',
     subMenuLists: [],
+    group: 'ЭДО',
   },
 
   {
@@ -37,10 +41,15 @@ const initialMenuList = [
     img: '/icons/documents.svg',
     isActive: false,
     linkSRC: '/',
+    group: 'ЭДО',
     subMenuLists: [
-      { title: 'Обмен документами', to: 'edo' },
-      { title: 'Заявки', to: url.applications() },
-      { title: 'Заявка на оплату', to: url.payment() },
+      { title: 'Обмен документами', to: 'edo', className: 'btn btn-outline-success d-flex align-items-center mx-3 mt-1' },
+      {
+        title: 'Заявки на ДС от дочерних компаний',
+        to: url.applications(),
+        className: 'btn btn-outline-success mx-3 mt-1 text-start',
+      },
+      // { title: 'Заявки на оплату', to: url.payment(), className: 'btn btn-outline-success d-flex align-items-center mx-3 mt-1' },
     ],
   },
 
@@ -52,6 +61,7 @@ const initialMenuList = [
     isActive: false,
     linkSRC: '/',
     subMenuLists: [],
+    group: 'Агрономы',
   },
 
   {
@@ -61,22 +71,23 @@ const initialMenuList = [
     img: '/icons/lab-profile.svg',
     isActive: false,
     linkSRC: '/',
+    group: 'Агрономы',
     subMenuLists: [
-      { title: 'Химия', to: 'chemistry' },
+      { title: 'Химия', to: 'chemistry', className: 'btn btn-outline-success d-flex align-items-center mx-3 mt-1' },
       // { title: 'Семена', to: '/' },
       // { title: 'Препараты', to: '/' },
     ],
   },
 
-  {
-    title: 'Карты',
-    id: 'map',
-    type: 'subMenu',
-    img: '/icons/map.svg',
-    isActive: false,
-    linkSRC: '/',
-    subMenuLists: [{ title: 'Карта полей', to: 'maps' }],
-  },
+  // {
+  //   title: 'Карты',
+  //   id: 'map',
+  //   type: 'subMenu',
+  //   img: '/icons/map.svg',
+  //   isActive: false,
+  //   linkSRC: '/',
+  //   subMenuLists: [{ title: 'Карта полей', to: 'maps' }],
+  // },
 
   {
     title: 'Тех. поддержка',
@@ -85,6 +96,7 @@ const initialMenuList = [
     img: '/icons/support.svg',
     isActive: false,
     linkSRC: 'support',
+    group: 'ЭДО',
   },
 ];
 
@@ -93,6 +105,7 @@ export const Menu = () => {
   const { isOpenMainMenu } = useSelector(utilsSelector);
 
   const dispatch = useDispatch();
+  const userGroup = useSelector(userSelectors).data.user.groups_names;
 
   const dropDownToggle = value => {
     if (value === activeDropDown) {
@@ -114,54 +127,57 @@ export const Menu = () => {
         </Offcanvas.Header>
         <Offcanvas.Body>
           <nav className="nav flex-column">
-            {initialMenuList.map((el, id) => {
-              if (el.type === 'link') {
-                return (
-                  <NavLink
-                    className="btn btn-outline-success d-flex align-items-center mt-3"
-                    to={el.linkSRC}
-                    key={el.id + id}
-                    onClick={() => dispatch(menuToggle())}
-                  >
-                    <img className="me-1" src={el.img} alt={el.title} />
-                    {el.title}
-                  </NavLink>
-                );
-              }
-
-              if (el.type === 'subMenu') {
-                return (
-                  <React.Fragment key={el.id}>
-                    <button className="btn btn-outline-success d-flex align-items-center mt-3" onClick={() => dropDownToggle(el.id)}>
+            {initialMenuList
+              .filter(el => userGroup.includes(el.group))
+              .map((el, id) => {
+                if (el.type === 'link') {
+                  return (
+                    <NavLink
+                      className="btn btn-outline-success d-flex align-items-center mt-3"
+                      to={el.linkSRC}
+                      key={el.id + id}
+                      onClick={() => dispatch(menuToggle())}
+                    >
                       <img className="me-1" src={el.img} alt={el.title} />
                       {el.title}
-                    </button>
-                    <AnimatePresence>
-                      {activeDropDown === el.id &&
-                        el.subMenuLists.map((subItem, index) => (
-                          <motion.span
-                            key={el.id + subItem.to + index}
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            style={{ overflow: 'hidden' }}
-                          >
-                            <NavLink
-                              className="btn btn-outline-success d-flex align-items-center mx-3 mt-1"
-                              to={subItem.to}
-                              onClick={() => dispatch(menuToggle())}
-                            >
-                              {subItem.title}
-                            </NavLink>
-                          </motion.span>
-                        ))}
-                    </AnimatePresence>
-                  </React.Fragment>
-                );
-              }
+                    </NavLink>
+                  );
+                }
 
-              return null;
-            })}
+                if (el.type === 'subMenu') {
+                  return (
+                    <React.Fragment key={el.id}>
+                      <button className="btn btn-outline-success d-flex align-items-center mt-3" onClick={() => dropDownToggle(el.id)}>
+                        <img className="me-1" src={el.img} alt={el.title} />
+                        {el.title}
+                      </button>
+                      <AnimatePresence>
+                        {activeDropDown === el.id &&
+                          el.subMenuLists.map((subItem, index) => (
+                            <motion.span
+                              key={el.id + subItem.to + index}
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: 'auto' }}
+                              exit={{ opacity: 0, height: 0 }}
+                              style={{ overflow: 'hidden' }}
+                            >
+                              <NavLink
+                                // className="btn btn-outline-success d-flex align-items-center mx-3 mt-1"
+                                className={subItem.className}
+                                to={subItem.to}
+                                onClick={() => dispatch(menuToggle())}
+                              >
+                                {subItem.title}
+                              </NavLink>
+                            </motion.span>
+                          ))}
+                      </AnimatePresence>
+                    </React.Fragment>
+                  );
+                }
+
+                return null;
+              })}
           </nav>
         </Offcanvas.Body>
       </Offcanvas>

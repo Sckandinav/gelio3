@@ -1,0 +1,33 @@
+.table {
+  word-wrap: break-word;
+  vertical-align: middle;
+  text-overflow: ellipsis;
+  border-collapse: collapse;
+
+  thead {
+    th {
+      font-weight: bold;
+      background: #efefef;
+      text-align: center;
+      border: 1px solid #0000007e;
+    }
+  }
+
+  tbody {
+    border: 1px solid #0000007e;
+    tr {
+      page-break-inside: avoid;
+    }
+    td {
+      padding: 5px;
+      border: 1px solid #0000007e;
+      &:nth-child(7) {
+        width: 100px;
+      }
+    }
+  }
+}
+
+.hide {
+  display: none !important;
+}

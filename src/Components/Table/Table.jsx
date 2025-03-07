@@ -87,7 +87,7 @@ export const Table = ({
     cells: {
       style: {
         fontSize: '16px',
-        whiteSpace: 'normal',
+        // whiteSpace: 'break-spaces',
         wordWrap: 'break-word',
         padding: '10px',
         overflow: 'hidden',
@@ -144,7 +144,7 @@ export const Table = ({
 
   return (
     <div>
-      <h2>{title}</h2>
+      <h3>{title}</h3>
       <div className="d-flex column-gap-4  mb-2">
         {hasSearch && (
           <div>
@@ -188,6 +188,7 @@ export const Table = ({
           </div>
         )}
       </div>
+
       <DataTable
         style={{ fontSize: '16px' }}
         columns={columns}

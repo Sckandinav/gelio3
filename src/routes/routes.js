@@ -9,7 +9,10 @@ export const url = {
   notFound: () => '/not-found',
   support: () => '/support',
   applications: () => '/applications',
+  applicationsAdd: () => '/applications/add',
   payment: () => '/payment',
+  paymentID: () => '/payment/:id',
+  paymentAdd: () => '/payment/add',
   chemistry: () => '/chemistry',
   chemistryAdd: () => '/chemistry/add',
   maps: () => '/maps',
@@ -67,7 +70,10 @@ export const applicationActionsUrl = {
   addManagers: id => [apiPath, 'edo', 'applications', id, 'add-managers/'].join('/'),
   removeManagers: id => [apiPath, 'edo', 'applications', id, 'remove-managers/'].join('/'),
   approveManagers: id => [apiPath, 'edo', 'applications', id, 'approve-manager/'].join('/'),
+  withoutApprovalToggle: id => [apiPath, 'edo', 'application-items', `${id}/`].join('/'),
 };
+
+// /api/edo/application-items/<id строки>/ PATCH need_approve = false
 
 //Складской учёт
 export const warehousingApi = {
@@ -90,4 +96,14 @@ export const warehousingApi = {
 
 export const mapsUrls = {
   getPolygonCoordinates: () => [apiPath, 'maps', 'fieldshape'].join('/'),
+};
+
+export const payment = {
+  payment: () => [apiPath, 'edo', 'payment-request/'].join('/'),
+  getBanks: () => [apiPath, 'core', 'bank-list/'].join('/'),
+  paymentID: id => [apiPath, 'edo', 'payment-request', `${id}/`].join('/'),
+  addSigners: () => [apiPath, 'edo', 'payment-request-signatures/'].join('/'),
+  removeSigners: id => [apiPath, 'edo', 'payment-request-signatures', `${id}/`].join('/'),
+  signetRow: id => [apiPath, 'edo', 'payment-request-signatures', `${id}/`].join('/'),
+  signetCeo: () => [apiPath, 'edo', 'payment-request-signatures/'].join('/'),
 };

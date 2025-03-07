@@ -12,7 +12,7 @@ import { getData } from '../../../api/getData.js';
 import { useAxiosInterceptor } from '../../hoc/useAxiosInterceptor';
 import { links } from '../../../routes/routes.js';
 
-export const RoomsList = ({ data }) => {
+export const RoomsList = ({ data, title }) => {
   const { search } = useLocation();
   const [roomsType, setRoomsType] = useState([]);
   const [selectedType, setSelectedType] = useState('');
@@ -176,7 +176,8 @@ export const RoomsList = ({ data }) => {
         <Table
           columns={columns}
           data={tableData}
-          title={!search || search === '?mode=created' ? 'Обмен документами, исходящие' : 'Обмен документами, входящие'}
+          // title={!search || search === '?mode=created' ? 'Обмен документами, исходящие' : 'Обмен документами, входящие'}
+          title={`Обмен документами, ${title}`}
           selectableRows={false}
           sortingOptions={roomsType}
           selectedType={selectedType}

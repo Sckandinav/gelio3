@@ -4,6 +4,7 @@ import { FaEdit, FaRegSave } from 'react-icons/fa';
 import { MdDeleteForever } from 'react-icons/md';
 import { MdOutlineCancel } from 'react-icons/md';
 import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 import { InputElem } from './InputElem';
 import { fetchUsers } from '../../../api/fetchUsers.js';
@@ -14,7 +15,7 @@ import { SelectComponent } from '../../Select/Select.jsx';
 import { userSelectors } from '../../../store/selectors/userSelectors.js';
 import { showSuccess, showError } from '../../../store/slices/toast.js';
 
-export const Create = ({ close, update }) => {
+export const Create = () => {
   const [appData, setAppData] = useState([]);
   const [agloList, setAgloList] = useState([]);
   const [users, setUsers] = useState([]);
@@ -33,6 +34,7 @@ export const Create = ({ close, update }) => {
   const dispatch = useDispatch();
 
   const axiosInstance = useAxiosInterceptor();
+  const navigate = useNavigate();
 
   const btnToggle = key => {
     setBtnState(prev => ({ ...prev, [key]: !prev[key] }));
@@ -161,8 +163,8 @@ export const Create = ({ close, update }) => {
         },
       });
       dispatch(showSuccess('Заявка создана'));
-      close();
-      update();
+
+      navigate('/applications');
     } catch (error) {
       dispatch(showError('Не удалось создать заявку'));
       console.log(error);
@@ -175,7 +177,7 @@ export const Create = ({ close, update }) => {
   }, []);
 
   return (
-    <Container fluid>
+    <Container fluid className="bg-light bordered p-3">
       <Row>
         <Col className="w100">
           <Table variant="outline-dark" bordered responsive style={{ tableLayout: 'fixed' }} className="align-middle" size="lg">
@@ -314,6 +316,12 @@ export const Create = ({ close, update }) => {
         </Col>
       </Row>
       <Row>
+        <Col>
+          <Button variant="outline-danger" onClick={() => navigate(-1)}>
+            Назад
+          </Button>
+        </Col>
+
         <Col className="mb-3 d-flex column-gap-3 flex-wrap">
           <Button
             size="sm"
@@ -361,7 +369,13 @@ export const Create = ({ close, update }) => {
       )}
 
       {btnState.addApproving && (
-        <Modal show={btnState.addApproving} onHide={() => btnToggle('addApproving')}>
+        <Modal
+          show={btnState.addApproving}
+          onHide={() => {
+            btnToggle('addApproving');
+            setChosen([]);
+          }}
+        >
           <Modal.Header closeButton>
             <Modal.Title>Добавить согласующего</Modal.Title>
           </Modal.Header>

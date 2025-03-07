@@ -1,16 +1,17 @@
 .cyOdnA {
-  overflow: hidden;
   white-space: break-spaces !important;
+  overflow: hidden;
   text-overflow: ellipsis;
   text-align: left;
 }
 
 .hmVlQg div:first-child {
   white-space: break-spaces !important;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
+.iejuCC div:first-child {
+  white-space: break-spaces !important;
+}
 .kmvUTK {
   z-index: 0;
 }

@@ -116,7 +116,7 @@ export const EdoRoom = () => {
   const actionsBtn = row => {
     return (
       <>
-        <Button variant="outline-secondary" onClick={() => actionsIDHandler(row.id)} className="mb-1" disabled={data.status === 'closed'}>
+        <Button variant="outline-secondary" size="sm" onClick={() => actionsIDHandler(row.id)} className="mb-1" disabled={data.status === 'closed'}>
           Действия
         </Button>
         <AnimatePresence>
@@ -125,6 +125,7 @@ export const EdoRoom = () => {
               <ButtonGroup vertical>
                 {checkSigners(row) && (
                   <Button
+                    size="sm"
                     variant="secondary"
                     className="text-start"
                     onClick={() => {
@@ -137,6 +138,7 @@ export const EdoRoom = () => {
                 )}
                 {checkSigners(row) && (
                   <Button
+                    size="sm"
                     variant="secondary"
                     className="text-start"
                     onClick={() => {
@@ -149,6 +151,7 @@ export const EdoRoom = () => {
                 )}
                 {checkViewers(row) && (
                   <Button
+                    size="sm"
                     variant="secondary"
                     className="text-start"
                     onClick={() => {
@@ -162,6 +165,7 @@ export const EdoRoom = () => {
 
                 {isSignableDocument(row.name) && isFreeUsers(row) && (
                   <Button
+                    size="sm"
                     variant="secondary"
                     className="text-start"
                     onClick={() => {
@@ -175,6 +179,7 @@ export const EdoRoom = () => {
 
                 {isFreeUsers(row) && (
                   <Button
+                    size="sm"
                     variant="secondary"
                     className="text-start"
                     onClick={() => {
@@ -188,6 +193,7 @@ export const EdoRoom = () => {
 
                 {isSigners(row) && (
                   <Button
+                    size="sm"
                     variant="secondary"
                     className="text-start"
                     onClick={() => {
@@ -201,6 +207,7 @@ export const EdoRoom = () => {
 
                 {isViewers(row) && (
                   <Button
+                    size="sm"
                     variant="secondary"
                     className="text-start"
                     onClick={() => {
@@ -227,7 +234,7 @@ export const EdoRoom = () => {
   const downloadBtn = row => {
     return row.signers_status.some(user => user.is_signed) ? (
       <>
-        <Button variant="warning" onClick={() => downloadIDHandler(row.id)} className="mb-1">
+        <Button variant="warning" size="sm" onClick={() => downloadIDHandler(row.id)} className="mb-1">
           Скачать
         </Button>
 
@@ -235,10 +242,16 @@ export const EdoRoom = () => {
           {downloadID === row.id && (
             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
               <ButtonGroup vertical>
-                <Button variant="warning" className="text-start p-2" onClick={() => downloadFile(roomLinks.downloadOriginal(row.id), row.name)}>
+                <Button
+                  size="sm"
+                  variant="warning"
+                  className="text-start p-2"
+                  onClick={() => downloadFile(roomLinks.downloadOriginal(row.id), row.name)}
+                >
                   Скачать оригинал
                 </Button>
                 <Button
+                  size="sm"
                   variant="warning"
                   className="text-start p-2 pe-4 position-relative"
                   onClick={() => {
@@ -254,7 +267,7 @@ export const EdoRoom = () => {
         </AnimatePresence>
       </>
     ) : (
-      <Button variant="warning" onClick={() => downloadFile(roomLinks.downloadOriginal(row.id), row.name)} className="p-2">
+      <Button size="sm" variant="warning" onClick={() => downloadFile(roomLinks.downloadOriginal(row.id), row.name)} className="p-2">
         Скачать
       </Button>
     );
@@ -506,7 +519,7 @@ export const EdoRoom = () => {
       <Container fluid className="bg-light-subtle rounded p-4">
         <Row className="p-0 d-flex align-items-center mb-3">
           <Col className="p-0">
-            <Button variant="outline-primary" onClick={() => navigate(-1)}>
+            <Button size="sm" variant="outline-primary" onClick={() => navigate(-1)}>
               Назад
             </Button>
             <div className="d-flex align-items-center mb-2">
@@ -530,16 +543,16 @@ export const EdoRoom = () => {
           </Col>
 
           <Col className="d-flex justify-content-end column-gap-3">
-            <Button variant="secondary" onClick={() => modalToggle('participants')}>
+            <Button size="sm" variant="secondary" onClick={() => modalToggle('participants')}>
               Участники
             </Button>
-            <Button variant="success" onClick={() => modalToggle('invite')} disabled={data.status === 'closed'}>
+            <Button size="sm" variant="success" onClick={() => modalToggle('invite')} disabled={data.status === 'closed'}>
               Пригласить участника
             </Button>
-            <Button variant="danger" onClick={() => modalToggle('removeUser')} disabled={data.status === 'closed'}>
+            <Button size="sm" variant="danger" onClick={() => modalToggle('removeUser')} disabled={data.status === 'closed'}>
               Удалить участника
             </Button>
-            <Button disabled={!isCompletedRoom} onClick={closingRoom}>
+            <Button size="sm" disabled={!isCompletedRoom} onClick={closingRoom}>
               {data.status === 'open' ? ' Закрыть комнату' : 'Открыть комнату'}
             </Button>
           </Col>
@@ -547,13 +560,13 @@ export const EdoRoom = () => {
 
         <Row>
           <Col className="p-0">
-            <h3>Документы</h3>
+            <h3 className="m-0">Документы</h3>
           </Col>
           <Col className="d-flex justify-content-end column-gap-3">
-            <Button variant="success" onClick={() => modalToggle('addFile')} disabled={data.status === 'closed'}>
+            <Button size="sm" variant="success" onClick={() => modalToggle('addFile')} disabled={data.status === 'closed'}>
               Добавить файл
             </Button>
-            <Button variant="danger" disabled={fileIdsToRemove.length === 0 || data.status === 'closed'} onClick={deleteFileFromRoom}>
+            <Button size="sm" variant="danger" disabled={fileIdsToRemove.length === 0 || data.status === 'closed'} onClick={deleteFileFromRoom}>
               Удалить файл
             </Button>
           </Col>

@@ -62,7 +62,7 @@ export const MapsComponent = ({ data }) => {
 
     if (foundField) {
       const center = centroid(foundField);
-      //console.log('Center coordinates:', center.geometry.coordinates);
+
       setViewState(prev => ({
         ...prev,
         longitude: center.geometry.coordinates[0],
@@ -150,7 +150,6 @@ export const MapsComponent = ({ data }) => {
   }
 
   if (data && data.length) {
-    console.log(hoveredField);
     return (
       <Row className="mapInner p-2">
         <Col className="position-relative col-8 border">

@@ -188,7 +188,7 @@ export const Chemistry = () => {
   const deleteRow = async url => {
     try {
       const selected = selectedRows.map(row => row.id);
-      console.log('selected', selected);
+
       await axiosInstance.delete(url, {
         headers: {
           'Content-Type': 'application/json',

@@ -36,6 +36,8 @@ export const Application = () => {
   const [loading, setLoading] = useState(false);
   const token = useUserToken();
 
+
+
   const dispatch = useDispatch();
   const axiosInstance = useAxiosInterceptor();
 
@@ -529,12 +531,49 @@ export const Application = () => {
     return `${surname} ${name[0]}. ${patronymic[0]}.`;
   };
 
-  const allItemsApproved =
-    Array.isArray(data.items) &&
-    data.items.every(
-      item =>
-        Array.isArray(item.item_approvals) && item.item_approvals.length > 0 && item.item_approvals.every(approval => approval.approved === true),
+  const withoutApprovalToggle = async (value, id) => {
+    try {
+      await axiosInstance.patch(
+        applicationActionsUrl.withoutApprovalToggle(id),
+        { need_approve: value },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Token ${token}`,
+          },
+        },
+      );
+      dispatch(showSuccess(`${value ? 'Строке вернули возможность назначения' : 'Строка без согласующего'}`));
+      fetchData();
+    } catch (error) {
+      dispatch(showError('Не удалось выполнить действие'));
+      console.log(error);
+    }
+  };
+
+  const showApprovalsInfo = row => {
+    if (!row.need_approve) {
+      return '-';
+    }
+
+    return row.item_approvals.length === 0 ? 'Не назначен' : row.item_approvals[0]?.approver_name;
+  };
+
+  const showApprovalsStatus = row => {
+    if (!row.need_approve) {
+      return '-';
+    }
+
+    return row.item_approvals.length > 0 && row.item_approvals[0].approved ? (
+      <span className="p-0 m-0 text-success fst-italic">Согласована {new Date(row.item_approvals[0].updated_at).toLocaleDateString()}</span>
+    ) : (
+      <span>На согласовании</span>
     );
+  };
+
+  const allItemsApproved =
+    data.items?.every(item => item.item_approvals.every(user => user.approved === true)) &&
+    data.managers_approvals?.every(manager => manager.approved === true);
 
   const costWithNdsChange = (rowID, newConst) => {
     const currentRow = data.items.find(row => row.id === rowID);
@@ -625,12 +664,9 @@ export const Application = () => {
                     <span>
                       Статус утверждения:{' '}
                       {data.approved_by_ceo ? (
-                        <strong>Согласована</strong>
-                      ) : +currentUserID === +data?.ceo_data?.ceo.id &&
-                        data?.fully_approved_by_users === true &&
-                        data.fully_approved_by_items === true &&
-                        !data?.approved_by_ceo === true ? (
-                        <Button variant="outline-success" onClick={ceoConfirmToggle}>
+                        <strong>Согласована {new Date(data.ceo_data.approved_at).toLocaleDateString()}</strong>
+                      ) : +currentUserID === +data?.ceo_data?.ceo.id ? (
+                        <Button size="sm" variant="outline-success" onClick={ceoConfirmToggle}>
                           Согласовать
                         </Button>
                       ) : (
@@ -708,7 +744,9 @@ export const Application = () => {
                           <tr key={groupName + row.id}>
                             <td className="text-center">{(rowCount += 1)}</td>
                             <td>
-                              <span className="fst-italic ms-2">{row.cost_item_name}</span>
+                              <span className="fst-italic ms-2">
+                                {row.cost_item_name} {row.id}
+                              </span>
                             </td>
                             <td
                               style={{ width: '130px' }}
@@ -848,7 +886,7 @@ export const Application = () => {
                                 }}
                                 disabled={isDisableBtn(row)}
                               >
-                                {isSecretary && row.item_approvals.length === 0 && (
+                                {isSecretary && row.item_approvals.length === 0 && row.need_approve && (
                                   <Dropdown.Item as={'button'} onClick={() => setActionsData('Добавить согласующего')}>
                                     Добавить согласующего
                                   </Dropdown.Item>
@@ -858,6 +896,19 @@ export const Application = () => {
                                     Убрать согласующего
                                   </Dropdown.Item>
                                 )}
+
+                                {isSecretary && row.item_approvals.length === 0 && row.need_approve && (
+                                  <Dropdown.Item as={'button'} onClick={() => withoutApprovalToggle(false, row.id)}>
+                                    Без согласования
+                                  </Dropdown.Item>
+                                )}
+
+                                {isSecretary && !isRowApproved(row) && !row.need_approve && (
+                                  <Dropdown.Item as={'button'} onClick={() => withoutApprovalToggle(true, row.id)}>
+                                    Вернуть согласование
+                                  </Dropdown.Item>
+                                )}
+
                                 {isApprover(row) && !isRowApproved(row) && (
                                   <Dropdown.Item as={'button'} onClick={() => setActionsData('Согласовать')}>
                                     Согласовать
@@ -865,18 +916,8 @@ export const Application = () => {
                                 )}
                               </DropdownButton>
                             </td>
-                            <td>
-                              {row.item_approvals.length > 0 ? <span>{row.item_approvals[0]?.approver_name}</span> : <span>Нет согласующего</span>}
-                            </td>
-                            <td>
-                              {row.item_approvals.length > 0 && row.item_approvals[0].approved ? (
-                                <span className="p-0 m-0 text-success fst-italic">
-                                  Согласована {new Date(row.item_approvals[0].updated_at).toLocaleDateString()}
-                                </span>
-                              ) : (
-                                <span>На согласовании</span>
-                              )}
-                            </td>
+                            <td>{showApprovalsInfo(row)}</td>
+                            <td>{showApprovalsStatus(row)}</td>
                           </tr>
                         ))}
                       </React.Fragment>
@@ -942,27 +983,29 @@ export const Application = () => {
                 </Table>
               ) : null}
             </Col>
-            <Col sm={2} className={print ? styles.hide : ''}>
-              <Button
-                className="mb-2"
-                variant="outline-success"
-                onClick={() => setAction('addManagers')}
-                size="sm"
-                style={{ width: '175px', textAlign: 'left' }}
-                disabled={data.approved_by_ceo}
-              >
-                Добавить руководителя
-              </Button>
-              <Button
-                variant="outline-danger"
-                onClick={() => setAction('removeManagers')}
-                size="sm"
-                style={{ width: '175px', textAlign: 'left' }}
-                disabled={data.managers_approvals?.every(managers => managers.approved)}
-              >
-                Убрать руководителя
-              </Button>
-            </Col>
+            {isSecretary && (
+              <Col sm={2} className={print ? styles.hide : ''}>
+                <Button
+                  className="mb-2"
+                  variant="outline-success"
+                  onClick={() => setAction('addManagers')}
+                  size="sm"
+                  style={{ width: '175px', textAlign: 'left' }}
+                  disabled={data.approved_by_ceo}
+                >
+                  Добавить руководителя
+                </Button>
+                <Button
+                  variant="outline-danger"
+                  onClick={() => setAction('removeManagers')}
+                  size="sm"
+                  style={{ width: '175px', textAlign: 'left' }}
+                  disabled={data.managers_approvals?.every(managers => managers.approved)}
+                >
+                  Убрать руководителя
+                </Button>
+              </Col>
+            )}
           </Row>
         </div>
         {data?.items?.some(item => {

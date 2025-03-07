@@ -6,6 +6,9 @@
   border-collapse: collapse;
 
   thead {
+    tr {
+      page-break-inside: avoid;
+    }
     th {
       font-weight: bold;
       background: #efefef;
@@ -31,6 +34,10 @@
 
 .agroTable {
   border-collapse: collapse;
+  tr {
+    page-break-inside: avoid;
+  }
+
   thead {
     th {
       font-weight: bold;
@@ -39,11 +46,16 @@
     }
   }
 
-  tbody td {
-    border: 1px solid #0000007e;
-    &:nth-child(2) {
-      text-align: center;
-      vertical-align: middle;
+  tbody {
+    tr {
+      page-break-inside: avoid;
+    }
+    td {
+      border: 1px solid #0000007e;
+      &:nth-child(2) {
+        text-align: center;
+        vertical-align: middle;
+      }
     }
   }
 }
