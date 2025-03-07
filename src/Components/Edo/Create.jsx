@@ -174,7 +174,6 @@ export const Create = ({ close, update }) => {
       update();
       dispatch(showSuccess('Комната создана'));
       close();
-      navigate(url.edoCreated());
     } catch (error) {
       dispatch(showError('Не удалось создать комнату'));
       console.log(error);

@@ -64,6 +64,17 @@ export const ApplicationsList = ({ data, title, company }) => {
       omit: true,
     },
     {
+      name: '№',
+      selector: row => row.number,
+      width: '80px',
+      sortable: true,
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      },
+    },
+    {
       name: 'Статус',
       selector: row => row.appointment,
       width: '80px',
@@ -124,6 +135,7 @@ export const ApplicationsList = ({ data, title, company }) => {
 
   const tableData = data.map(row => ({
     id: row.id,
+    number: row.id,
     appointment: notificationCheck(row),
     title: row.agro,
     creator: row.creator_name,
