@@ -19,7 +19,7 @@ export const Congratulations = () => {
   return (
     <div className={styles.postcard}>
       <div className={styles.imageInner}>
-        <img className={styles.img} src="./flowers.png" alt="flowers" />
+        <img className={styles.img} src="/flowers.png" alt="flowers" />
       </div>
       <p className={styles.textContent}>С 8 марта!</p>
     </div>

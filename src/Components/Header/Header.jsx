@@ -69,6 +69,15 @@ export const Header = () => {
             </Link>
           </span>
         );
+      case 'application_manager_approval':
+        return (
+          <span>
+            Новый запрос на согласование расходов в заявке{' '}
+            <Link onClick={closeFunc} to={`/application/${notification.object_id}`}>
+              {notification.object_id}
+            </Link>
+          </span>
+        );
       case 'application_ceo_approval':
         return (
           <span>

@@ -36,8 +36,6 @@ export const Application = () => {
   const [loading, setLoading] = useState(false);
   const token = useUserToken();
 
-
-
   const dispatch = useDispatch();
   const axiosInstance = useAxiosInterceptor();
 
@@ -572,7 +570,9 @@ export const Application = () => {
   };
 
   const allItemsApproved =
+    data.items?.length > 0 &&
     data.items?.every(item => item.item_approvals.every(user => user.approved === true)) &&
+    data.managers_approvals?.length > 0 &&
     data.managers_approvals?.every(manager => manager.approved === true);
 
   const costWithNdsChange = (rowID, newConst) => {
@@ -744,9 +744,7 @@ export const Application = () => {
                           <tr key={groupName + row.id}>
                             <td className="text-center">{(rowCount += 1)}</td>
                             <td>
-                              <span className="fst-italic ms-2">
-                                {row.cost_item_name} {row.id}
-                              </span>
+                              <span className="fst-italic ms-2">{row.cost_item_name}</span>
                             </td>
                             <td
                               style={{ width: '130px' }}
