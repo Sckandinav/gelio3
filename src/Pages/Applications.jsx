@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import { useSelector } from 'react-redux';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useLocation } from 'react-router-dom';
 
 import { Dashboard } from '../Components/Dashboard/Dashboard';
 import { fetchApplicationMenu } from '../api/fetchApplicationMenu';
@@ -18,9 +18,12 @@ export const Applications = () => {
   const [company, setCompany] = useState([]);
   const [searchParams, setSearchParams] = useSearchParams();
   const axiosInstance = useAxiosInterceptor();
+  const { search } = useLocation();
 
   const notificationsCounter = useSelector(notificationsSelector).applicationMenu || {};
   const type = searchParams.get('application_type');
+
+  console.log('location', search);
 
   const addParam = (key, value) => {
     searchParams.set(key, value);
@@ -45,7 +48,11 @@ export const Applications = () => {
 
   const getApplicationsList = async () => {
     try {
-      const response = await fetchApplicationMenu(applicationUrl.sideBar(), axiosInstance, searchParams);
+      const response = await fetchApplicationMenu(
+        `${search ? applicationUrl.sideBar() : `${applicationUrl.sideBar()}?application_type=incoming`}`,
+        axiosInstance,
+        searchParams,
+      );
       const companyResponse = await getData(links.getAgro(), axiosInstance);
       const option = companyResponse.map(el => ({
         value: el.id,
@@ -60,6 +67,11 @@ export const Applications = () => {
   };
 
   useEffect(() => {
+    addParam('application_type', 'incoming');
+  }, []);
+
+  useEffect(() => {
+    // getApplicationsList();
     getApplicationsList();
   }, [searchParams]);
 
