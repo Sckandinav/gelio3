@@ -2,5 +2,5 @@ export const signedFormats = ['.doc', '.docx', '.xls', '.xlsx', '.pdf', '.ods', 
 
 export const isSignableDocument = title => {
   const format = title.slice(title.lastIndexOf('.') - title.length).toLowerCase();
-  return signedFormats.includes(format);
+  return signedFormats?.includes(format);
 };

@@ -91,7 +91,7 @@ export const Create = ({ close, update }) => {
           return {
             ...doc,
             [roll]: [...doc[roll], ...chosen],
-            members: doc.members.filter(user => !idToRemove.includes(user.value)),
+            members: doc.members.filter(user => !idToRemove?.includes(user.value)),
           };
         }
         return doc;
@@ -106,7 +106,7 @@ export const Create = ({ close, update }) => {
       ...prev,
       documents: prev.documents.map(doc => {
         if (doc.id === docID) {
-          return { ...doc, members: [...doc.members, ...chosen], [roll]: doc[roll].filter(user => !idToRemove.includes(user.value)) };
+          return { ...doc, members: [...doc.members, ...chosen], [roll]: doc[roll].filter(user => !idToRemove?.includes(user.value)) };
         }
 
         return doc;

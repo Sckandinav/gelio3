@@ -128,7 +128,7 @@ export const Menu = () => {
         <Offcanvas.Body>
           <nav className="nav flex-column">
             {initialMenuList
-              .filter(el => userGroup.includes(el.group))
+              .filter(el => userGroup?.includes(el.group))
               .map((el, id) => {
                 if (el.type === 'link') {
                   return (

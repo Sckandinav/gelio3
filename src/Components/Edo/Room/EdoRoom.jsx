@@ -98,7 +98,7 @@ export const EdoRoom = () => {
   const isFreeUsers = row => {
     const membersID = data.members.map(user => user.user_id);
     const usersWithRole = [...row.signers_status.map(user => user.signer_id), ...row.viewers_status.map(user => user.viewer_id)];
-    return membersID.some(user => !usersWithRole.includes(user));
+    return membersID.some(user => !usersWithRole?.includes(user));
   };
 
   const isSigners = row => {

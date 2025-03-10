@@ -114,7 +114,7 @@ export const Table = ({
       return item[selectionkey] === Number(selectedType);
     })
     .filter(item => {
-      return Object.keys(item).some(key => item[key]?.toString().toLowerCase().includes(searchText.toLowerCase()));
+      return Object.keys(item).some(key => item[key]?.toString().toLowerCase()?.includes(searchText.toLowerCase()));
     });
 
   const handlePageChange = page => {

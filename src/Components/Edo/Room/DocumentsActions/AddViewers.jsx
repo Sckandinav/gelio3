@@ -18,7 +18,7 @@ export const AddViewers = ({ closePopup, updateRoom, document, members, actionsI
     const signers = document.signers_status.map(user => user.signer_id);
     const viewer = document.viewers_status.map(user => user.viewer_id);
 
-    return members.filter(user => !signers.includes(user.user_id)).filter(user => !viewer.includes(user.user_id));
+    return members.filter(user => !signers?.includes(user.user_id)).filter(user => !viewer?.includes(user.user_id));
   };
 
   const prepareDataForUpdate = () => {

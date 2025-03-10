@@ -213,7 +213,7 @@ export const Application = () => {
 
   const currentUserID = useSelector(userSelectors)?.data?.user?.id;
   const currentUserGroup = useSelector(userSelectors)?.data?.user?.groups_names;
-  const isSecretary = currentUserGroup.includes('Заявки');
+  const isSecretary = currentUserGroup?.includes('Заявки');
 
   const isDisableBtn = row => {
     if (row.item_approvals[0]?.approved === true) {
@@ -640,7 +640,7 @@ export const Application = () => {
             </Col>
             <Col className="col-6 col-md-4 col-lg-3">
               {allItemsApproved ? (
-                !data?.ceo_data && currentUserGroup.includes('Заявки') ? (
+                !data?.ceo_data && currentUserGroup?.includes('Заявки') ? (
                   <div>
                     <Form.Select name="ceo" id="ceo" onFocus={getCeoList} onChange={setCeo}>
                       <option value="">Выбрать согласующего</option>
@@ -676,7 +676,7 @@ export const Application = () => {
                     {data.ceo_data && <p className="m-0 p-0">ООО "{data?.ceo_data?.ceo.user_post_departament[0].company_name}"</p>}
                     <p className="m-0 p-0">{data.ceo_data?.ceo.user_post_departament[0].post_name}</p>
                     <p className="m-0 p-0">{AbbreviationOfName(data?.ceo_data?.ceo?.full_name)}</p>
-                    {!data.approved_by_ceo && currentUserGroup.includes('Заявки') && data.ceo_data && (
+                    {!data.approved_by_ceo && currentUserGroup?.includes('Заявки') && data.ceo_data && (
                       <Button variant="outline-danger" disabled={data?.ceo_data === null} onClick={fetchRemoveCeo}>
                         Убрать
                       </Button>

@@ -119,7 +119,7 @@ export const MapsComponent = ({ data }) => {
 
   const getFieldDetails = (field, key) => {
     const result = field.properties.crop_details.reduce((acc, curr) => {
-      if (!acc.includes(curr[key])) {
+      if (!acc?.includes(curr[key])) {
         acc.push(curr[key]);
       }
       return acc;

@@ -73,7 +73,7 @@ export const Edo = () => {
           </Col>
         </Row>
         <Row>
-          <Col className="px-4">{pathname.includes('/edo/room/') ? <Outlet /> : <RoomsList data={rooms} title={title} />}</Col>
+          <Col className="px-4">{pathname?.includes('/edo/room/') ? <Outlet /> : <RoomsList data={rooms} title={title} />}</Col>
         </Row>
       </Container>
     );

@@ -55,7 +55,7 @@ export const RemoveSigners = ({ closePopup, updateRoom, document, actionsIDHandl
     <div>
       <CheckboxSelection
         data={document.signers_status
-          .filter(user => !userWithTaskCompleted.includes(user.signer_id))
+          .filter(user => !userWithTaskCompleted?.includes(user.signer_id))
           .map(user => ({ value: user.signer_id, label: user.signer }))}
         chosen={chosen}
         func={chosenToggle}

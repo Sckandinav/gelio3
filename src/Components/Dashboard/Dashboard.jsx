@@ -169,7 +169,7 @@ export const Dashboard = ({
               </Button>
             )}
 
-            {pathname.includes('edo') ? (
+            {pathname?.includes('edo') ? (
               <Button
                 className="btn-primary"
                 onClick={() => {
@@ -205,7 +205,7 @@ export const Dashboard = ({
               </Button>
             )}
 
-            {pathname.includes('applications') || pathname.includes('payment') ? (
+            {pathname?.includes('applications') || pathname?.includes('payment') ? (
               <Link to={linkUrl()}>
                 <Button variant="success">Создать</Button>
               </Link>

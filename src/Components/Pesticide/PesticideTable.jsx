@@ -18,7 +18,7 @@ export const PesticideTable = ({ columns, data, addBtnClick, deleteBtnClick, han
   // };
 
   const filteredData = data.filter(item => {
-    return Object.keys(item).some(key => item[key]?.toString().toLowerCase().includes(searchText.toLowerCase()));
+    return Object.keys(item).some(key => item[key]?.toString().toLowerCase()?.includes(searchText.toLowerCase()));
   });
 
   return (

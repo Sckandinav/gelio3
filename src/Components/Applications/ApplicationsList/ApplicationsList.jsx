@@ -31,7 +31,7 @@ export const ApplicationsList = ({ data, title, company }) => {
       return null;
     }
 
-    if (currentUsersGroup.includes('Заявки')) {
+    if (currentUsersGroup?.includes('Заявки')) {
       if (row.notifications.lacks_assigned_item_approvers && row.fully_approved_by_users) {
         return <FaExclamation title="Ожидает назначения" size={20} style={{ color: 'red' }} />;
       }

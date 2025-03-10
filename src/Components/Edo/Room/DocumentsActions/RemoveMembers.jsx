@@ -16,7 +16,7 @@ export const RemoveMembers = ({ closePopup, updateRoom, roomsDetails }) => {
   const dispatch = useDispatch();
 
   const chosenHandler = selected => {
-    usersData.includes(selected.value) ? setChosen(prev => prev.filter(id => id !== selected.value)) : setChosen(prev => [...prev, selected.value]);
+    usersData?.includes(selected.value) ? setChosen(prev => prev.filter(id => id !== selected.value)) : setChosen(prev => [...prev, selected.value]);
   };
 
   const removeUser = async e => {

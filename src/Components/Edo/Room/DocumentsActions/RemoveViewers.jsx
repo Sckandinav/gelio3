@@ -54,7 +54,7 @@ export const RemoveViewers = ({ closePopup, updateRoom, document, actionsIDHandl
     <div>
       <CheckboxSelection
         data={document.viewers_status
-          .filter(user => !userWithTaskCompleted.includes(user.signer_id))
+          .filter(user => !userWithTaskCompleted?.includes(user.signer_id))
           .map(user => ({ value: user.viewer_id, label: user.viewer }))}
         chosen={chosen}
         func={chosenToggle}

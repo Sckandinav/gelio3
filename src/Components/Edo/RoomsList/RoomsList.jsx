@@ -68,9 +68,9 @@ export const RoomsList = ({ data, title }) => {
   };
 
   const chekFrom = row => {
-    if (search.includes('departament_id')) {
+    if (search?.includes('departament_id')) {
       return row.departament;
-    } else if (search.includes('agro_id')) {
+    } else if (search?.includes('agro_id')) {
       return row.departament;
     } else {
       return row.company;

@@ -66,7 +66,7 @@ export const InviteMembers = ({ closePopup, updateRoom, members }) => {
       try {
         const response = await fetchUsers(links.getUsers(), axiosInstance);
         const options = response.reduce((acc, user) => {
-          if (!usersIdInRoom.includes(user.id)) {
+          if (!usersIdInRoom?.includes(user.id)) {
             acc.push({
               value: user.id,
               label: user.full_name,

@@ -435,7 +435,7 @@ export const PaymentItem = () => {
             </Modal.Header>
             <Modal.Body>
               <Select
-                options={users.filter(user => !usersIDInPayment.includes(user.value))}
+                options={users.filter(user => !usersIDInPayment?.includes(user.value))}
                 formatOptionLabel={formatOptionLabel}
                 value={null}
                 placeholder="Выбор пользователя"

@@ -9,7 +9,6 @@ import { notificationsSelector } from '../../store/selectors/notificationsSelect
 import { logOut } from '../../store/slices/userAuth';
 import { Menu } from '../Menu/Menu';
 import { userSelectors } from '../../store/selectors/userSelectors';
-import { Congratulations } from '../Congratulations/Congratulations';
 
 import styles from './Header.module.scss';
 
@@ -164,8 +163,6 @@ export const Header = () => {
       <Row className="p-3 bg-body">
         <Col className="d-flex justify-content-between align-items-center">
           <Menu />
-
-          <Congratulations />
 
           <div className="d-flex">
             <OverlayTrigger

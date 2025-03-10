@@ -44,7 +44,7 @@ export const InputElem = ({ close, addRow }) => {
     const excludedKeys = ['comment', 'files']; // Ключи, которые нужно игнорировать
     return Object.keys(data).some(
       key =>
-        !excludedKeys.includes(key) && (data[key] === '' || data[key] === null || data[key] === undefined || Object.keys(data[key]).length === 0),
+        !excludedKeys?.includes(key) && (data[key] === '' || data[key] === null || data[key] === undefined || Object.keys(data[key]).length === 0),
     );
   };
 
