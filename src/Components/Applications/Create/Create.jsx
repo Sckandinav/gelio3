@@ -30,6 +30,8 @@ export const Create = () => {
     showMembers: false,
   });
 
+  console.log('appData', appData);
+
   const { data } = useSelector(userSelectors);
   const dispatch = useDispatch();
 
@@ -44,7 +46,6 @@ export const Create = () => {
       id: Date.now(),
       title: data.title,
       priceWithVAT: data.priceWithVAT,
-      priceWithoutVAT: data.priceWithoutVAT,
       date: data.date,
       comment: data.comment,
       files: data.files,
@@ -183,28 +184,14 @@ export const Create = () => {
           <Table variant="outline-dark" bordered responsive style={{ tableLayout: 'fixed' }} className="align-middle" size="lg">
             <thead>
               <tr>
-                <th title="Наименование статьи расходов" rowSpan="2" style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <th title="Наименование статьи расходов" style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   Наименование статьи расходов
                 </th>
-                <th style={{ overflow: 'hidden', textOverflow: 'ellipsis' }} colSpan="2">
-                  Сумма, требующая к перечислению
-                </th>
-                <th style={{ overflow: 'hidden', textOverflow: 'ellipsis' }} rowSpan="2">
-                  Сроки исполнения
-                </th>
-                <th style={{ overflow: 'hidden', textOverflow: 'ellipsis' }} rowSpan="2">
-                  Комментарий
-                </th>
-                <th style={{ overflow: 'hidden', textOverflow: 'ellipsis' }} rowSpan="2">
-                  Файлы
-                </th>
-                <th style={{ overflow: 'hidden', textOverflow: 'ellipsis' }} rowSpan="2">
-                  Действия
-                </th>
-              </tr>
-              <tr>
-                <th>с НДС</th>
-                <th>без НДС</th>
+                <th style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>Сумма, требующая к перечислению, (руб) с НДС</th>
+                <th style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>Сроки исполнения</th>
+                <th style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>Комментарий</th>
+                <th style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>Файлы</th>
+                <th style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>Действия</th>
               </tr>
             </thead>
             <tbody>
@@ -224,7 +211,7 @@ export const Create = () => {
                             />
                           </Form.Label>
                         </td>
-                        <td>
+                        {/* <td>
                           <Form.Label htmlFor="priceWithoutVAT">
                             <Form.Control
                               id="priceWithoutVAT"
@@ -233,7 +220,7 @@ export const Create = () => {
                               onChange={e => setEditedRow({ ...editedRow, priceWithoutVAT: e.target.value })}
                             />
                           </Form.Label>
-                        </td>
+                        </td> */}
                         <td>
                           <Form.Label htmlFor="dateInput">
                             <Form.Control
@@ -276,7 +263,7 @@ export const Create = () => {
                       <>
                         <td style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{row.title.name}</td>
                         <td>{formatPrice(row.priceWithVAT)}</td>
-                        <td>{formatPrice(row.priceWithoutVAT)}</td>
+                        {/* <td>{formatPrice(row.priceWithoutVAT)}</td> */}
                         <td>{new Date(row.date).toLocaleDateString()}</td>
                         <td style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{row.comment}</td>
                         <td>
@@ -308,7 +295,20 @@ export const Create = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="7">Нет данных</td>
+                  <td colSpan="6">Нет данных</td>
+                </tr>
+              )}
+              {appData.length > 0 && (
+                <tr>
+                  <td className="fw-bold">Итого</td>
+                  <td className="fw-bold" colSpan={5}>
+                    {appData
+                      .reduce((acc, curr) => {
+                        acc += +curr.priceWithVAT;
+                        return acc;
+                      }, 0)
+                      .toLocaleString('ru-RU')}
+                  </td>
                 </tr>
               )}
             </tbody>
@@ -382,7 +382,6 @@ export const Create = () => {
           <Modal.Body>
             <SelectComponent data={users} selected={chosen} selectHandler={addChosen} deleteHandler={removeUser} />
           </Modal.Body>
-
           <Modal.Footer>
             <Button
               disabled={chosen.length === 0}

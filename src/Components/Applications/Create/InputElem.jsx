@@ -8,13 +8,32 @@ import { SelectComponent } from '../../Select/Select.jsx';
 
 import styles from './styles.module.scss';
 
+const optionFormatter = option => (
+  <div
+    style={{
+      display: 'grid',
+      gridTemplateColumns: '1fr 1fr',
+      width: '100%',
+      opacity: '1',
+      visibility: 'visibility',
+      fontSize: '16px',
+      color: 'var(--dark)',
+      gap: '10px',
+      alignItems: 'center',
+    }}
+  >
+    <span>{option.label}</span>
+    {option?.category && <span style={{ fontStyle: 'italic', color: 'var(--text)', fontSize: '12px' }}>{option.category}</span>}
+  </div>
+);
+
 export const InputElem = ({ close, addRow }) => {
   const axiosInstance = useAxiosInterceptor();
   const [expenses, setExpenses] = useState([]);
   const [data, setData] = useState({
     title: {},
     priceWithVAT: '',
-    priceWithoutVAT: '',
+    // priceWithoutVAT: '',
     date: '',
     comment: '',
     files: [],
@@ -40,7 +59,7 @@ export const InputElem = ({ close, addRow }) => {
     }
   };
 
-  const hasEmptyKeys = obj => {
+  const hasEmptyKeys = () => {
     const excludedKeys = ['comment', 'files']; // Ключи, которые нужно игнорировать
     return Object.keys(data).some(
       key =>
@@ -70,9 +89,13 @@ export const InputElem = ({ close, addRow }) => {
               data={expenses.map(el => ({
                 value: el.id,
                 label: el.name,
+
+                category: el.cost_item_group.name,
               }))}
               multiSelection={false}
               selectHandler={onSelect}
+              placeholder="Выберите позицию"
+              formatOptionLabel={optionFormatter}
             />
           </div>
           <div className="d-flex justify-content-between align-items-center column-gap-3 flex-wrap">
@@ -87,7 +110,7 @@ export const InputElem = ({ close, addRow }) => {
                 onChange={handleChange}
               />
             </Form.Label>
-            <Form.Label>
+            {/* <Form.Label>
               <Form.Control
                 className={`shadow ${styles.input}`}
                 id="priceWithoutVAT"
@@ -98,7 +121,7 @@ export const InputElem = ({ close, addRow }) => {
                 onChange={handleChange}
                 style={{ maxWidth: '130px' }}
               />
-            </Form.Label>
+            </Form.Label> */}
             <Form.Label>
               <Form.Control className="shadow" type="date" id="date" value={data.date} onChange={handleChange} />
             </Form.Label>

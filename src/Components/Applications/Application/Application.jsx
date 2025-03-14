@@ -34,19 +34,24 @@ export const Application = () => {
   const [selectedUser, setSelectedUser] = useState([]);
   const [print, setPrint] = useState(false);
   const [loading, setLoading] = useState(false);
-  const token = useUserToken();
-
-  const dispatch = useDispatch();
-  const axiosInstance = useAxiosInterceptor();
-
-  const inputRefs = useRef({});
-
+  const [comment, setComment] = useState('');
   const [editCell, setEditCell] = useState(null);
   const [editedValue, setEditedValue] = useState({
     amountWithNds: '',
     amountWithoutNds: '',
   });
+  const token = useUserToken();
+  const dispatch = useDispatch();
+  const axiosInstance = useAxiosInterceptor();
+  const inputRefs = useRef({});
+  const currentUserID = useSelector(userSelectors)?.data?.user?.id;
+  const currentUserGroup = useSelector(userSelectors)?.data?.user?.groups_names;
+  const isSecretary = currentUserGroup?.includes('Заявки');
+  const isManager = data.managers_approvals?.some(user => Number(user.manager) === Number(currentUserID));
+  const isCeo = ceoList?.some(user => +user.id === +currentUserID);
   const navigate = useNavigate();
+
+  console.log(`isManager: ${isManager}, isCeo: ${isCeo} `);
 
   const selectedHandler = (...props) => {
     setSelectedUser(props[1]);
@@ -189,11 +194,11 @@ export const Application = () => {
     }
   };
 
-  const approveManagers = async () => {
+  const approveManagers = async (approved, description) => {
     try {
       await axiosInstance.post(
         applicationActionsUrl.approveManagers(id),
-        {},
+        { approved, description },
         {
           headers: {
             'Content-Type': 'application/json',
@@ -201,22 +206,23 @@ export const Application = () => {
           },
         },
       );
-      dispatch(showSuccess('Расходы согласованы'));
+      setComment('');
+      setAction('');
+      dispatch(showSuccess(`${approved ? 'Расходы согласованы' : 'Расходы отклонены'}`));
       fetchData();
     } catch (error) {
-      dispatch(showError('Не удалось согласовать расходы'));
+      dispatch(showError(`${approved ? 'Не удалось согласовать расходы' : 'Не удалось отклонить расходы'}`));
       console.log(error);
     }
   };
 
   let rowCount = 0;
 
-  const currentUserID = useSelector(userSelectors)?.data?.user?.id;
-  const currentUserGroup = useSelector(userSelectors)?.data?.user?.groups_names;
-  const isSecretary = currentUserGroup?.includes('Заявки');
-
   const isDisableBtn = row => {
-    if (row.item_approvals[0]?.approved === true) {
+    if (isManager || isCeo) {
+      return false;
+    }
+    if (row.item_approvals[0]?.approved === true || data.approved_by_ceo === true || row.item_approvals[0]?.approved === null) {
       return true;
     } else if (!isRowApproved(row) && isSecretary) {
       return false;
@@ -279,16 +285,7 @@ export const Application = () => {
 
   const totalInGroupWithNds = groupItems => {
     const sum = groupItems.reduce((acc, curr) => {
-      const amount = curr.item_approvals[0]?.amount_with_nds || curr?.amount_with_nds;
-      return acc + Number(amount);
-    }, 0);
-
-    return Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 }).format(sum);
-  };
-
-  const totalInGroupWithoutNds = groupItems => {
-    const sum = groupItems.reduce((acc, curr) => {
-      const amount = curr.item_approvals[0]?.amount_without_nds || curr?.amount_without_nds;
+      const amount = curr.item_approvals[0]?.amount || curr?.amount_with_nds;
       return acc + Number(amount);
     }, 0);
 
@@ -299,21 +296,21 @@ export const Application = () => {
     const { items } = data;
 
     const sum = items?.reduce((acc, curr) => {
-      return acc + Number(curr.item_approvals[0]?.amount_with_nds || curr?.amount_with_nds);
+      return acc + Number(curr.item_approvals[0]?.amount || curr?.amount_with_nds);
     }, 0);
 
     return Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 }).format(sum);
   };
 
-  const totalWithoutNds = () => {
-    const { items } = data;
+  // const totalWithoutNds = () => {
+  //   const { items } = data;
 
-    const sum = items?.reduce((acc, curr) => {
-      return acc + Number(curr.item_approvals[0]?.amount_without_nds || curr?.amount_without_nds);
-    }, 0);
+  //   const sum = items?.reduce((acc, curr) => {
+  //     return acc + Number(curr.item_approvals[0]?.amount_without_nds || curr?.amount_without_nds);
+  //   }, 0);
 
-    return Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 }).format(sum);
-  };
+  //   return Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 }).format(sum);
+  // };
 
   const ceoConfirmToggle = () => {
     SetCeoConfirm(prev => !prev);
@@ -322,24 +319,31 @@ export const Application = () => {
   const isApprover = row => {
     return Number(row?.item_approvals[0]?.approver) === Number(currentUserID);
   };
-  const isRowApproved = row => row?.item_approvals[0]?.approved;
+  const isRowApproved = row => row?.item_approvals[0]?.approved || row?.item_approvals[0]?.approved === null;
 
-  const approveRowFunc = async data => {
+  const actionRowFunc = async (data, comment, approved) => {
     try {
-      await axiosInstance.patch(applicationActionsUrl.approveRow(data.id), data, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Token ${token}`,
+      await axiosInstance.patch(
+        applicationActionsUrl.approveRow(data.id),
+        { ...data, description: comment, approved: approved },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Token ${token}`,
+          },
         },
-      });
-      dispatch(showSuccess('Заявка согласована'));
+      );
+      dispatch(showSuccess(`${approved ? 'Заявка согласована' : 'Заявка отклонена'}`));
       fetchData();
+      setComment('');
       setAction('');
     } catch (error) {
-      dispatch(showError('Не удалось согласовать заявку'));
+      dispatch(showError(`${approved ? 'Не удалось согласовать согласовать заявку' : 'Не удалось отклонить заявку'}`));
       console.log(error);
     }
   };
+
+  console.log('rowData', JSON.stringify(rowData));
 
   const approveFunc = async () => {
     try {
@@ -353,10 +357,6 @@ export const Application = () => {
       console.log(error);
       dispatch(showError('Не удалось согласовать заявку'));
     }
-  };
-
-  const setAmountWithoutNds = e => {
-    setEditedValue(prev => ({ ...prev, amountWithoutNds: e.target.value }));
   };
 
   const verificationOfApproval = user => {
@@ -396,18 +396,27 @@ export const Application = () => {
   const verificationOfManager = user => {
     if (user.approved) {
       return (
-        <div className="p-0 m-0">
-          <p className="p-0 m-0 text-success fst-italic">Согласована</p>
-          <span className="p-0 m-0 text-success fst-italic">{new Date(user.updated_at).toLocaleDateString()}</span>
+        <div className="p-0 m-0 text-success fst-italic text-start">
+          Согласована {new Date(user.updated_at).toLocaleDateString()} {user.description ? `с комментарием: '${user.description}'` : ''}
+        </div>
+      );
+    }
+
+    if (user.approved === null) {
+      return (
+        <div className="p-0 m-0 text-danger fst-italic text-start">
+          Отклонена {new Date(user.updated_at).toLocaleDateString()} с комментарием: '{user.description}'
         </div>
       );
     }
 
     if (+currentUserID === +user.manager_id) {
       return (
-        <Button size="sm" variant="outline-success" onClick={() => approveManagers('approveManagers')}>
-          Утвердить
-        </Button>
+        <span className="d-flex justify-content-center">
+          <Button size="sm" variant="outline-success" onClick={() => setAction('approveManagers')}>
+            Утвердить
+          </Button>
+        </span>
       );
     } else {
       return (
@@ -562,43 +571,83 @@ export const Application = () => {
       return '-';
     }
 
-    return row.item_approvals.length > 0 && row.item_approvals[0].approved ? (
-      <span className="p-0 m-0 text-success fst-italic">Согласована {new Date(row.item_approvals[0].updated_at).toLocaleDateString()}</span>
-    ) : (
-      <span>На согласовании</span>
-    );
+    if (row.item_approvals[0]?.approved) {
+      return (
+        <span className="p-0 m-0 text-success fst-italic" style={{ fontSize: '12px' }}>{`Согласована ${new Date(
+          row.item_approvals[0].updated_at,
+        ).toLocaleDateString()} ${
+          row.item_approvals[0]?.description?.length > 0 ? `с комментарием: '${row.item_approvals[0].description}'` : ''
+        }`}</span>
+      );
+    }
+
+    if (row.item_approvals[0]?.approved === null) {
+      return (
+        <span className="p-0 m-0 text-danger fst-italic" style={{ fontSize: '12px' }}>{`Отклонен ${new Date(
+          row.item_approvals[0].updated_at,
+        ).toLocaleDateString()} ${
+          row.item_approvals[0]?.description?.length > 0 ? `с комментарием: '${row.item_approvals[0].description}'` : ''
+        }`}</span>
+      );
+    }
+
+    return <span>На согласовании</span>;
   };
 
   const allItemsApproved =
-    data.items?.length > 0 &&
-    data.items?.every(item => item.item_approvals.every(user => user.approved === true)) &&
     data.managers_approvals?.length > 0 &&
-    data.managers_approvals?.every(manager => manager.approved === true);
+    data.managers_approvals.every(manager => manager.approved === true) &&
+    data.items?.length > 0 &&
+    data.items.every(item =>
+      item.need_approve
+        ? item.item_approvals.length > 0 && item.item_approvals.every(user => user.approved === true || user.approved === null)
+        : true,
+    );
 
   const costWithNdsChange = (rowID, newConst) => {
     const currentRow = data.items.find(row => row.id === rowID);
     if (currentRow) {
       currentRow.item_approvals = currentRow.item_approvals.map(approval => ({
         ...approval,
-        amount_with_nds: newConst,
+        amount: newConst,
       }));
     }
   };
 
-  const costWithoutNdsChange = (rowID, newConst) => {
-    const currentRow = data.items.find(row => row.id === rowID);
-    if (currentRow) {
-      currentRow.item_approvals = currentRow.item_approvals.map(approval => ({
-        ...approval,
-        amount_without_nds: newConst,
-      }));
+  const protocolDescription = (row, title, price) => {
+    if (row.amount_with_nds === null && row.approved === true) {
+      return null;
+    }
+
+    if (row.approved === false) {
+      return (
+        <ListGroup.Item key={row.timestamp}>
+          {new Date(row.timestamp).toLocaleDateString()} {row.current_user} вернул строку "{title}" на пересогласование
+        </ListGroup.Item>
+      );
+    }
+
+    if (row.approved === null) {
+      return (
+        <ListGroup.Item key={row.timestamp}>
+          {new Date(row.timestamp).toLocaleDateString()} {row.current_user} отклонил строку "{title}" с комментарием: "{row.description}"
+        </ListGroup.Item>
+      );
+    }
+
+    if (row.amount_with_nds !== null && row.approved === true) {
+      return (
+        <ListGroup.Item key={row.timestamp}>
+          {new Date(row.timestamp).toLocaleDateString()} {row.current_user} согласовал строку "{title}" с изменением цены с{' '}
+          {Number(price).toLocaleString('ru-RU')} на {row.amount_with_nds.toLocaleString('ru-RU')}
+          {row.description ? `, добавив комментарий: '${row.description}'` : '.'}
+        </ListGroup.Item>
+      );
     }
   };
-
   const deleteHandler = (...props) => {
     const selectedUser = props[1];
     setSelectedUser(prev => prev.filter(user => user.value !== selectedUser.value));
-    console.log(selectedUser);
   };
 
   useEffect(() => {
@@ -694,23 +743,15 @@ export const Application = () => {
               <Table responsive className={styles.table} style={{ fontSize: `${print ? '10px' : '14px'}` }}>
                 <thead>
                   <tr>
-                    <th rowSpan="2">№ п/п</th>
-                    <th rowSpan="2">Наименование статьи расходов</th>
-                    <th colSpan="2">Сумма, требующая к перечислению, (руб)</th>
-                    <th rowSpan="2">Сроки исполнения</th>
-                    <th rowSpan="2">Комментарии</th>
-                    <th rowSpan="2" className={print ? styles.hide : ''}>
-                      Файлы
-                    </th>
-                    <th rowSpan="2" className={print ? styles.hide : ''}>
-                      Действия
-                    </th>
-                    <th rowSpan="2">Согласующий в УК</th>
-                    <th rowSpan="2">Статус согласования</th>
-                  </tr>
-                  <tr>
-                    <th>с НДС</th>
-                    <th>без НДС</th>
+                    <th>№ п/п</th>
+                    <th>Наименование статьи расходов</th>
+                    <th>Сумма, требующая к перечислению, (руб)</th>
+                    <th>Сроки исполнения</th>
+                    <th>Комментарии</th>
+                    <th className={print ? styles.hide : ''}>Файлы</th>
+                    <th className={print ? styles.hide : ''}>Действия</th>
+                    <th>Согласующий в УК</th>
+                    <th>Статус согласования</th>
                   </tr>
                   <tr>
                     <th></th>
@@ -722,7 +763,6 @@ export const Application = () => {
                     <th className={`${print ? styles.hide : ''} fw-normal fst-italic`}>{print ? '' : 6}</th>
                     <th className={`${print ? styles.hide : ''} fw-normal fst-italic`}>{print ? '' : 7}</th>
                     <th className="fw-normal fst-italic">{print ? 6 : 8}</th>
-                    <th className="fw-normal fst-italic">{print ? 7 : 9}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -737,7 +777,6 @@ export const Application = () => {
                             <span className="fw-semibold">{groupName}, в т.ч.</span>
                           </td>
                           <td className="fw-semibold text-end">{totalInGroupWithNds(groupItems)}</td>
-                          <td className="fw-semibold text-end">{totalInGroupWithoutNds(groupItems)}</td>
                           <td colSpan="6"></td>
                         </tr>
                         {groupItems.map(row => (
@@ -748,13 +787,13 @@ export const Application = () => {
                             </td>
                             <td
                               style={{ width: '130px' }}
-                              className={`${costChangeChek(row) && !row?.item_approvals[0]?.approved ? styles.edit : ''} text-end`}
+                              className={`${costChangeChek(row) && row?.item_approvals[0]?.approved === false ? styles.edit : ''} text-end`}
                               onDoubleClick={() => handleDoubleClick(row.id, 'withNds')}
                             >
                               {editCell?.rowId === row.id &&
                               editCell?.field === 'withNds' &&
                               costChangeChek(row) &&
-                              !row?.item_approvals[0]?.approved ? (
+                              row?.item_approvals[0]?.approved === false ? (
                                 <AnimatePresence>
                                   <motion.form
                                     className={styles.cellsForm}
@@ -799,66 +838,11 @@ export const Application = () => {
                                     animate={{ opacity: 1, visibility: 'visible' }}
                                     exit={{ opacity: 0, visibility: 'hidden' }}
                                   >
-                                    {row.item_approvals[0]?.amount_with_nds
-                                      ? Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 }).format(row.item_approvals[0]?.amount_with_nds)
+                                    {row.item_approvals[0]?.amount
+                                      ? Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 }).format(row.item_approvals[0]?.amount)
                                       : Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 }).format(row?.amount_with_nds)}
                                   </motion.span>
                                 </AnimatePresence>
-                              )}
-                            </td>
-
-                            <td
-                              style={{ width: '130px' }}
-                              className={`${costChangeChek(row) && !row?.item_approvals[0]?.approved ? styles.edit : ''} text-end`}
-                              onDoubleClick={() => handleDoubleClick(row.id, 'withoutNds')}
-                            >
-                              {editCell?.rowId === row.id &&
-                              editCell?.field === 'withoutNds' &&
-                              costChangeChek(row) &&
-                              !row?.item_approvals[0]?.approved ? (
-                                <AnimatePresence>
-                                  <motion.form
-                                    className={styles.cellsForm}
-                                    initial={{ opacity: 0, visibility: 'hidden' }}
-                                    animate={{ opacity: 1, visibility: 'visible' }}
-                                    exit={{ opacity: 0, visibility: 'hidden' }}
-                                  >
-                                    <label htmlFor={row.id + 'withoutNds'}>
-                                      <input
-                                        id={row.id + 'withoutNds'}
-                                        type="number"
-                                        value={editedValue?.amountWithoutNds || ''}
-                                        onChange={setAmountWithoutNds}
-                                        ref={el => (inputRefs.current[`${row.id}-withoutNds`] = el)}
-                                        min="0"
-                                      />
-
-                                      <div className={styles.btnsGroup}>
-                                        <button
-                                          disabled={editedValue.amountWithoutNds.length === 0}
-                                          onClick={e => {
-                                            handleSave(e);
-
-                                            costWithoutNdsChange(row.id, editedValue.amountWithoutNds);
-                                          }}
-                                        >
-                                          <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#28ac61">
-                                            <path d="M389-267 195-460l51-52 143 143 325-324 51 51-376 375Z" />
-                                          </svg>
-                                        </button>
-                                        <button onClick={cancelEdit}>
-                                          <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#b82b27">
-                                            <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
-                                          </svg>
-                                        </button>
-                                      </div>
-                                    </label>
-                                  </motion.form>
-                                </AnimatePresence>
-                              ) : row.item_approvals[0]?.amount_without_nds ? (
-                                Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 }).format(row.item_approvals[0]?.amount_without_nds)
-                              ) : (
-                                Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 }).format(row.amount_without_nds)
                               )}
                             </td>
                             <td style={{ width: '100px' }}>{new Date(row.date_end).toLocaleDateString()}</td>
@@ -878,6 +862,7 @@ export const Application = () => {
                               <DropdownButton
                                 size="sm"
                                 title={'Действия'}
+                                variant="outline-primary"
                                 onClick={() => {
                                   actionPopupToggle(groupName + row.id);
                                   setRowData(row);
@@ -889,7 +874,7 @@ export const Application = () => {
                                     Добавить согласующего
                                   </Dropdown.Item>
                                 )}
-                                {isSecretary && row.item_approvals.length > 0 && !row.item_approvals[0]?.approved && (
+                                {isSecretary && row.item_approvals.length > 0 && row.item_approvals[0]?.approved === false && (
                                   <Dropdown.Item as={'button'} onClick={() => setActionsData('Убрать согласующего')}>
                                     Убрать согласующего
                                   </Dropdown.Item>
@@ -912,6 +897,18 @@ export const Application = () => {
                                     Согласовать
                                   </Dropdown.Item>
                                 )}
+
+                                {isApprover(row) && !isRowApproved(row) && (
+                                  <Dropdown.Item as={'button'} onClick={() => setActionsData('Отклонить')}>
+                                    Отклонить
+                                  </Dropdown.Item>
+                                )}
+
+                                {(isManager || isCeo) && isRowApproved(row) && (
+                                  <Dropdown.Item as={'button'} onClick={() => setActionsData('Пересогласовать')}>
+                                    Пересогласовать
+                                  </Dropdown.Item>
+                                )}
                               </DropdownButton>
                             </td>
                             <td>{showApprovalsInfo(row)}</td>
@@ -926,8 +923,7 @@ export const Application = () => {
                       <span className="fw-bold">Итого:</span>
                     </td>
                     <td className="text-end fw-bold">{totalWithNds(data)}</td>
-                    <td className="text-end fw-bold">{totalWithoutNds(data)}</td>
-                    <td colSpan="6"></td>
+                    <td colSpan="7"></td>
                   </tr>
                 </tbody>
               </Table>
@@ -998,7 +994,7 @@ export const Application = () => {
                   onClick={() => setAction('removeManagers')}
                   size="sm"
                   style={{ width: '175px', textAlign: 'left' }}
-                  disabled={data.managers_approvals?.every(managers => managers.approved)}
+                  disabled={data.managers_approvals?.every(managers => managers.approved !== false)}
                 >
                   Убрать руководителя
                 </Button>
@@ -1006,47 +1002,20 @@ export const Application = () => {
             )}
           </Row>
         </div>
-        {data?.items?.some(item => {
-          const approvals = item.item_approvals[0];
-          return (
-            (approvals?.amount_with_nds !== null && approvals?.amount_with_nds !== undefined && approvals?.approved === true) ||
-            (approvals?.amount_without_nds !== null && approvals?.amount_without_nds !== undefined && approvals?.approved === true)
-          );
-        }) && (
-          <Accordion flush className="mb-3">
-            <Accordion.Item></Accordion.Item>
+
+        <Accordion flush className="mb-3">
+          <Accordion.Item eventKey="0">
             <Accordion.Header>Протокол изменений</Accordion.Header>
             <Accordion.Body>
               <ListGroup>
-                {data.items.map(item => {
+                {data?.items?.map(item => {
                   const approvals = item.item_approvals[0];
-                  if (approvals?.amount_with_nds !== null && approvals?.amount_without_nds !== null) {
-                    return (
-                      <ListGroup.Item key={item.id}>
-                        {approvals?.amount_with_nds !== null && (
-                          <span>
-                            Стоимость с НДС на "{item.cost_item_name}" была изменена сотрудником {approvals?.approver_name} с{' '}
-                            {Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 }).format(item.amount_with_nds)} руб на{' '}
-                            {Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 }).format(approvals?.amount_with_nds)} руб.
-                          </span>
-                        )}
-
-                        {approvals?.amount_without_nds !== null && (
-                          <span>
-                            Стоимость без НДС на "{item.cost_item_name}" была изменена сотрудником {approvals?.approver_name} с{' '}
-                            {Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 }).format(item.amount_without_nds)} руб на{' '}
-                            {Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 }).format(approvals?.amount_without_nds)} руб.
-                          </span>
-                        )}
-                      </ListGroup.Item>
-                    );
-                  }
-                  return null;
+                  return approvals?.application_item_history?.map(el => protocolDescription(el, item.cost_item_name, item.amount_with_nds));
                 })}
               </ListGroup>
             </Accordion.Body>
-          </Accordion>
-        )}
+          </Accordion.Item>
+        </Accordion>
       </Container>
 
       <Modal show={isConfirm} onHide={confirmToggleBtn}>
@@ -1138,7 +1107,7 @@ export const Application = () => {
         <Modal.Body>
           <ListGroup>
             {data?.managers_approvals
-              ?.filter(user => !user.approved)
+              ?.filter(user => user.approved === false)
               ?.map(user => (
                 <ListGroup.Item key={user.id} className="p-0">
                   <Form>
@@ -1187,22 +1156,33 @@ export const Application = () => {
       </Modal>
 
       <Modal
-        show={action === 'Согласовать'}
+        show={action === 'Отклонить'}
         onHide={() => {
           setAction('');
-          setSelectedUser([]);
+          setComment('');
         }}
       >
         <Modal.Header>
-          <Modal.Title>Подтверждение согласования</Modal.Title>
+          <Modal.Title>Подтверждение отклонения</Modal.Title>
         </Modal.Header>
-        <Modal.Body>Вы действительно хотите согласовать расходы?</Modal.Body>
-        <Modal.Footer>
-          <Button variant="outline-danger" onClick={() => setAction('')}>
-            Отменить
+        <Modal.Body>
+          <Form.Group>
+            <Form.Label className="mb-3">Вы действительно хотите отклонить расходы? </Form.Label>
+            <Form.Control
+              className="mb-3"
+              type="text"
+              placeholder="Комментарий обязателен"
+              value={comment}
+              onChange={e => setComment(e.target.value)}
+            />
+          </Form.Group>
+        </Modal.Body>
+        <Modal.Footer className="d-flex justify-content-between">
+          <Button variant="outline-danger" size="sm" onClick={() => setAction('')}>
+            Назад
           </Button>
-          <Button variant="outline-success" onClick={() => approveRowFunc(rowData)}>
-            Согласовать
+          <Button variant="outline-danger" size="sm" onClick={() => actionRowFunc(rowData, comment, null)} disabled={comment.length === 0}>
+            Отклонить
           </Button>
         </Modal.Footer>
       </Modal>
@@ -1232,28 +1212,91 @@ export const Application = () => {
         <Modal.Header>
           <Modal.Title>Подтверждение согласования</Modal.Title>
         </Modal.Header>
-        <Modal.Body>Вы действительно хотите согласовать расходы?</Modal.Body>
+        <Modal.Body>
+          <Form.Group>
+            <Form.Label>Вы действительно хотите согласовать расходы? </Form.Label>
+            <Form.Control type="text" placeholder="Комментарий" value={comment} onChange={e => setComment(e.target.value)} />
+          </Form.Group>
+        </Modal.Body>
         <Modal.Footer>
           <Button variant="outline-danger" onClick={() => setAction('')}>
             Отменить
           </Button>
-          <Button variant="outline-success" onClick={() => approveRowFunc(rowData)}>
+          <Button variant="outline-success" onClick={() => actionRowFunc(rowData, comment, true)}>
             Согласовать
           </Button>
         </Modal.Footer>
       </Modal>
 
-      <Modal show={action === 'approveManagers'}>
+      <Modal
+        show={action === 'Пересогласовать'}
+        onHide={() => {
+          setAction('');
+          setSelectedUser([]);
+        }}
+      >
+        <Modal.Header>
+          <Modal.Title>Подтверждение пересогласования</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>Вы действительно хотите пересогласовать расходы?</Modal.Body>
+        <Modal.Footer>
+          <Button variant="outline-danger" onClick={() => setAction('')}>
+            Назад
+          </Button>
+          <Button variant="outline-success" onClick={() => actionRowFunc(rowData, '', false)}>
+            Пересогласовать
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal
+        show={action === 'approveManagers'}
+        onHide={() => {
+          setAction('');
+          setComment('');
+        }}
+      >
         <Modal.Header>
           <Modal.Title>Подтверждение согласования</Modal.Title>
         </Modal.Header>
-        <Modal.Body>Вы действительно хотите согласовать расходы?</Modal.Body>
+        <Modal.Body>
+          <Form.Group>
+            <Form.Label>Вы действительно хотите согласовать расходы?</Form.Label>
+            <Form.Control type="text" placeholder="Комментарий" value={comment} onChange={e => setComment(e.target.value)} />
+          </Form.Group>
+        </Modal.Body>
         <Modal.Footer>
-          <Button variant="outline-danger" onClick={() => setAction('')}>
+          <Button size="sm" variant="outline-danger" onClick={() => setAction('')}>
             Отменить
           </Button>
-          <Button variant="outline-success" onClick={() => approveManagers()}>
+          <Button size="sm" variant="outline-success" onClick={() => approveManagers(true, comment)}>
             Согласовать
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal
+        show={action === 'rejectManagers'}
+        onHide={() => {
+          setAction('');
+          setComment('');
+        }}
+      >
+        <Modal.Header>
+          <Modal.Title>Подтверждение отклонения</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form.Group>
+            <Form.Label>Вы действительно хотите отклонить расходы?</Form.Label>
+            <Form.Control type="text" placeholder="Комментарий обязателен" value={comment} onChange={e => setComment(e.target.value)} />
+          </Form.Group>
+        </Modal.Body>
+        <Modal.Footer className="d-flex justify-content-between">
+          <Button size="sm" variant="outline-danger" onClick={() => setAction('')}>
+            Назад
+          </Button>
+          <Button size="sm" variant="outline-success" onClick={() => approveManagers(null, comment)} disabled={comment.length === 0}>
+            Отклонить
           </Button>
         </Modal.Footer>
       </Modal>

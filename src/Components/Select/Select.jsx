@@ -3,7 +3,38 @@ import Select from 'react-select';
 import { CloseButton, ListGroup } from 'react-bootstrap';
 import styles from './Select.module.scss';
 
-export const SelectComponent = ({ data, placeholder = 'Выберите пользователей', multiSelection = true, selected, selectHandler, deleteHandler }) => {
+const userFormatter = option => (
+  <div
+    style={{
+      display: 'grid',
+      gridTemplateColumns: '1fr 1fr',
+      width: '100%',
+      opacity: '1',
+      visibility: 'visibility',
+      fontSize: '16px',
+      color: 'var(--dark)',
+      gap: '10px',
+      alignItems: 'center',
+    }}
+  >
+    <span>{option.label}</span>
+    {option.post && (
+      <span style={{ fontStyle: 'italic', color: 'var(--text)', fontSize: '12px' }}>
+        {option.companyName}, {option.post}
+      </span>
+    )}
+  </div>
+);
+
+export const SelectComponent = ({
+  data,
+  placeholder = 'Выберите пользователей',
+  multiSelection = true,
+  selected,
+  selectHandler,
+  deleteHandler,
+  formatOptionLabel = userFormatter,
+}) => {
   const [initialList, setInitialList] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
 
@@ -21,28 +52,28 @@ export const SelectComponent = ({ data, placeholder = 'Выберите поль
     setInitialList(prev => [...prev, selectedOption]);
   };
 
-  const formatOptionLabel = option => (
-    <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        width: '100%',
-        opacity: '1',
-        visibility: 'visibility',
-        fontSize: '16px',
-        color: 'var(--dark)',
-        gap: '10px',
-        alignItems: 'center',
-      }}
-    >
-      <span>{option.label}</span>
-      {option.post && (
-        <span style={{ fontStyle: 'italic', color: 'var(--text)', fontSize: '12px' }}>
-          {option.companyName}, {option.post}
-        </span>
-      )}
-    </div>
-  );
+  // const formatOptionLabel = option => (
+  //   <div
+  //     style={{
+  //       display: 'grid',
+  //       gridTemplateColumns: '1fr 1fr',
+  //       width: '100%',
+  //       opacity: '1',
+  //       visibility: 'visibility',
+  //       fontSize: '16px',
+  //       color: 'var(--dark)',
+  //       gap: '10px',
+  //       alignItems: 'center',
+  //     }}
+  //   >
+  //     <span>{option.label}</span>
+  //     {option.post && (
+  //       <span style={{ fontStyle: 'italic', color: 'var(--text)', fontSize: '12px' }}>
+  //         {option.companyName}, {option.post}
+  //       </span>
+  //     )}
+  //   </div>
+  // );
 
   useEffect(() => {
     setInitialList(data);

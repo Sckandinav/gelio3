@@ -198,7 +198,7 @@ export const Dashboard = ({
               >
                 <span>Исходящие</span>
                 {created > 0 && (
-                  <Badge pill bg="light" text="primary" className="mx-1" title={`Исходящие комнаты со статусом "Открыта": ${created?.total_rooms}`}>
+                  <Badge pill bg="light" text="primary" className="mx-1" title={`Исходящие комнаты со статусом "Открыта": ${created}`}>
                     {created}
                   </Badge>
                 )}

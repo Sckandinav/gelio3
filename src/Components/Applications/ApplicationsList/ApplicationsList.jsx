@@ -31,22 +31,11 @@ export const ApplicationsList = ({ data, title, company }) => {
       return null;
     }
 
-    if (currentUsersGroup?.includes('Заявки')) {
-      if (row.notifications.lacks_assigned_item_approvers && row.fully_approved_by_users) {
-        return <FaExclamation title="Ожидает назначения" size={20} style={{ color: 'red' }} />;
-      }
-
-      if (row.fully_approved_by_users === true && row.fully_approved_by_items === true && row.notifications.lacks_assigned_ceo === true) {
-        return <FaExclamation title="Ожидает назначения" size={20} style={{ color: 'red' }} />;
-      }
-      return <BsCheck2Circle title="Выполнили действия" size={20} style={{ color: 'green' }} />;
-    } else {
-      if (row.notifications.already_approved) {
-        return <BsCheck2Circle title="Выполнили действия" size={20} style={{ color: 'green' }} />;
-      } else {
-        return <FaExclamation title="Ожидает согласования" size={20} style={{ color: 'red' }} />;
-      }
-    }
+    return row.notification ? (
+      <FaExclamation title="Необходимо выполнить действие" size={20} style={{ color: 'red' }} />
+    ) : (
+      <BsCheck2Circle title="Выполнили действия" size={20} style={{ color: 'green' }} />
+    );
   };
 
   const statusCheck = value => {
@@ -141,7 +130,7 @@ export const ApplicationsList = ({ data, title, company }) => {
     creator: row.creator_name,
     date: new Date(row.created_at).toLocaleString(),
     agro: statusCheck(row.fully_approved_by_users),
-    mc: statusCheck(row.fully_approved_by_items),
+    mc: statusCheck(row.fully_approved_by_items && row.fully_approved_by_managers),
     ceo: statusCheck(row.approved_by_ceo),
     agroID: row.agroid,
   }));

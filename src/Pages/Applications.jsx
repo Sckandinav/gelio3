@@ -23,8 +23,6 @@ export const Applications = () => {
   const notificationsCounter = useSelector(notificationsSelector).applicationMenu || {};
   const type = searchParams.get('application_type');
 
-  console.log('location', search);
-
   const addParam = (key, value) => {
     searchParams.set(key, value);
     setSearchParams(searchParams);
@@ -71,7 +69,6 @@ export const Applications = () => {
   }, []);
 
   useEffect(() => {
-    // getApplicationsList();
     getApplicationsList();
   }, [searchParams]);
 
@@ -95,7 +92,13 @@ export const Applications = () => {
       <Row>
         <Col className="px-4">
           <ApplicationsList
-            data={data}
+            data={data.sort(
+              (a, b) =>
+                Number(a.approved_by_ceo) - Number(b.approved_by_ceo) ||
+                Number(a.fully_approved_by_items) - Number(b.fully_approved_by_items) ||
+                Number(a.fully_approved_by_users) - Number(b.fully_approved_by_users) ||
+                new Date(b.created_at) - new Date(a.created_at),
+            )}
             title={type === 'created' ? 'Заявки на ДС от дочерних компаний, исходящие' : 'Заявки на ДС от дочерних компаний, входящие'}
             company={company}
           />
