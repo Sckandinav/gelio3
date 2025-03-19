@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Form, Container, Row, Col, Button, Modal, ListGroup, CloseButton, Table } from 'react-bootstrap';
+import { Form, Container, Row, Col, Button, Modal, ListGroup, CloseButton, Table, Spinner } from 'react-bootstrap';
 import Select from 'react-select';
 import { rubles } from 'rubles';
 import { useDispatch, useSelector } from 'react-redux';
@@ -40,9 +40,9 @@ export const CreatePayment = () => {
     files: [],
   });
 
-  console.log('state', state);
   const [banksList, setBanksList] = useState([]);
   const [users, setUsers] = useState([]);
+  const [loadingSendingData, setLoadingSendingData] = useState(false);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [chosen, setChosen] = useState([]);
@@ -148,6 +148,7 @@ export const CreatePayment = () => {
 
   const addPayment = async e => {
     e.preventDefault();
+    setLoadingSendingData(true);
     try {
       const formData = new FormData();
 
@@ -166,6 +167,7 @@ export const CreatePayment = () => {
       formData.append('reference', state.reference);
       formData.append('type', state.type);
       formData.append('details', state.details);
+      formData.append('need_ceo_approve', true);
       state.signatories.forEach(user => {
         formData.append('signatories', user.value);
       });
@@ -184,6 +186,8 @@ export const CreatePayment = () => {
     } catch (error) {
       dispatch(showError('Не удалось создать заявку'));
       console.log(error);
+    } finally {
+      setLoadingSendingData(false);
     }
   };
 
@@ -366,7 +370,7 @@ export const CreatePayment = () => {
               </Col>
               <Col sm={4} xl={2}>
                 <Form.Label className="fw-bold" htmlFor="date">
-                  Дата
+                  Дата исполнения платежа
                 </Form.Label>
                 <Form.Control id="date" type="date" value={state.date} onChange={e => inputHandler('date', e)} required />
               </Col>
@@ -382,9 +386,14 @@ export const CreatePayment = () => {
               <Button variant="outline-danger" onClick={() => navigate(-1)}>
                 Назад
               </Button>
-              <Button variant="primary" type="submit" disabled={state.signatories.length === 0}>
-                Отправить
-              </Button>
+
+              {loadingSendingData ? (
+                <Spinner animation="border" variant="success" />
+              ) : (
+                <Button variant="primary" type="submit" disabled={state.signatories.length === 0}>
+                  Отправить
+                </Button>
+              )}
             </div>
           </Form>
         </Col>
@@ -430,6 +439,7 @@ export const CreatePayment = () => {
           >
             Отмена
           </Button>
+
           <Button variant="outline-success" onClick={addApprovers}>
             Добавить
           </Button>

@@ -206,11 +206,11 @@ export const PaymentItem = () => {
         { ceo: selectedCeo },
         { headers: { 'Content-Type': 'application/json', Authorization: `Token ${token}` } },
       );
-      dispatch(showSuccess('ген. дир. назначен'));
+      dispatch(showSuccess('ген. дир. добавлен'));
       modalToggle('seo');
       getPayment();
     } catch (error) {
-      dispatch(showError('Не удалось переназначить ген. дир-а'));
+      dispatch(showError('Не удалось изменить согласующего'));
       console.log(error);
     }
   };
@@ -325,27 +325,27 @@ export const PaymentItem = () => {
           <Row className="justify-content-end align-items-center">
             {isCreator && (
               <Col className={`${print ? styles.hide : ''}`}>
-                <Button className="me-2" size="sm" onClick={() => modalToggle('signer')}>
+                <Button className="me-2" size="sm" onClick={() => modalToggle('signer')} disabled={data.is_ceo_signed}>
                   Добавить согласующего
                 </Button>
                 {data.ceo && (
-                  <Button size="sm" onClick={() => modalToggle('seo')}>
-                    Переназначить ген. дир-а
+                  <Button size="sm" onClick={() => modalToggle('seo')} disabled={data.is_ceo_signed}>
+                    Изменить согласующего ген. дир-а
                   </Button>
                 )}
 
                 {!data.ceo && data.need_ceo_approve && (
-                  <Button className="me-2" size="sm" onClick={() => modalToggle('seo')} disabled={!isAllSignet}>
-                    Назначить ген. дир-а
+                  <Button className="me-2" size="sm" onClick={() => modalToggle('seo')} disabled={data.is_ceo_signed}>
+                    Добавить ген. дир-а
                   </Button>
                 )}
-                {data.need_ceo_approve && (
-                  <Button size="sm" onClick={() => needCeoToggle(false)} disabled={!isAllSignet}>
+                {data.need_ceo_approve && !data.is_ceo_signed && (
+                  <Button className="me-2" size="sm" onClick={() => needCeoToggle(false)}>
                     Без согласования ген. дир-а
                   </Button>
                 )}
                 {!data.need_ceo_approve && (
-                  <Button size="sm" onClick={() => needCeoToggle(true)}>
+                  <Button className="me-2" size="sm" onClick={() => needCeoToggle(true)}>
                     C согласованием ген. дир-а
                   </Button>
                 )}
@@ -366,7 +366,7 @@ export const PaymentItem = () => {
                 </Alert>
               ) : (
                 <Alert variant="light">
-                  <p className="m-0">Согласующий не назначен</p>
+                  <p className="m-0">Согласующий не добавлен</p>
                 </Alert>
               )}
             </Col>
@@ -427,7 +427,7 @@ export const PaymentItem = () => {
                   ))}
 
                   <tr>
-                    <td className="fw-semibold">Дата</td>
+                    <td className="fw-semibold">Дата исполнения платежа</td>
                     <td colSpan={2}>{new Date(data.date).toLocaleDateString()}</td>
                   </tr>
                 </tbody>
@@ -441,8 +441,8 @@ export const PaymentItem = () => {
                 <h5>Приложенные файлы</h5>
                 <ListGroup>
                   {data.files.map(file => (
-                    <ListGroup.Item key={file.id}>
-                      <a href={file.file} target="_blank" rel="noopener noreferrer">
+                    <ListGroup.Item key={file.id} style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <a href={file.file} target="_blank" rel="noopener noreferrer" title={file.file.slice(file.file.lastIndexOf('/') + 1)}>
                         {file.file.slice(file.file.lastIndexOf('/') + 1)}
                       </a>
                     </ListGroup.Item>
@@ -497,7 +497,7 @@ export const PaymentItem = () => {
             }}
           >
             <Modal.Header closeButton>
-              <Modal.Title>Назначение ген. дир-а</Modal.Title>
+              <Modal.Title>Добавление ген. дир-а</Modal.Title>
             </Modal.Header>
             <Modal.Body>
               <Form.Select value={selectedCeo} onChange={e => setSelectedCeo(e.target.value)}>
