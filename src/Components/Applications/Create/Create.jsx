@@ -30,8 +30,6 @@ export const Create = () => {
     showMembers: false,
   });
 
-  console.log('appData', appData);
-
   const { data } = useSelector(userSelectors);
   const dispatch = useDispatch();
 

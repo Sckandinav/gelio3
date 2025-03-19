@@ -49,7 +49,7 @@ const initialMenuList = [
         to: url.applications(),
         className: 'btn btn-outline-success mx-3 mt-1 text-start',
       },
-      // { title: 'Заявки на оплату', to: url.payment(), className: 'btn btn-outline-success d-flex align-items-center mx-3 mt-1' },
+      { title: 'Заявки на оплату', to: url.payment(), className: 'btn btn-outline-success d-flex align-items-center mx-3 mt-1' },
     ],
   },
 

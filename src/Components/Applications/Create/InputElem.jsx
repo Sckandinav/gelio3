@@ -110,18 +110,7 @@ export const InputElem = ({ close, addRow }) => {
                 onChange={handleChange}
               />
             </Form.Label>
-            {/* <Form.Label>
-              <Form.Control
-                className={`shadow ${styles.input}`}
-                id="priceWithoutVAT"
-                type="number"
-                min="0"
-                placeholder="Цена без НДС"
-                value={data.priceWithoutVAT}
-                onChange={handleChange}
-                style={{ maxWidth: '130px' }}
-              />
-            </Form.Label> */}
+
             <Form.Label>
               <Form.Control className="shadow" type="date" id="date" value={data.date} onChange={handleChange} />
             </Form.Label>

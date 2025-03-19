@@ -20,13 +20,6 @@ export const RemoveSigners = ({ closePopup, updateRoom, document, actionsIDHandl
     chosen.some(user => user.value === el.value) ? setChosen(prev => prev.filter(user => user.value !== el.value)) : setChosen(prev => [...prev, el]);
   };
 
-  const userWithTaskCompleted = document.signers_status.reduce((acc, current) => {
-    if (current.is_signed || current.is_signed === null) {
-      acc.push(current.signer_id);
-    }
-    return acc;
-  }, []);
-
   const updateData = async e => {
     e.preventDefault();
 
@@ -41,7 +34,7 @@ export const RemoveSigners = ({ closePopup, updateRoom, document, actionsIDHandl
           Authorization: `Token ${token}`,
         },
       });
-      dispatch(showSuccess(`${chosen.length > 1 ? 'Пользователе удалены' : 'Пользователь удален'}`));
+      dispatch(showSuccess(`${chosen.length > 1 ? 'Пользователи удалены' : 'Пользователь удален'}`));
       actionsIDHandler();
       closePopup();
       updateRoom();
@@ -54,9 +47,7 @@ export const RemoveSigners = ({ closePopup, updateRoom, document, actionsIDHandl
   return (
     <div>
       <CheckboxSelection
-        data={document.signers_status
-          .filter(user => !userWithTaskCompleted?.includes(user.signer_id))
-          .map(user => ({ value: user.signer_id, label: user.signer }))}
+        data={document.signers_status.filter(user => user.is_signed === false).map(user => ({ value: user.signer_id, label: user.signer }))}
         chosen={chosen}
         func={chosenToggle}
         titleFromParent="Убрать"

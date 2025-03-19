@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Button, Card, CloseButton, Col, Row, Dropdown } from 'react-bootstrap';
+import { Form, Button, Card, CloseButton, Col, Row, Dropdown, Spinner } from 'react-bootstrap';
 import { motion, AnimatePresence } from 'motion/react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -29,6 +29,7 @@ export const Create = ({ close, update }) => {
   const [pageNumber, setPageNumber] = useState(1);
   const [actionsModal, setActionsModal] = useState(false);
   const [chosen, setChosen] = useState([]);
+  const [sendDataLoading, setSendDataLoading] = useState(false);
   const [actionType, setActionType] = useState({
     id: null,
     action: null,
@@ -128,6 +129,7 @@ export const Create = ({ close, update }) => {
   };
 
   const sendToServer = async () => {
+    setSendDataLoading(true);
     const formData = new FormData();
     formData.append('title', state.title);
     formData.append('room_type', state.roomType);
@@ -177,6 +179,8 @@ export const Create = ({ close, update }) => {
     } catch (error) {
       dispatch(showError('Не удалось создать комнату'));
       console.log(error);
+    } finally {
+      setSendDataLoading(false);
     }
   };
 
@@ -347,9 +351,13 @@ export const Create = ({ close, update }) => {
                         Назад
                       </Button>
 
-                      <Button variant="success" onClick={sendToServer}>
-                        Создать
-                      </Button>
+                      {sendDataLoading ? (
+                        <Spinner animation="border" variant="success" size="5" />
+                      ) : (
+                        <Button variant="success" onClick={sendToServer}>
+                          Создать
+                        </Button>
+                      )}
                     </Col>
                   </Row>
                 </div>

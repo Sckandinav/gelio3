@@ -20,13 +20,6 @@ export const RemoveViewers = ({ closePopup, updateRoom, document, actionsIDHandl
     chosen.some(user => user.value === el.value) ? setChosen(prev => prev.filter(user => user.value !== el.value)) : setChosen(prev => [...prev, el]);
   };
 
-  const userWithTaskCompleted = document.viewers_status.reduce((acc, current) => {
-    if (current.is_viewed) {
-      acc.push(current.signer_id);
-    }
-    return acc;
-  }, []);
-
   const updateData = async e => {
     e.preventDefault();
 
@@ -53,9 +46,7 @@ export const RemoveViewers = ({ closePopup, updateRoom, document, actionsIDHandl
   return (
     <div>
       <CheckboxSelection
-        data={document.viewers_status
-          .filter(user => !userWithTaskCompleted?.includes(user.signer_id))
-          .map(user => ({ value: user.viewer_id, label: user.viewer }))}
+        data={document.viewers_status.filter(user => !user.is_viewed).map(user => ({ value: user.viewer_id, label: user.viewer }))}
         chosen={chosen}
         func={chosenToggle}
         titleFromParent="Убрать"

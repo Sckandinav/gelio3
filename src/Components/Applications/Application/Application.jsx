@@ -12,9 +12,10 @@ import { useAxiosInterceptor } from '../../hoc/useAxiosInterceptor';
 import { fetchApprove } from '../../../api/Applications/approve.js';
 import { SelectComponent } from '../../Select/Select.jsx';
 import { fetchUsers } from '../../../api/fetchUsers.js';
-import { links, applicationActionsUrl, applicationUrl } from '../../../routes/routes.js';
+import { links, applicationActionsUrl, applicationUrl, url } from '../../../routes/routes.js';
 import { Spinner } from '../../Spinner/Spinner.jsx';
 import { useUserToken } from '../../hoc/useUserToken.js';
+import { EditApplicationMode } from './EditApplicationMode';
 
 import styles from './Application.module.scss';
 
@@ -26,6 +27,7 @@ export const Application = () => {
   const [actionsOpen, setActionsOpen] = useState('');
   const [action, setAction] = useState('');
   const [rowData, setRowData] = useState({});
+  const [loadingData, setLoadingData] = useState(false);
 
   const [ceoList, setCeoList] = useState([]);
   const [selectedCeo, setSelectedCeo] = useState('');
@@ -40,6 +42,7 @@ export const Application = () => {
     amountWithNds: '',
     amountWithoutNds: '',
   });
+  const [isEdit, setIsEdit] = useState(false);
   const token = useUserToken();
   const dispatch = useDispatch();
   const axiosInstance = useAxiosInterceptor();
@@ -50,8 +53,11 @@ export const Application = () => {
   const isManager = data.managers_approvals?.some(user => Number(user.manager) === Number(currentUserID));
   const isCeo = ceoList?.some(user => +user.id === +currentUserID);
   const navigate = useNavigate();
+  let rowCount = 0;
 
-  console.log(`isManager: ${isManager}, isCeo: ${isCeo} `);
+  const editToggle = () => {
+    setIsEdit(prev => !prev);
+  };
 
   const selectedHandler = (...props) => {
     setSelectedUser(props[1]);
@@ -96,11 +102,14 @@ export const Application = () => {
   };
 
   const fetchData = async () => {
+    setLoadingData(true);
     try {
       const response = await getData(applicationUrl.getTask(id), axiosInstance);
       setData(response);
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoadingData(false);
     }
   };
 
@@ -216,8 +225,6 @@ export const Application = () => {
     }
   };
 
-  let rowCount = 0;
-
   const isDisableBtn = row => {
     if (isManager || isCeo) {
       return false;
@@ -285,7 +292,12 @@ export const Application = () => {
 
   const totalInGroupWithNds = groupItems => {
     const sum = groupItems.reduce((acc, curr) => {
-      const amount = curr.item_approvals[0]?.amount || curr?.amount_with_nds;
+      const amount =
+        curr.item_approvals.length > 0
+          ? curr.item_approvals[0]?.amount === null
+            ? curr?.amount_with_nds
+            : curr.item_approvals[0]?.amount
+          : curr?.amount_with_nds;
       return acc + Number(amount);
     }, 0);
 
@@ -296,21 +308,17 @@ export const Application = () => {
     const { items } = data;
 
     const sum = items?.reduce((acc, curr) => {
-      return acc + Number(curr.item_approvals[0]?.amount || curr?.amount_with_nds);
+      const currPrice =
+        curr.item_approvals.length > 0
+          ? curr.item_approvals[0]?.amount === null
+            ? curr?.amount_with_nds
+            : curr.item_approvals[0]?.amount
+          : curr?.amount_with_nds;
+      return acc + Number(currPrice);
     }, 0);
 
     return Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 }).format(sum);
   };
-
-  // const totalWithoutNds = () => {
-  //   const { items } = data;
-
-  //   const sum = items?.reduce((acc, curr) => {
-  //     return acc + Number(curr.item_approvals[0]?.amount_without_nds || curr?.amount_without_nds);
-  //   }, 0);
-
-  //   return Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 }).format(sum);
-  // };
 
   const ceoConfirmToggle = () => {
     SetCeoConfirm(prev => !prev);
@@ -342,8 +350,6 @@ export const Application = () => {
       console.log(error);
     }
   };
-
-  console.log('rowData', JSON.stringify(rowData));
 
   const approveFunc = async () => {
     try {
@@ -614,7 +620,9 @@ export const Application = () => {
     }
   };
 
-  const protocolDescription = (row, title, price) => {
+  const protocolDescription = row => {
+    const currentItem = data.items.find(el => el.id === row.application_item_id);
+
     if (row.amount_with_nds === null && row.approved === true) {
       return null;
     }
@@ -622,7 +630,8 @@ export const Application = () => {
     if (row.approved === false) {
       return (
         <ListGroup.Item key={row.timestamp}>
-          {new Date(row.timestamp).toLocaleDateString()} {row.current_user} вернул строку "{title}" на пересогласование
+          {new Date(row.timestamp).toLocaleDateString()} пользователь {row.current_user} вернул строку "{currentItem.cost_item_name}" на
+          пересогласование
         </ListGroup.Item>
       );
     }
@@ -630,7 +639,8 @@ export const Application = () => {
     if (row.approved === null) {
       return (
         <ListGroup.Item key={row.timestamp}>
-          {new Date(row.timestamp).toLocaleDateString()} {row.current_user} отклонил строку "{title}" с комментарием: "{row.description}"
+          {new Date(row.timestamp).toLocaleDateString()} пользователь {row.current_user} отклонил строку "{currentItem.cost_item_name}" с
+          комментарием: "{row.description}"
         </ListGroup.Item>
       );
     }
@@ -638,23 +648,51 @@ export const Application = () => {
     if (row.amount_with_nds !== null && row.approved === true) {
       return (
         <ListGroup.Item key={row.timestamp}>
-          {new Date(row.timestamp).toLocaleDateString()} {row.current_user} согласовал строку "{title}" с изменением цены с{' '}
-          {Number(price).toLocaleString('ru-RU')} на {row.amount_with_nds.toLocaleString('ru-RU')}
+          {new Date(row.timestamp).toLocaleDateString()} пользователь {row.current_user} согласовал строку "{currentItem.cost_item_name}" с изменением
+          цены с {Number(currentItem.amount_with_nds).toLocaleString('ru-RU')} на {row.amount_with_nds.toLocaleString('ru-RU')}
           {row.description ? `, добавив комментарий: '${row.description}'` : '.'}
         </ListGroup.Item>
       );
     }
+
+    return null;
   };
+
   const deleteHandler = (...props) => {
     const selectedUser = props[1];
     setSelectedUser(prev => prev.filter(user => user.value !== selectedUser.value));
   };
+
+  const canBeEdited = () => {
+    return !data?.items?.some(item => item.item_approvals[0]?.approved === true || item.item_approvals[0]?.approved === null);
+  };
+
+  const isThereAccess = () => {
+    const isAgroUser = data?.user_approvals?.some(user => Number(user?.approver) === Number(currentUserID));
+    const isRowApprover = data.items?.some(row => row.item_approvals[0]?.approver === currentUserID);
+    const isCeo = data?.ceo_data?.ceo?.id === currentUserID;
+    const isCreator = data.creator_id === currentUserID;
+
+    return isAgroUser || isRowApprover || isCeo || isCreator || isSecretary;
+  };
+
+  const hasAccess = isThereAccess();
+
+  console.log('hasAccess', hasAccess);
 
   useEffect(() => {
     fetchData();
     getUsers();
     getCeoList();
   }, [id]);
+
+  if (loadingData) {
+    return <Spinner />;
+  }
+
+  if (!loadingData && !hasAccess) {
+    navigate(url.noAccess());
+  }
 
   return (
     <>
@@ -687,6 +725,15 @@ export const Application = () => {
                 <span className="d-block">"{data.agro}"</span>
               </h2>
             </Col>
+            {data.creator_id === currentUserID && (
+              <Col>
+                {canBeEdited() && (
+                  <Button onClick={editToggle} size="sm" variant="outline-secondary">
+                    Редактировать
+                  </Button>
+                )}
+              </Col>
+            )}
             <Col className="col-6 col-md-4 col-lg-3">
               {allItemsApproved ? (
                 !data?.ceo_data && currentUserGroup?.includes('Заявки') ? (
@@ -740,282 +787,305 @@ export const Application = () => {
 
           <Row>
             <Col>
-              <Table responsive className={styles.table} style={{ fontSize: `${print ? '10px' : '14px'}` }}>
-                <thead>
-                  <tr>
-                    <th>№ п/п</th>
-                    <th>Наименование статьи расходов</th>
-                    <th>Сумма, требующая к перечислению, (руб)</th>
-                    <th>Сроки исполнения</th>
-                    <th>Комментарии</th>
-                    <th className={print ? styles.hide : ''}>Файлы</th>
-                    <th className={print ? styles.hide : ''}>Действия</th>
-                    <th>Согласующий в УК</th>
-                    <th>Статус согласования</th>
-                  </tr>
-                  <tr>
-                    <th></th>
-                    <th className="fw-normal fst-italic">1</th>
-                    <th className="fw-normal fst-italic">2</th>
-                    <th className="fw-normal fst-italic">3</th>
-                    <th className="fw-normal fst-italic">4</th>
-                    <th className="fw-normal fst-italic">5</th>
-                    <th className={`${print ? styles.hide : ''} fw-normal fst-italic`}>{print ? '' : 6}</th>
-                    <th className={`${print ? styles.hide : ''} fw-normal fst-italic`}>{print ? '' : 7}</th>
-                    <th className="fw-normal fst-italic">{print ? 6 : 8}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {dataSorting &&
-                    Object.entries(dataSorting).map(([groupName, groupItems]) => (
-                      <React.Fragment key={groupName}>
-                        <tr>
-                          <td style={{ width: '50px' }} className="text-center">
-                            {(rowCount += 1)}
-                          </td>
-                          <td>
-                            <span className="fw-semibold">{groupName}, в т.ч.</span>
-                          </td>
-                          <td className="fw-semibold text-end">{totalInGroupWithNds(groupItems)}</td>
-                          <td colSpan="6"></td>
-                        </tr>
-                        {groupItems.map(row => (
-                          <tr key={groupName + row.id}>
-                            <td className="text-center">{(rowCount += 1)}</td>
+              {isEdit ? (
+                <EditApplicationMode data={data} appID={id} update={fetchData} close={editToggle} />
+              ) : (
+                <Table responsive className={styles.table} style={{ fontSize: `${print ? '10px' : '14px'}` }}>
+                  <thead>
+                    <tr>
+                      <th>№ п/п</th>
+                      <th>Наименование статьи расходов</th>
+                      <th>Сумма, требуемая к перечислению, (руб) c НДС</th>
+                      <th>Сроки исполнения</th>
+                      <th>Комментарии</th>
+                      <th className={print ? styles.hide : ''}>Файлы</th>
+                      <th className={print ? styles.hide : ''}>Действия</th>
+                      <th>Согласующий в УК</th>
+                      <th>Статус согласования</th>
+                    </tr>
+                    <tr>
+                      <th></th>
+                      <th className="fw-normal fst-italic">1</th>
+                      <th className="fw-normal fst-italic">2</th>
+                      <th className="fw-normal fst-italic">3</th>
+                      <th className="fw-normal fst-italic">4</th>
+                      <th className="fw-normal fst-italic">5</th>
+                      <th className={`${print ? styles.hide : ''} fw-normal fst-italic`}>{print ? '' : 6}</th>
+                      <th className={`${print ? styles.hide : ''} fw-normal fst-italic`}>{print ? '' : 7}</th>
+                      <th className="fw-normal fst-italic">{print ? 6 : 8}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {dataSorting &&
+                      Object.entries(dataSorting).map(([groupName, groupItems]) => (
+                        <React.Fragment key={groupName}>
+                          <tr>
+                            <td style={{ width: '50px' }} className="text-center">
+                              {(rowCount += 1)}
+                            </td>
                             <td>
-                              <span className="fst-italic ms-2">{row.cost_item_name}</span>
+                              <span className="fw-semibold">{groupName}, в т.ч.</span>
                             </td>
-                            <td
-                              style={{ width: '130px' }}
-                              className={`${costChangeChek(row) && row?.item_approvals[0]?.approved === false ? styles.edit : ''} text-end`}
-                              onDoubleClick={() => handleDoubleClick(row.id, 'withNds')}
-                            >
-                              {editCell?.rowId === row.id &&
-                              editCell?.field === 'withNds' &&
-                              costChangeChek(row) &&
-                              row?.item_approvals[0]?.approved === false ? (
-                                <AnimatePresence>
-                                  <motion.form
-                                    className={styles.cellsForm}
-                                    initial={{ opacity: 0, visibility: 'hidden' }}
-                                    animate={{ opacity: 1, visibility: 'visible' }}
-                                    exit={{ opacity: 0, visibility: 'hidden' }}
-                                  >
-                                    <label htmlFor={row.id + 'withNds'}>
-                                      <input
-                                        id={row.id + 'withNds'}
-                                        type="number"
-                                        value={editedValue?.amountWithNds || ''}
-                                        onChange={setAmountWithNds}
-                                        ref={el => (inputRefs.current[`${row.id}-withNds`] = el)}
-                                        min="0"
-                                      />
-                                      <div className={styles.btnsGroup}>
-                                        <button
-                                          disabled={editedValue.amountWithNds.length === 0}
-                                          onClick={e => {
-                                            handleSave(e);
-                                            costWithNdsChange(row.id, editedValue.amountWithNds);
-                                          }}
-                                        >
-                                          <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#28ac61">
-                                            <path d="M389-267 195-460l51-52 143 143 325-324 51 51-376 375Z" />
-                                          </svg>
-                                        </button>
-                                        <button onClick={cancelEdit}>
-                                          <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#b82b27">
-                                            <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
-                                          </svg>
-                                        </button>
-                                      </div>
-                                    </label>
-                                  </motion.form>
-                                </AnimatePresence>
-                              ) : (
-                                <AnimatePresence>
-                                  <motion.span
-                                    initial={{ opacity: 0, visibility: 'hidden' }}
-                                    animate={{ opacity: 1, visibility: 'visible' }}
-                                    exit={{ opacity: 0, visibility: 'hidden' }}
-                                  >
-                                    {row.item_approvals[0]?.amount
-                                      ? Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 }).format(row.item_approvals[0]?.amount)
-                                      : Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 }).format(row?.amount_with_nds)}
-                                  </motion.span>
-                                </AnimatePresence>
-                              )}
-                            </td>
-                            <td style={{ width: '100px' }}>{new Date(row.date_end).toLocaleDateString()}</td>
-                            <td>{row.comment}</td>
-                            <td className={print ? styles.hide : ''}>
-                              <ul className=" m-0 p-0" style={{ width: '100px', listStyle: 'none' }}>
-                                {row.files.map(file => (
-                                  <li key={file.id} className="overflow-hidden" style={{ wordWrap: 'normal', textOverflow: 'ellipsis' }}>
-                                    <a className="overflow-hidden" title={file.file_name} target="_blank" rel="noopener noreferrer" href={file.file}>
-                                      {file.file_name}
-                                    </a>
-                                  </li>
-                                ))}
-                              </ul>
-                            </td>
-                            <td className={print ? styles.hide : ''}>
-                              <DropdownButton
-                                size="sm"
-                                title={'Действия'}
-                                variant="outline-primary"
-                                onClick={() => {
-                                  actionPopupToggle(groupName + row.id);
-                                  setRowData(row);
-                                }}
-                                disabled={isDisableBtn(row)}
-                              >
-                                {isSecretary && row.item_approvals.length === 0 && row.need_approve && (
-                                  <Dropdown.Item as={'button'} onClick={() => setActionsData('Добавить согласующего')}>
-                                    Добавить согласующего
-                                  </Dropdown.Item>
-                                )}
-                                {isSecretary && row.item_approvals.length > 0 && row.item_approvals[0]?.approved === false && (
-                                  <Dropdown.Item as={'button'} onClick={() => setActionsData('Убрать согласующего')}>
-                                    Убрать согласующего
-                                  </Dropdown.Item>
-                                )}
-
-                                {isSecretary && row.item_approvals.length === 0 && row.need_approve && (
-                                  <Dropdown.Item as={'button'} onClick={() => withoutApprovalToggle(false, row.id)}>
-                                    Без согласования
-                                  </Dropdown.Item>
-                                )}
-
-                                {isSecretary && !isRowApproved(row) && !row.need_approve && (
-                                  <Dropdown.Item as={'button'} onClick={() => withoutApprovalToggle(true, row.id)}>
-                                    Вернуть согласование
-                                  </Dropdown.Item>
-                                )}
-
-                                {isApprover(row) && !isRowApproved(row) && (
-                                  <Dropdown.Item as={'button'} onClick={() => setActionsData('Согласовать')}>
-                                    Согласовать
-                                  </Dropdown.Item>
-                                )}
-
-                                {isApprover(row) && !isRowApproved(row) && (
-                                  <Dropdown.Item as={'button'} onClick={() => setActionsData('Отклонить')}>
-                                    Отклонить
-                                  </Dropdown.Item>
-                                )}
-
-                                {(isManager || isCeo) && isRowApproved(row) && (
-                                  <Dropdown.Item as={'button'} onClick={() => setActionsData('Пересогласовать')}>
-                                    Пересогласовать
-                                  </Dropdown.Item>
-                                )}
-                              </DropdownButton>
-                            </td>
-                            <td>{showApprovalsInfo(row)}</td>
-                            <td>{showApprovalsStatus(row)}</td>
+                            <td className="fw-semibold text-end">{totalInGroupWithNds(groupItems)}</td>
+                            <td colSpan="6"></td>
                           </tr>
-                        ))}
-                      </React.Fragment>
-                    ))}
-                  <tr>
-                    <td className="text-center">{(rowCount += 1)} </td>
-                    <td>
-                      <span className="fw-bold">Итого:</span>
-                    </td>
-                    <td className="text-end fw-bold">{totalWithNds(data)}</td>
-                    <td colSpan="7"></td>
-                  </tr>
-                </tbody>
-              </Table>
+                          {groupItems.map(row => (
+                            <tr key={groupName + row.id}>
+                              <td className="text-center">{(rowCount += 1)}</td>
+                              <td>
+                                <span className="fst-italic ms-2">{row.cost_item_name}</span>
+                              </td>
+                              <td
+                                style={{ width: '130px' }}
+                                className={`${costChangeChek(row) && row?.item_approvals[0]?.approved === false ? styles.edit : ''} text-end`}
+                                onDoubleClick={() => handleDoubleClick(row.id, 'withNds')}
+                              >
+                                {editCell?.rowId === row.id &&
+                                editCell?.field === 'withNds' &&
+                                costChangeChek(row) &&
+                                row?.item_approvals[0]?.approved === false ? (
+                                  <AnimatePresence>
+                                    <motion.form
+                                      className={styles.cellsForm}
+                                      initial={{ opacity: 0, visibility: 'hidden' }}
+                                      animate={{ opacity: 1, visibility: 'visible' }}
+                                      exit={{ opacity: 0, visibility: 'hidden' }}
+                                    >
+                                      <label htmlFor={row.id + 'withNds'}>
+                                        <input
+                                          id={row.id + 'withNds'}
+                                          type="number"
+                                          value={editedValue?.amountWithNds || ''}
+                                          onChange={setAmountWithNds}
+                                          ref={el => (inputRefs.current[`${row.id}-withNds`] = el)}
+                                          min="0"
+                                        />
+                                        <div className={styles.btnsGroup}>
+                                          <button
+                                            disabled={editedValue.amountWithNds.length === 0}
+                                            onClick={e => {
+                                              handleSave(e);
+                                              costWithNdsChange(row.id, editedValue.amountWithNds);
+                                            }}
+                                          >
+                                            <svg
+                                              xmlns="http://www.w3.org/2000/svg"
+                                              height="20px"
+                                              viewBox="0 -960 960 960"
+                                              width="20px"
+                                              fill="#28ac61"
+                                            >
+                                              <path d="M389-267 195-460l51-52 143 143 325-324 51 51-376 375Z" />
+                                            </svg>
+                                          </button>
+                                          <button onClick={cancelEdit}>
+                                            <svg
+                                              xmlns="http://www.w3.org/2000/svg"
+                                              height="20px"
+                                              viewBox="0 -960 960 960"
+                                              width="20px"
+                                              fill="#b82b27"
+                                            >
+                                              <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
+                                            </svg>
+                                          </button>
+                                        </div>
+                                      </label>
+                                    </motion.form>
+                                  </AnimatePresence>
+                                ) : (
+                                  <AnimatePresence>
+                                    <motion.span
+                                      initial={{ opacity: 0, visibility: 'hidden' }}
+                                      animate={{ opacity: 1, visibility: 'visible' }}
+                                      exit={{ opacity: 0, visibility: 'hidden' }}
+                                    >
+                                      {row?.item_approvals?.length > 0
+                                        ? row.item_approvals[0]?.amount === null
+                                          ? Number(row?.amount_with_nds).toLocaleString('ru-RU')
+                                          : Number(row.item_approvals[0]?.amount).toLocaleString('ru-RU')
+                                        : Number(row?.amount_with_nds).toLocaleString('ru-RU')}
+                                    </motion.span>
+                                  </AnimatePresence>
+                                )}
+                              </td>
+                              <td style={{ width: '100px' }}>{new Date(row.date_end).toLocaleDateString()}</td>
+                              <td>{row.comment}</td>
+                              <td className={print ? styles.hide : ''}>
+                                <ul className=" m-0 p-0" style={{ width: '100px', listStyle: 'none' }}>
+                                  {row.files.map(file => (
+                                    <li key={file.id} className="overflow-hidden" style={{ wordWrap: 'normal', textOverflow: 'ellipsis' }}>
+                                      <a
+                                        className="overflow-hidden"
+                                        title={file.file_name}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        href={file.file}
+                                      >
+                                        {file.file_name}
+                                      </a>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </td>
+                              <td className={print ? styles.hide : ''}>
+                                <DropdownButton
+                                  size="sm"
+                                  title={'Действия'}
+                                  variant="outline-primary"
+                                  onClick={() => {
+                                    actionPopupToggle(groupName + row.id);
+                                    setRowData(row);
+                                  }}
+                                  disabled={isDisableBtn(row)}
+                                >
+                                  {isSecretary && row.item_approvals.length === 0 && row.need_approve && (
+                                    <Dropdown.Item as={'button'} onClick={() => setActionsData('Добавить согласующего')}>
+                                      Добавить согласующего
+                                    </Dropdown.Item>
+                                  )}
+                                  {isSecretary && row.item_approvals.length > 0 && row.item_approvals[0]?.approved === false && (
+                                    <Dropdown.Item as={'button'} onClick={() => setActionsData('Убрать согласующего')}>
+                                      Убрать согласующего
+                                    </Dropdown.Item>
+                                  )}
+
+                                  {isSecretary && row.item_approvals.length === 0 && row.need_approve && (
+                                    <Dropdown.Item as={'button'} onClick={() => withoutApprovalToggle(false, row.id)}>
+                                      Без согласования
+                                    </Dropdown.Item>
+                                  )}
+
+                                  {isSecretary && !isRowApproved(row) && !row.need_approve && (
+                                    <Dropdown.Item as={'button'} onClick={() => withoutApprovalToggle(true, row.id)}>
+                                      Вернуть согласование
+                                    </Dropdown.Item>
+                                  )}
+
+                                  {isApprover(row) && !isRowApproved(row) && (
+                                    <Dropdown.Item as={'button'} onClick={() => setActionsData('Согласовать')}>
+                                      Согласовать
+                                    </Dropdown.Item>
+                                  )}
+
+                                  {isApprover(row) && !isRowApproved(row) && (
+                                    <Dropdown.Item as={'button'} onClick={() => setActionsData('Отклонить')}>
+                                      Отклонить
+                                    </Dropdown.Item>
+                                  )}
+
+                                  {(isManager || isCeo) && isRowApproved(row) && (
+                                    <Dropdown.Item as={'button'} onClick={() => setActionsData('Пересогласовать')}>
+                                      Пересогласовать
+                                    </Dropdown.Item>
+                                  )}
+                                </DropdownButton>
+                              </td>
+                              <td>{showApprovalsInfo(row)}</td>
+                              <td>{showApprovalsStatus(row)}</td>
+                            </tr>
+                          ))}
+                        </React.Fragment>
+                      ))}
+                    <tr>
+                      <td className="text-center">{(rowCount += 1)} </td>
+                      <td>
+                        <span className="fw-bold">Итого:</span>
+                      </td>
+                      <td className="text-end fw-bold">{totalWithNds(data)}</td>
+                      <td colSpan="7"></td>
+                    </tr>
+                  </tbody>
+                </Table>
+              )}
             </Col>
           </Row>
 
-          <Row>
-            <Col className="col-4">
-              <Table className={styles.agroTable} style={{ fontSize: `${print ? '10px' : '14px'}` }}>
-                <thead>
-                  <tr>
-                    <th>Список согласующих</th>
-                    <th>Информация</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.user_approvals &&
-                    data.user_approvals.map(user => (
-                      <tr key={user.id}>
-                        <td>
-                          <span> {user?.approver_name}</span>
-                          <span className="d-block">{user.approver_post}</span>
-                        </td>
-                        <td>{verificationOfApproval(user)}</td>
-                      </tr>
-                    ))}
-                </tbody>
-              </Table>
-            </Col>
-
-            <Col sm={4}>
-              {data.managers_approvals ? (
+          {!isEdit && (
+            <Row>
+              <Col className="col-4">
                 <Table className={styles.agroTable} style={{ fontSize: `${print ? '10px' : '14px'}` }}>
                   <thead>
                     <tr>
-                      <th>Руководители отделов</th>
+                      <th>Список согласующих</th>
                       <th>Информация</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {data.managers_approvals.map(user => (
-                      <tr key={user.id}>
-                        <td>
-                          <span> {user?.manager_name}</span>
-                          <span className="d-block">{user.manager_post}</span>
-                        </td>
-                        <td>{verificationOfManager(user)}</td>
-                      </tr>
-                    ))}
+                    {data.user_approvals &&
+                      data.user_approvals.map(user => (
+                        <tr key={user.id}>
+                          <td>
+                            <span> {user?.approver_name}</span>
+                            <span className="d-block">{user.approver_post}</span>
+                          </td>
+                          <td>{verificationOfApproval(user)}</td>
+                        </tr>
+                      ))}
                   </tbody>
                 </Table>
-              ) : null}
-            </Col>
-            {isSecretary && (
-              <Col sm={2} className={print ? styles.hide : ''}>
-                <Button
-                  className="mb-2"
-                  variant="outline-success"
-                  onClick={() => setAction('addManagers')}
-                  size="sm"
-                  style={{ width: '175px', textAlign: 'left' }}
-                  disabled={data.approved_by_ceo}
-                >
-                  Добавить руководителя
-                </Button>
-                <Button
-                  variant="outline-danger"
-                  onClick={() => setAction('removeManagers')}
-                  size="sm"
-                  style={{ width: '175px', textAlign: 'left' }}
-                  disabled={data.managers_approvals?.every(managers => managers.approved !== false)}
-                >
-                  Убрать руководителя
-                </Button>
               </Col>
-            )}
-          </Row>
+
+              <Col sm={4}>
+                {data.managers_approvals ? (
+                  <Table className={styles.agroTable} style={{ fontSize: `${print ? '10px' : '14px'}` }}>
+                    <thead>
+                      <tr>
+                        <th>Руководители отделов</th>
+                        <th>Информация</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {data.managers_approvals.map(user => (
+                        <tr key={user.id}>
+                          <td>
+                            <span> {user?.manager_name}</span>
+                            <span className="d-block">{user.manager_post}</span>
+                          </td>
+                          <td>{verificationOfManager(user)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                ) : null}
+              </Col>
+              {isSecretary && (
+                <Col sm={2} className={print ? styles.hide : ''}>
+                  <Button
+                    className="mb-2"
+                    variant="outline-success"
+                    onClick={() => setAction('addManagers')}
+                    size="sm"
+                    style={{ width: '175px', textAlign: 'left' }}
+                    disabled={data.approved_by_ceo}
+                  >
+                    Добавить руководителя
+                  </Button>
+                  <Button
+                    variant="outline-danger"
+                    onClick={() => setAction('removeManagers')}
+                    size="sm"
+                    style={{ width: '175px', textAlign: 'left' }}
+                    disabled={data.managers_approvals?.every(managers => managers.approved !== false)}
+                  >
+                    Убрать руководителя
+                  </Button>
+                </Col>
+              )}
+            </Row>
+          )}
         </div>
 
-        <Accordion flush className="mb-3">
-          <Accordion.Item eventKey="0">
-            <Accordion.Header>Протокол изменений</Accordion.Header>
-            <Accordion.Body>
-              <ListGroup>
-                {data?.items?.map(item => {
-                  const approvals = item.item_approvals[0];
-                  return approvals?.application_item_history?.map(el => protocolDescription(el, item.cost_item_name, item.amount_with_nds));
-                })}
-              </ListGroup>
-            </Accordion.Body>
-          </Accordion.Item>
-        </Accordion>
+        {!isEdit && (
+          <Accordion flush className="mb-3">
+            <Accordion.Item eventKey="0">
+              <Accordion.Header>Протокол изменений</Accordion.Header>
+              <Accordion.Body>
+                <ListGroup>{data?.item_approvals_history?.length > 0 && data?.item_approvals_history.map(el => protocolDescription(el))}</ListGroup>
+              </Accordion.Body>
+            </Accordion.Item>
+          </Accordion>
+        )}
       </Container>
 
       <Modal show={isConfirm} onHide={confirmToggleBtn}>

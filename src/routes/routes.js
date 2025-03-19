@@ -16,6 +16,7 @@ export const url = {
   chemistry: () => '/chemistry',
   chemistryAdd: () => '/chemistry/add',
   maps: () => '/maps',
+  noAccess: () => '/no-access',
 };
 
 export const links = {
@@ -59,6 +60,7 @@ export const applicationUrl = {
   approve: id => [apiPath, 'edo', 'applications', id, 'approve/'].join('/'),
   actionsWithRow: () => [apiPath, 'edo', 'application-items/'].join('/'),
   approveByCeo: id => [apiPath, 'edo', 'applications', id, 'approve-ceo/'].join('/'),
+  editApplication: id => [apiPath, 'edo', 'applications', id, 'edit/'].join('/'),
 };
 
 export const applicationActionsUrl = {

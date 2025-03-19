@@ -12,6 +12,11 @@ import { getData } from '../../api/getData';
 import { links, payment } from '../../routes/routes.js';
 import { userSelectors } from '../../store/selectors/userSelectors.js';
 
+const groupType = [
+  { id: 1, name: 'Экономисты' },
+  { id: 2, name: 'Бухгалтерия' },
+];
+
 export const CreatePayment = () => {
   const currentUserID = useSelector(userSelectors).data.user.id;
   const [state, setState] = useState({
@@ -25,9 +30,12 @@ export const CreatePayment = () => {
     date: '',
     ceo: '',
     bank: '',
+    bankFrom: '',
     amount_str: '',
     creator: currentUserID,
+    type: '',
     reference: '',
+
     files: [],
   });
   const [banksList, setBanksList] = useState([]);
@@ -148,7 +156,8 @@ export const CreatePayment = () => {
       formData.append('amount', state.amount);
       formData.append('date', state.date);
       formData.append('ceo', state.ceo);
-      formData.append('bank', state.bank);
+      formData.append('bank_to', state.bank);
+      formData.append('bank_from', state.bankFrom);
       formData.append('amount_str', state.amount_str);
       formData.append('creator', state.creator);
       formData.append('reference', state.reference);
@@ -183,25 +192,22 @@ export const CreatePayment = () => {
       <Row>
         <Col md={12}>
           <Form onSubmit={addPayment}>
-            {/* <Form.Group className="d-flex align-items-center column-gap-2 justify-content-end mb-3">
-              <Form.Label className="m-0">Выберите согласующего</Form.Label>
-              <Col sm={5}>
-                <Form.Select onChange={e => selectChange('ceo', e)} value={state.ceo} required>
-                  <option value=""></option>
-                  {ceo.map(el => (
+            <Form.Group as={Row} className="mb-3 align-items-center">
+              <Form.Label className="fw-bold" column sm={5} xl={4} md={4} htmlFor="payer_name">
+                Наименование предприятия-плательщика
+              </Form.Label>
+              <Col sm={4} xl={6}>
+                <Form.Control id="payer_name" value={state.payer} type="text" onChange={e => inputHandler('payer_name', e)} required />
+              </Col>
+              <Col xl={2} md={4} sm={2}>
+                <Form.Select required onChange={e => selectChange('bankFrom', e)} value={state.bankFrom}>
+                  <option value="">Выберите банк</option>
+                  {banksList.map(el => (
                     <option value={el.id} key={el.id}>
-                      {el.full_name}
+                      {el.name}
                     </option>
                   ))}
                 </Form.Select>
-              </Col>
-            </Form.Group> */}
-            <Form.Group as={Row} className="mb-3">
-              <Form.Label className="fw-bold" column sm={5} htmlFor="payer_name">
-                Наименование предприятия-плательщика
-              </Form.Label>
-              <Col sm={6}>
-                <Form.Control id="payer_name" value={state.payer} type="text" onChange={e => inputHandler('payer_name', e)} required />
               </Col>
             </Form.Group>
 
@@ -222,7 +228,7 @@ export const CreatePayment = () => {
                   Наименование предприятия-получателя денежных средств
                 </Form.Label>
               </Col>
-              <Col sm={4}>
+              <Col xl={2} md={4} sm={2}>
                 <Form.Select required onChange={e => selectChange('bank', e)} value={state.bank}>
                   <option value="">Выберите банк</option>
                   {banksList.map(el => (
@@ -289,11 +295,27 @@ export const CreatePayment = () => {
             </Form.Group>
 
             <Form.Group as={Row} className="mb-3">
-              <Form.Label column sm={2} lg={1} htmlFor="reference">
+              <Form.Label column sm={2} lg={1} htmlFor="reference" className="fw-bold">
                 Справочно:
               </Form.Label>
               <Col>
                 <Form.Control id="reference" type="text" value={state.reference} onChange={e => inputHandler('reference', e)} />
+              </Col>
+            </Form.Group>
+
+            <Form.Group as={Row} className="mb-3">
+              <Form.Label column sm={2} lg={1} htmlFor="type" className="fw-bold">
+                Группа:
+              </Form.Label>
+              <Col sm={2}>
+                <Form.Select id="type" value={state.type} onChange={e => inputHandler('type', e)} required>
+                  <option value="">Выбор группы</option>
+                  {groupType.map(el => (
+                    <option value={el.name} key={el.id}>
+                      {el.name}
+                    </option>
+                  ))}
+                </Form.Select>
               </Col>
             </Form.Group>
 

@@ -20,6 +20,7 @@ import { Maps } from './Pages/Maps.jsx';
 import { Create } from './Components/Applications/Create/Create.jsx';
 import { CreatePayment } from './Components/Payment/CreatePayment.jsx';
 import { PaymentItem } from './Components/Payment/PaymentItem.jsx';
+import { AccessDenied } from './Pages/NotAccess.jsx';
 
 function App() {
   return (
@@ -53,6 +54,7 @@ function App() {
         <Route path={url.support()} element={<Support />} />
         <Route path={url.error()} element={<ErrorPage />} />
         <Route path={url.notFound()} element={<NotFound />} />
+        <Route path={url.noAccess()} element={<AccessDenied />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>

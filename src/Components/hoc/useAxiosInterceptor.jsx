@@ -5,11 +5,26 @@ import { useNavigate } from 'react-router-dom';
 export const useAxiosInterceptor = () => {
   const navigate = useNavigate();
 
-  const axiosInstance = axios.create({});
+  const axiosInstance = axios.create();
+
+  axiosInstance.interceptors.request.use(
+    config => {
+      console.log('Запрос отправлен:', config.url);
+      return config;
+    },
+    error => {
+      console.error('Ошибка при отправке запроса:', error);
+      return Promise.reject(error);
+    },
+  );
 
   axiosInstance.interceptors.response.use(
-    response => response,
+    response => {
+      console.log('Ответ получен:', response.config.url);
+      return response;
+    },
     error => {
+      console.error('Ошибка при получении ответа:', error);
       if (axios.isCancel(error)) {
         console.log('Запрос был отменен', error.message);
         navigate(url.error());
@@ -27,6 +42,7 @@ export const useAxiosInterceptor = () => {
           navigate(url.error());
         }
       } else {
+        console.error('Ошибка без ответа от сервера:', error);
         navigate(url.error());
       }
 
