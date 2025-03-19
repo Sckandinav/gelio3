@@ -35,9 +35,12 @@ export const CreatePayment = () => {
     creator: currentUserID,
     type: '',
     reference: '',
+    details: '',
 
     files: [],
   });
+
+  console.log('state', state);
   const [banksList, setBanksList] = useState([]);
   const [users, setUsers] = useState([]);
 
@@ -161,6 +164,8 @@ export const CreatePayment = () => {
       formData.append('amount_str', state.amount_str);
       formData.append('creator', state.creator);
       formData.append('reference', state.reference);
+      formData.append('type', state.type);
+      formData.append('details', state.details);
       state.signatories.forEach(user => {
         formData.append('signatories', user.value);
       });
@@ -266,8 +271,17 @@ export const CreatePayment = () => {
               <Form.Label className="fw-bold" column xl={1} sm={2} htmlFor="beneficiary">
                 За кого
               </Form.Label>
-              <Col sm={5}>
-                <Form.Control id="beneficiary" type="text" value={state.beneficiary} onChange={e => inputHandler('beneficiary', e)} required />
+              <Col sm={10}>
+                <Form.Control id="beneficiary" type="text" value={state.beneficiary} onChange={e => inputHandler('beneficiary', e)} />
+              </Col>
+            </Form.Group>
+
+            <Form.Group as={Row} className="mb-3 align-items-center">
+              <Form.Label className="fw-bold" column xl={2} lg={3} md={3} htmlFor="details">
+                № и дата договора взаиморасчетов
+              </Form.Label>
+              <Col>
+                <Form.Control id="details" type="text" value={state.details} onChange={e => inputHandler('details', e)} />
               </Col>
             </Form.Group>
 
@@ -295,7 +309,7 @@ export const CreatePayment = () => {
             </Form.Group>
 
             <Form.Group as={Row} className="mb-3">
-              <Form.Label column sm={2} lg={1} htmlFor="reference" className="fw-bold">
+              <Form.Label column sm={2} lg={2} htmlFor="reference" className="fw-bold">
                 Справочно:
               </Form.Label>
               <Col>
@@ -307,11 +321,11 @@ export const CreatePayment = () => {
               <Form.Label column sm={2} lg={1} htmlFor="type" className="fw-bold">
                 Группа:
               </Form.Label>
-              <Col sm={2}>
+              <Col lg={3} md={4} sm={5}>
                 <Form.Select id="type" value={state.type} onChange={e => inputHandler('type', e)} required>
                   <option value="">Выбор группы</option>
                   {groupType.map(el => (
-                    <option value={el.name} key={el.id}>
+                    <option value={el.id} key={el.id}>
                       {el.name}
                     </option>
                   ))}

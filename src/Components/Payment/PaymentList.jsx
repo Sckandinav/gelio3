@@ -23,6 +23,13 @@ export const PaymentList = ({ data, title }) => {
     return date.getTime();
   };
 
+  const nameFormate = str => {
+    if (str) {
+      const [surname, name, patronymic] = str?.split(' ');
+      return `${surname} ${name[0]}.${patronymic[0]}.`;
+    }
+  };
+
   const columns = [
     {
       name: '',
@@ -46,9 +53,10 @@ export const PaymentList = ({ data, title }) => {
       sortable: true,
       cell: row => <Link to={`/payment/${row.id}`}>{row.title}</Link>,
     },
+    { name: 'Банк плательщика', selector: row => row.bank_from, sortable: true },
 
     { name: 'Кому', selector: row => row.beneficiary, sortable: true },
-    { name: 'Банк', selector: row => row.bank, sortable: true },
+    { name: 'Банк получателя', selector: row => row.bank_to, sortable: true },
     {
       name: 'Сумма',
       selector: row => row.amount,
@@ -59,6 +67,7 @@ export const PaymentList = ({ data, title }) => {
           maximumFractionDigits: 2,
         }),
     },
+    { name: 'Создатель', selector: row => nameFormate(row.creator), sortable: true },
     { name: 'Дата создания', selector: row => dateFormate(row.date), cell: row => row.date, sortable: true },
     {
       name: 'Одобрено руководителем',
@@ -85,9 +94,11 @@ export const PaymentList = ({ data, title }) => {
     id: row.id,
     number: row.id,
     title: row.payer_name,
+    bank_from: row.bank_from,
     beneficiary: row.beneficiary,
-    bank: row.bank,
+    bank_to: row.bank_to,
     amount: row.amount,
+    creator: row.creator.full_name,
     date: new Date(row.created_at).toLocaleString(),
     signed: statusCheck(row.users_signed),
     ceo: statusCheck(row.is_ceo_signed),

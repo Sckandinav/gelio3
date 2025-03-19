@@ -129,6 +129,21 @@ export const PaymentItem = () => {
     }
   };
 
+  const needCeoToggle = async value => {
+    try {
+      await axiosInstance.patch(
+        payment.paymentID(id),
+        { need_ceo_approve: value },
+        { headers: { 'Content-Type': 'application/json', Authorization: `Token ${token}` } },
+      );
+      dispatch(showSuccess(value ? 'Согласование ген. дир-а не требуется' : 'Требуется согласование ген. дир-а'));
+      getPayment();
+    } catch (error) {
+      console.log('error');
+      dispatch(showError('Не удалось выполнить действие'));
+    }
+  };
+
   const getUser = async () => {
     try {
       const res = await getData(links.getUsers(), axiosInstance);
@@ -191,11 +206,11 @@ export const PaymentItem = () => {
         { ceo: selectedCeo },
         { headers: { 'Content-Type': 'application/json', Authorization: `Token ${token}` } },
       );
-      dispatch(showSuccess('ГД назначен'));
+      dispatch(showSuccess('ген. дир. назначен'));
       modalToggle('seo');
       getPayment();
     } catch (error) {
-      dispatch(showError('Не удалось переназначить ГД'));
+      dispatch(showError('Не удалось переназначить ген. дир-а'));
       console.log(error);
     }
   };
@@ -315,20 +330,34 @@ export const PaymentItem = () => {
                 </Button>
                 {data.ceo && (
                   <Button size="sm" onClick={() => modalToggle('seo')}>
-                    Переназначить ГД
+                    Переназначить ген. дир-а
                   </Button>
                 )}
 
-                {!data.ceo && (
-                  <Button size="sm" onClick={() => modalToggle('seo')} disabled={!isAllSignet}>
-                    Назначить ГД
+                {!data.ceo && data.need_ceo_approve && (
+                  <Button className="me-2" size="sm" onClick={() => modalToggle('seo')} disabled={!isAllSignet}>
+                    Назначить ген. дир-а
+                  </Button>
+                )}
+                {data.need_ceo_approve && (
+                  <Button size="sm" onClick={() => needCeoToggle(false)} disabled={!isAllSignet}>
+                    Без согласования ген. дир-а
+                  </Button>
+                )}
+                {!data.need_ceo_approve && (
+                  <Button size="sm" onClick={() => needCeoToggle(true)}>
+                    C согласованием ген. дир-а
                   </Button>
                 )}
               </Col>
             )}
 
             <Col xl={3} lg={3} md={4} sm={6}>
-              {data.ceo ? (
+              {!data.need_ceo_approve ? (
+                <Alert variant="light">
+                  <p className="m-0 p-0">Не требуется согласование с ген. дир-ом</p>
+                </Alert>
+              ) : data.ceo ? (
                 <Alert variant="light">
                   <p className="m-0 p-0">Статус: {ceoActionStatus()} </p>
                   <p className="m-0 p-0">{data?.ceo?.user_post_departament[0]?.post_name}</p>
@@ -468,11 +497,11 @@ export const PaymentItem = () => {
             }}
           >
             <Modal.Header closeButton>
-              <Modal.Title>Назначение ГД</Modal.Title>
+              <Modal.Title>Назначение ген. дир-а</Modal.Title>
             </Modal.Header>
             <Modal.Body>
               <Form.Select value={selectedCeo} onChange={e => setSelectedCeo(e.target.value)}>
-                <option value="">Выбор ГД</option>
+                <option value="">Выбор ген. дир-а</option>
                 {ceo.map(user => (
                   <option key={user.id} value={user.id}>
                     {user.full_name}
