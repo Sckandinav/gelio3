@@ -17,6 +17,8 @@ export const url = {
   chemistryAdd: () => '/chemistry/add',
   maps: () => '/maps',
   noAccess: () => '/no-access',
+  seeds: () => '/seeds',
+  seedsAdd: () => '/seeds/add',
 };
 
 export const links = {
@@ -108,4 +110,13 @@ export const payment = {
   removeSigners: id => [apiPath, 'edo', 'payment-request-signatures', `${id}/`].join('/'),
   signetRow: id => [apiPath, 'edo', 'payment-request-signatures', `${id}/`].join('/'),
   signetCeo: () => [apiPath, 'edo', 'payment-request-signatures/'].join('/'),
+};
+
+export const seeds = {
+  seeds: () => [apiPath, 'chemicals', 'seeds/'].join('/'), //это партии семян
+  certificates: () => [apiPath, 'chemicals', 'seeds-documents/'].join('/'), //это сертификаты  семян
+  sorts: () => [apiPath, 'maps', 'sorts/'].join('/'), //это сорта семян
+  generations: () => [apiPath, 'maps', 'generations/'].join('/'), // поколения семян
+  deleteSeeds: () => [apiPath, 'chemicals', 'seeds', 'bulk-delete/'].join('/'),
+  deleteCertificates: () => [apiPath, 'chemicals', 'seeds-documents', 'bulk-delete/'].join('/'),
 };

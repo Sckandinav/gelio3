@@ -21,6 +21,9 @@ import { Create } from './Components/Applications/Create/Create.jsx';
 import { CreatePayment } from './Components/Payment/CreatePayment.jsx';
 import { PaymentItem } from './Components/Payment/PaymentItem.jsx';
 import { AccessDenied } from './Pages/NotAccess.jsx';
+import { SeedsPages } from './Pages/SeedsPages.jsx';
+import { SeedsAdd } from './Components/Seeds/SeedsAdd.jsx';
+import { SeedsItem } from './Components/Seeds/SeedsItem.jsx';
 
 function App() {
   return (
@@ -50,6 +53,10 @@ function App() {
 
         <Route path={url.chemistry()} element={<Chemistry />} />
         <Route path={url.chemistryAdd()} element={<CreationPesticide />} />
+        <Route path={url.seeds()} element={<SeedsPages />} />
+        <Route path={`${url.seeds()}/:id`} element={<SeedsItem />} />
+        <Route path={url.seedsAdd()} element={<SeedsAdd />} />
+
         <Route path={url.maps()} element={<Maps />} />
         <Route path={url.support()} element={<Support />} />
         <Route path={url.error()} element={<ErrorPage />} />

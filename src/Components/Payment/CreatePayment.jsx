@@ -209,7 +209,7 @@ export const CreatePayment = () => {
                 <Form.Control id="payer_name" value={state.payer} type="text" onChange={e => inputHandler('payer_name', e)} required />
               </Col>
               <Col xl={2} md={4} sm={2}>
-                <Form.Select required onChange={e => selectChange('bankFrom', e)} value={state.bankFrom}>
+                <Form.Select onChange={e => selectChange('bankFrom', e)} value={state.bankFrom}>
                   <option value="">Выберите банк</option>
                   {banksList.map(el => (
                     <option value={el.id} key={el.id}>
@@ -238,7 +238,7 @@ export const CreatePayment = () => {
                 </Form.Label>
               </Col>
               <Col xl={2} md={4} sm={2}>
-                <Form.Select required onChange={e => selectChange('bank', e)} value={state.bank}>
+                <Form.Select onChange={e => selectChange('bank', e)} value={state.bank}>
                   <option value="">Выберите банк</option>
                   {banksList.map(el => (
                     <option value={el.id} key={el.id}>

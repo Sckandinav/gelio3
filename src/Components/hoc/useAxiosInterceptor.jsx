@@ -38,6 +38,8 @@ export const useAxiosInterceptor = () => {
           navigate(url.login());
         } else if (status === 404) {
           navigate(url.notFound());
+        } else if (status === 409) {
+          return Promise.reject(error);
         } else {
           navigate(url.error());
         }

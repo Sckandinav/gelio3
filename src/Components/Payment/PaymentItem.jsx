@@ -27,8 +27,8 @@ export const PaymentItem = () => {
     rowSignConfirm: false,
     ceoSignConfirm: false,
   });
+  const [banks, setBanks] = useState([]);
   const [printerLoader, setPrinterLoader] = useState(false);
-
   const [selected, setSelected] = useState([]);
   const { id } = useParams();
   const navigate = useNavigate();
@@ -56,6 +56,10 @@ export const PaymentItem = () => {
   const isCreator = +currentUserID === +data?.creator?.id;
 
   const isAllSignet = data.signatories?.every(user => user.is_signed);
+
+  const stateHandler = (key, value) => {
+    setData(prev => ({ ...prev, [key]: value }));
+  };
 
   //PDF
   const contentRef = useRef(null);
@@ -154,6 +158,15 @@ export const PaymentItem = () => {
         post: el.user_post_departament.length > 0 ? el.user_post_departament[0].post_name : null,
       }));
       setUsers(option);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getBanks = async () => {
+    try {
+      const res = await getData(payment.getBanks(), axiosInstance);
+      setBanks(res);
     } catch (error) {
       console.log(error);
     }
@@ -298,9 +311,10 @@ export const PaymentItem = () => {
   };
 
   useEffect(() => {
-    getPayment();
     getUser();
     getCeo();
+    getBanks();
+    getPayment();
   }, []);
 
   if (isLoading) {
@@ -384,12 +398,40 @@ export const PaymentItem = () => {
                 <tbody>
                   <tr>
                     <td className="fw-semibold">Наименование предприятия-плательщика</td>
-                    <td colSpan={2}>{data.payer_name}</td>
+                    <td colSpan={2}>
+                      <Row className="align-items-center">
+                        <Col>{data.payer_name}</Col>
+                        <Col xl={3}>
+                          <Form.Select value={data.bank_from} onChange={e => stateHandler('bank_from', e.target.value)}>
+                            <option value="">Выберите банк</option>
+                            {banks.map(el => (
+                              <option value={el.id} key={el.id}>
+                                {el.name}
+                              </option>
+                            ))}
+                          </Form.Select>
+                        </Col>
+                      </Row>
+                    </td>
                   </tr>
 
                   <tr>
                     <td className="fw-semibold">Кому</td>
-                    <td colSpan={2}>{data.payer_to}</td>
+                    <td colSpan={2}>
+                      <Row className="align-items-center">
+                        <Col>{data.payer_to}</Col>
+                        <Col xl={3}>
+                          <Form.Select value={data.bank_to} onChange={e => stateHandler('bank_to', e.target.value)}>
+                            <option value="">Выберите банк</option>
+                            {banks.map(el => (
+                              <option value={el.id} key={el.id}>
+                                {el.name}
+                              </option>
+                            ))}
+                          </Form.Select>
+                        </Col>
+                      </Row>
+                    </td>
                   </tr>
                   <tr>
                     <td className="fw-semibold">№ счета(договора)</td>

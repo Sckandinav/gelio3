@@ -672,13 +672,12 @@ export const Application = () => {
     const isRowApprover = data.items?.some(row => row.item_approvals[0]?.approver === currentUserID);
     const isCeo = data?.ceo_data?.ceo?.id === currentUserID;
     const isCreator = data.creator_id === currentUserID;
+    const isManager = data.managers_approvals.some(user => Number(user.manager) === Number(currentUserID));
 
-    return isAgroUser || isRowApprover || isCeo || isCreator || isSecretary;
+    return isAgroUser || isRowApprover || isCeo || isCreator || isSecretary || isManager;
   };
 
   const hasAccess = isThereAccess();
-
-  console.log('hasAccess', hasAccess);
 
   useEffect(() => {
     fetchData();

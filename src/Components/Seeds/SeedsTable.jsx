@@ -10,13 +10,11 @@ const paginationOptions = {
   selectAllRowsItemText: 'Все',
 };
 
-export const PesticideTable = ({ columns, data, addBtnClick, deleteBtnClick, handleSelectedRowsChange, selectedRows }) => {
+export const SeedsTable = ({ columns, data, addBtnClick, deleteBtnClick, handleSelectedRowsChange, selectedRows, isAddBtn = false }) => {
   const [searchText, setSearchText] = useState('');
-
   const filteredData = data.filter(item => {
     return Object.keys(item).some(key => item[key]?.toString().toLowerCase()?.includes(searchText.toLowerCase()));
   });
-
   return (
     <>
       <Row className="mb-3 ">
@@ -31,10 +29,12 @@ export const PesticideTable = ({ columns, data, addBtnClick, deleteBtnClick, han
         </Col>
 
         <Col className="text-end">
-          <Button className="me-3" variant="outline-success" size="sm" onClick={addBtnClick}>
-            Добавить
-          </Button>
-          <Button variant="outline-danger" size="sm" disabled={selectedRows.length === 0} onClick={deleteBtnClick}>
+          {isAddBtn && (
+            <Button className="me-3" variant="outline-success" size="sm" onClick={addBtnClick}>
+              Добавить
+            </Button>
+          )}
+          <Button variant="outline-danger" size="sm" disabled={selectedRows?.length === 0} onClick={deleteBtnClick}>
             Удалить
           </Button>
         </Col>

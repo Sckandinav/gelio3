@@ -74,7 +74,7 @@ const initialMenuList = [
     group: 'Агрономы',
     subMenuLists: [
       { title: 'Химия', to: 'chemistry', className: 'btn btn-outline-success d-flex align-items-center mx-3 mt-1' },
-      // { title: 'Семена', to: '/' },
+      { title: 'Семена', to: 'seeds', className: 'btn btn-outline-success d-flex align-items-center mx-3 mt-1' },
       // { title: 'Препараты', to: '/' },
     ],
   },
