@@ -669,10 +669,10 @@ export const Application = () => {
 
   const isThereAccess = () => {
     const isAgroUser = data?.user_approvals?.some(user => Number(user?.approver) === Number(currentUserID));
-    const isRowApprover = data.items?.some(row => row.item_approvals[0]?.approver === currentUserID);
+    const isRowApprover = data?.items?.some(row => row.item_approvals[0]?.approver === currentUserID);
     const isCeo = data?.ceo_data?.ceo?.id === currentUserID;
-    const isCreator = data.creator_id === currentUserID;
-    const isManager = data.managers_approvals?.some(user => Number(user.manager) === Number(currentUserID));
+    const isCreator = data?.creator_id === currentUserID;
+    const isManager = data?.managers_approvals?.some(user => Number(user.manager) === Number(currentUserID));
 
     return isAgroUser || isRowApprover || isCeo || isCreator || isSecretary || isManager;
   };
