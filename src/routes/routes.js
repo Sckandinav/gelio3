@@ -15,6 +15,7 @@ export const url = {
   paymentAdd: () => '/payment/add',
   chemistry: () => '/chemistry',
   chemistryAdd: () => '/chemistry/add',
+  chemistryPesticideItem: () => '/chemistry/pesticide',
   maps: () => '/maps',
   noAccess: () => '/no-access',
   seeds: () => '/seeds',

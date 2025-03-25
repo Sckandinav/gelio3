@@ -139,20 +139,6 @@ export const SeedsAdd = () => {
                     ))}
                   </Form.Select>
                 </Col>
-
-                <Col sm={2}>
-                  <Button title="Редактировать" className="actionBtn">
-                    <FaRegEdit size={20} color="#0d6efd" />
-                  </Button>
-
-                  <Button title="Добавить новый элемент" className="actionBtn mx-2">
-                    <IoMdAddCircleOutline size={20} color="#198754" />
-                  </Button>
-
-                  <Button title="Удалить выбранный элемент" className="actionBtn" disabled={selected.organization === ''}>
-                    <IoMdRemoveCircleOutline size={20} color="#dc3545" />
-                  </Button>
-                </Col>
               </Form.Group>
 
               <InputElem
@@ -177,20 +163,6 @@ export const SeedsAdd = () => {
                       </option>
                     ))}
                   </Form.Select>
-                </Col>
-
-                <Col sm={2}>
-                  <Button title="Редактировать" className="actionBtn">
-                    <FaRegEdit size={20} color="#0d6efd" />
-                  </Button>
-
-                  <Button title="Добавить новый элемент" className="actionBtn mx-2">
-                    <IoMdAddCircleOutline size={20} color="#198754" />
-                  </Button>
-
-                  <Button title="Удалить выбранный элемент" className="actionBtn" disabled={selected.organization === ''}>
-                    <IoMdRemoveCircleOutline size={20} color="#dc3545" />
-                  </Button>
                 </Col>
               </Form.Group>
 

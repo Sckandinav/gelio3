@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Button, Form, Spinner } from 'react-bootstrap';
-import { FaRegEdit } from 'react-icons/fa';
-import { IoMdAddCircleOutline, IoMdRemoveCircleOutline } from 'react-icons/io';
+import { IoMdRemoveCircleOutline } from 'react-icons/io';
 import { useDispatch } from 'react-redux';
 
 import { useAxiosInterceptor } from '../hoc/useAxiosInterceptor';
@@ -62,7 +61,7 @@ export const SeedsItem = () => {
           weight_1000: '',
           germination: '',
           purity: '',
-          seed_id: data.id,
+          seed: data.id,
         },
       ],
     }));
@@ -97,10 +96,12 @@ export const SeedsItem = () => {
     setIsLoading(prev => ({ ...prev, sendData: true }));
     const dataToSend = { ...data };
     dataToSend.sortid = dataToSend.sortid.value;
+    dataToSend.generationid = dataToSend?.generationid?.id ? dataToSend.generationid.id : dataToSend.generationid;
+    dataToSend.agroid = dataToSend?.agroid?.id ? dataToSend.agroid?.id : dataToSend?.agroid;
 
     try {
       await axiosInstance.put(
-        `${seeds.seeds()}${id}`,
+        `${seeds.seeds()}${id}/`,
         { ...dataToSend },
         {
           headers: {
@@ -177,20 +178,6 @@ export const SeedsItem = () => {
                       </option>
                     ))}
                   </Form.Select>
-                </Col>
-
-                <Col sm={2}>
-                  <Button title="Редактировать" className="actionBtn">
-                    <FaRegEdit size={20} color="#0d6efd" />
-                  </Button>
-
-                  <Button title="Добавить новый элемент" className="actionBtn mx-2">
-                    <IoMdAddCircleOutline size={20} color="#198754" />
-                  </Button>
-
-                  <Button title="Удалить выбранный элемент" className="actionBtn">
-                    <IoMdRemoveCircleOutline size={20} color="#dc3545" />
-                  </Button>
                 </Col>
               </Form.Group>
 
@@ -305,7 +292,7 @@ export const SeedsItem = () => {
                     <Spinner animation="border" variant="success" />
                   ) : (
                     <Button variant="outline-success" size="sm" type="submit">
-                      Создать
+                      Сохранить
                     </Button>
                   )}
                 </Col>

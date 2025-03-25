@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Tabs, Tab, Container, Row, Col, Modal, Button, Form } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 
 import { useAxiosInterceptor } from '../Components/hoc/useAxiosInterceptor';
@@ -70,6 +70,7 @@ export const Chemistry = () => {
       name: 'Название препарата',
       selector: row => row.name,
       sortable: true,
+      cell: row => <Link to={`${url.chemistryPesticideItem()}/${row.id}`}>{row.name}</Link>,
     },
     {
       name: 'Группа пестицидов',

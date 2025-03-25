@@ -86,6 +86,7 @@ const initialMenuList = [
   //   img: '/icons/map.svg',
   //   isActive: false,
   //   linkSRC: '/',
+  //   group: 'ЭДО',
   //   subMenuLists: [{ title: 'Карта полей', to: 'maps' }],
   // },
 

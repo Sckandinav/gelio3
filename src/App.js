@@ -16,6 +16,7 @@ import { Application } from './Components/Applications/Application/Application.j
 import { Payment } from './Pages/Payment.jsx';
 import { Chemistry } from './Pages/Chemistry.jsx';
 import { CreationPesticide } from './Components/Pesticide/CreationPesticide.jsx';
+import { PesticideItem } from './Components/Pesticide/PesticideItem.jsx';
 import { Maps } from './Pages/Maps.jsx';
 import { Create } from './Components/Applications/Create/Create.jsx';
 import { CreatePayment } from './Components/Payment/CreatePayment.jsx';
@@ -53,6 +54,8 @@ function App() {
 
         <Route path={url.chemistry()} element={<Chemistry />} />
         <Route path={url.chemistryAdd()} element={<CreationPesticide />} />
+        <Route path={`${url.chemistryPesticideItem()}/:id`} element={<PesticideItem />} />
+
         <Route path={url.seeds()} element={<SeedsPages />} />
         <Route path={`${url.seeds()}/:id`} element={<SeedsItem />} />
         <Route path={url.seedsAdd()} element={<SeedsAdd />} />

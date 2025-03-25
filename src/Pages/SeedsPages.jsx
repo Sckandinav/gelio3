@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Tabs, Tab, Container, Row, Col, Modal, Button, Form } from 'react-bootstrap';
+import { Tabs, Tab, Container, Row, Col, Spinner } from 'react-bootstrap';
 import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 
@@ -15,6 +15,7 @@ export const SeedsPages = () => {
   const [data, setData] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]);
   const [activeTab, setActiveTab] = useState('seeds');
+  const [loading, setLoading] = useState(false);
   const axiosInstance = useAxiosInterceptor();
   const navigate = useNavigate();
   const token = useUserToken();
@@ -34,12 +35,15 @@ export const SeedsPages = () => {
   };
 
   const getSeeds = async () => {
+    setLoading(true);
     try {
       const apiMethod = apiMethods[activeTab];
       const response = await getData(apiMethod(), axiosInstance);
       setData(response);
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -58,7 +62,7 @@ export const SeedsPages = () => {
   };
 
   console.log('data', data);
-  const getSuitability = row => Number(row.germination) * Number(row.purity);
+  const getSuitability = row => (Number(row.germination) * Number(row.purity)) / 100;
 
   const seedsColumns = [
     {
@@ -143,7 +147,7 @@ export const SeedsPages = () => {
       sortable: true,
     },
     {
-      name: 'Посевная годность',
+      name: 'Посевная годность, %',
       selector: row => row.suitability,
       sortable: true,
     },
@@ -188,30 +192,55 @@ export const SeedsPages = () => {
   useEffect(() => {
     getSeeds();
   }, [activeTab]);
+
+  // if (loading) {
+  //   return (
+  //     <Container fluid className="bg-light rounded-3" style={{ height: '300px', paddingTop: '50px' }}>
+  //       <Row className="justify-content-center align-items-center">
+  //         <Col>
+  //           <Spinner />
+  //         </Col>
+  //       </Row>
+  //     </Container>
+  //   );
+  // }
+
   return (
     <Container fluid className="bg-light rounded-3">
       <Row>
         <Col>
           <Tabs defaultActiveKey={activeTab} transition={true} id="noanim-tab-example" justify className="mb-3" onSelect={handleTabSelect}>
             <Tab eventKey="seeds" title="Партии семян">
-              <SeedsTable
-                data={seedsData}
-                columns={seedsColumns}
-                addBtnClick={() => navigate(url.seedsAdd())}
-                deleteBtnClick={() => deleteRow(seeds.deleteSeeds())}
-                handleSelectedRowsChange={handleSelectedRowsChange}
-                selectedRows={selectedRows}
-                isAddBtn={true}
-              />
+              {loading ? (
+                <div className="text-center py-3">
+                  <Spinner />
+                </div>
+              ) : (
+                <SeedsTable
+                  data={seedsData}
+                  columns={seedsColumns}
+                  addBtnClick={() => navigate(url.seedsAdd())}
+                  deleteBtnClick={() => deleteRow(seeds.deleteSeeds())}
+                  handleSelectedRowsChange={handleSelectedRowsChange}
+                  selectedRows={selectedRows}
+                  isAddBtn={true}
+                />
+              )}
             </Tab>
             <Tab eventKey="certificates" title="Сертификаты">
-              <SeedsTable
-                data={certificatesData}
-                columns={certificatesColumns}
-                deleteBtnClick={() => deleteRow(seeds.deleteCertificates())}
-                handleSelectedRowsChange={handleSelectedRowsChange}
-                selectedRows={selectedRows}
-              />
+              {loading ? (
+                <div className="text-center py-3">
+                  <Spinner />
+                </div>
+              ) : (
+                <SeedsTable
+                  data={certificatesData}
+                  columns={certificatesColumns}
+                  deleteBtnClick={() => deleteRow(seeds.deleteCertificates())}
+                  handleSelectedRowsChange={handleSelectedRowsChange}
+                  selectedRows={selectedRows}
+                />
+              )}
             </Tab>
           </Tabs>
         </Col>

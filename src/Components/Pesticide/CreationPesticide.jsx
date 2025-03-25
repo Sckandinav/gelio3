@@ -182,7 +182,7 @@ export const CreationPesticide = () => {
   }, []);
 
   return (
-    <Container className="bg-light-subtle p-3 col-5">
+    <Container className="bg-light-subtle p-3" style={{ maxWidth: '900px' }}>
       <Row>
         <Col>
           <Form onSubmit={sendData}>
