@@ -17,6 +17,13 @@ const groupType = [
   { id: 2, name: 'Бухгалтерия' },
 ];
 
+const ndsType = [
+  { id: 0, name: 'Без НДС' },
+  { id: 5, name: '5%' },
+  { id: 10, name: '10%' },
+  { id: 20, name: '20%' },
+];
+
 export const CreatePayment = () => {
   const currentUserID = useSelector(userSelectors).data.user.id;
   const [state, setState] = useState({
@@ -36,6 +43,7 @@ export const CreatePayment = () => {
     type: '',
     reference: '',
     details: '',
+    nds: 0,
 
     files: [],
   });
@@ -168,6 +176,7 @@ export const CreatePayment = () => {
       formData.append('type', state.type);
       formData.append('details', state.details);
       formData.append('need_ceo_approve', true);
+      formData.append('nds', state.nds);
       state.signatories.forEach(user => {
         formData.append('signatories', user.value);
       });
@@ -309,6 +318,32 @@ export const CreatePayment = () => {
                 <Form.Text className="text-muted" style={{ lineHeight: '38px' }}>
                   {state.amount_str}
                 </Form.Text>
+              </Col>
+            </Form.Group>
+
+            <Form.Group as={Row} className="mb-3">
+              <Form.Label
+                className="fw-bold"
+                column
+                sm={2}
+                lg={1}
+                htmlFor="nds"
+                value={state.nds}
+                onChange={e => {
+                  inputHandler('nds', e);
+                  setSumInWords(e);
+                }}
+              >
+                в т.ч. НДС
+              </Form.Label>
+              <Col sm={4} lg={2}>
+                <Form.Select id="nds">
+                  {ndsType.map(el => (
+                    <option value={el.id} key={el.id}>
+                      {el.name}
+                    </option>
+                  ))}
+                </Form.Select>
               </Col>
             </Form.Group>
 

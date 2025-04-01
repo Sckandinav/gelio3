@@ -107,8 +107,6 @@ export const PesticideItem = () => {
     getPesticideItem();
   }, []);
 
-  console.log('data', data);
-
   if (loading.getData) {
     return <LoadingSpinner />;
   }

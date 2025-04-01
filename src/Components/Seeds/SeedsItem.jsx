@@ -30,14 +30,11 @@ export const SeedsItem = () => {
   const axiosInstance = useAxiosInterceptor();
   const dispatch = useDispatch();
 
-  console.log(data);
-
   const selectHandler = (key, value) => {
     setData(prev => ({ ...prev, [key]: value }));
   };
 
   const changeHandler = option => {
-    console.log('option', option);
     setData(prev => ({ ...prev, sortid: option }));
   };
 

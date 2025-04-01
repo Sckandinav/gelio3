@@ -87,8 +87,18 @@ const initialMenuList = [
   //   isActive: false,
   //   linkSRC: '/',
   //   group: 'ЭДО',
-  //   subMenuLists: [{ title: 'Карта полей', to: 'maps' }],
+  //   subMenuLists: [{ title: 'Карта полей', to: 'maps', className: 'btn btn-outline-success d-flex align-items-center mx-3 mt-1' }],
   // },
+
+  {
+    title: 'Отчеты',
+    id: 'reports',
+    type: 'link',
+    img: '/icons/quick_reference.svg',
+    isActive: false,
+    linkSRC: 'reports',
+    group: 'Заявки',
+  },
 
   {
     title: 'Тех. поддержка',

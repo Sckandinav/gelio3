@@ -52,6 +52,10 @@ export const Payment = () => {
   };
 
   useEffect(() => {
+    addParam(searchProps.incoming.key, searchProps.incoming.value);
+  }, []);
+
+  useEffect(() => {
     getPayment();
   }, [searchParams]);
 

@@ -61,7 +61,6 @@ export const SeedsPages = () => {
     return `${day}.${month}.${year}`;
   };
 
-  console.log('data', data);
   const getSuitability = row => (Number(row.germination) * Number(row.purity)) / 100;
 
   const seedsColumns = [
@@ -184,7 +183,7 @@ export const SeedsPages = () => {
         dispatch(showError('Удалить нельзя, т.к. есть связанные списки'));
       } else {
         dispatch(showError('Не удалось удалить запись'));
-        console.log('error', error);
+        console.log(error);
       }
     }
   };

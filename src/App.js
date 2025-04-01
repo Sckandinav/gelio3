@@ -25,6 +25,7 @@ import { AccessDenied } from './Pages/NotAccess.jsx';
 import { SeedsPages } from './Pages/SeedsPages.jsx';
 import { SeedsAdd } from './Components/Seeds/SeedsAdd.jsx';
 import { SeedsItem } from './Components/Seeds/SeedsItem.jsx';
+import { Reports } from './Pages/Reports.jsx';
 
 function App() {
   return (
@@ -61,6 +62,7 @@ function App() {
         <Route path={url.seedsAdd()} element={<SeedsAdd />} />
 
         <Route path={url.maps()} element={<Maps />} />
+        <Route path={url.reports()} element={<Reports />} />
         <Route path={url.support()} element={<Support />} />
         <Route path={url.error()} element={<ErrorPage />} />
         <Route path={url.notFound()} element={<NotFound />} />

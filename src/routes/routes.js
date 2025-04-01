@@ -20,6 +20,7 @@ export const url = {
   noAccess: () => '/no-access',
   seeds: () => '/seeds',
   seedsAdd: () => '/seeds/add',
+  reports: () => '/reports',
 };
 
 export const links = {
@@ -78,8 +79,6 @@ export const applicationActionsUrl = {
   withoutApprovalToggle: id => [apiPath, 'edo', 'application-items', `${id}/`].join('/'),
 };
 
-// /api/edo/application-items/<id строки>/ PATCH need_approve = false
-
 //Складской учёт
 export const warehousingApi = {
   warehousing: () => [apiPath, 'chemicals/'].join('/'),
@@ -120,4 +119,8 @@ export const seeds = {
   generations: () => [apiPath, 'maps', 'generations/'].join('/'), // поколения семян
   deleteSeeds: () => [apiPath, 'chemicals', 'seeds', 'bulk-delete/'].join('/'),
   deleteCertificates: () => [apiPath, 'chemicals', 'seeds-documents', 'bulk-delete/'].join('/'),
+};
+
+export const reports = {
+  reports: () => [apiPath, 'reports', 'payments/'].join('/'),
 };

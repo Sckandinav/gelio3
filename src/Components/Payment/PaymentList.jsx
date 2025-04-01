@@ -7,11 +7,11 @@ import { Link } from 'react-router-dom';
 import { Table } from '../Table/Table';
 
 export const PaymentList = ({ data, title }) => {
-  const statusCheck = status => {
+  const statusCheck = (status, titleDone = 'Заявка согласована', titlePending = 'Ожидает согласования') => {
     return status ? (
-      <BsCheck2Circle title="Заявка согласована" size={20} style={{ color: 'green' }} />
+      <BsCheck2Circle title={titleDone} size={20} style={{ color: 'green' }} />
     ) : (
-      <IoMdTimer title="Ожидает согласования" size={20} style={{ color: 'red' }} />
+      <IoMdTimer title={titlePending} size={20} style={{ color: 'red' }} />
     );
   };
 
@@ -72,7 +72,7 @@ export const PaymentList = ({ data, title }) => {
     {
       name: 'Одобрено руководителем',
       selector: row => row.signed,
-      width: '200px',
+      width: '150px',
       style: {
         display: 'flex',
         alignItems: 'center',
@@ -82,7 +82,17 @@ export const PaymentList = ({ data, title }) => {
     {
       name: 'Одобрена генеральным директором',
       selector: row => row.ceo,
-      width: '200px',
+      width: '130px',
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      },
+    },
+    {
+      name: 'Статус платежа',
+      selector: row => row.paymentStatus,
+      width: '100px',
       style: {
         display: 'flex',
         alignItems: 'center',
@@ -94,14 +104,15 @@ export const PaymentList = ({ data, title }) => {
     id: row.id,
     number: row.id,
     title: row.payer_name,
-    bank_from: row.bank_from,
+    bank_from: row.bank_from?.name,
     beneficiary: row.beneficiary,
-    bank_to: row.bank_to,
+    bank_to: row.bank_to?.name,
     amount: row.amount,
     creator: row.creator.full_name,
     date: new Date(row.created_at).toLocaleString(),
     signed: statusCheck(row.users_signed),
     ceo: statusCheck(row.is_ceo_signed),
+    paymentStatus: statusCheck(row.is_done),
   }));
 
   return (
