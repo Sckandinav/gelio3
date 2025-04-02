@@ -80,6 +80,17 @@ const initialMenuList = [
   },
 
   // {
+  //   title: 'ЕФИС',
+  //   id: 'efis',
+  //   type: 'subMenu',
+  //   img: '/icons/host.svg',
+  //   isActive: false,
+  //   linkSRC: '/',
+  //   group: 'Агрономы',
+  //   subMenuLists: [{ title: 'Сев', to: 'sowing', className: 'btn btn-outline-success d-flex align-items-center mx-3 mt-1' }],
+  // },
+
+  // {
   //   title: 'Карты',
   //   id: 'map',
   //   type: 'subMenu',

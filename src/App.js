@@ -26,6 +26,7 @@ import { SeedsPages } from './Pages/SeedsPages.jsx';
 import { SeedsAdd } from './Components/Seeds/SeedsAdd.jsx';
 import { SeedsItem } from './Components/Seeds/SeedsItem.jsx';
 import { Reports } from './Pages/Reports.jsx';
+import { Sowing } from './Pages/Sowing.jsx';
 
 function App() {
   return (
@@ -67,6 +68,7 @@ function App() {
         <Route path={url.error()} element={<ErrorPage />} />
         <Route path={url.notFound()} element={<NotFound />} />
         <Route path={url.noAccess()} element={<AccessDenied />} />
+        <Route path={url.sowing()} element={<Sowing />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>

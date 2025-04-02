@@ -65,7 +65,7 @@ export const Applications = () => {
   };
 
   useEffect(() => {
-    addParam('application_type', 'incoming');
+    addParam(searchProps.incoming.key, searchProps.incoming.value);
   }, []);
 
   useEffect(() => {

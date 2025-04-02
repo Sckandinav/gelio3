@@ -23,6 +23,8 @@ export const Edo = () => {
   const axiosInstance = useAxiosInterceptor();
   const { pathname } = useLocation();
 
+  console.log('searchParams', searchParams.size);
+
   const { data } = useSelector(notificationsSelector)?.sideBar || {};
 
   const addParam = (key, value) => {
@@ -38,7 +40,7 @@ export const Edo = () => {
   const getRoomsList = async () => {
     setIsLoading(true);
     try {
-      const response = await getRoom(links.getRooms(), axiosInstance, searchParams);
+      const response = await getRoom(`${links.getRooms()}${searchParams.size ? '' : '?mode=incoming'}`, axiosInstance, searchParams);
       setRooms(response);
       setIsLoading(false);
     } catch (error) {
@@ -48,6 +50,10 @@ export const Edo = () => {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    addParam('mode', 'incoming');
+  }, []);
 
   useEffect(() => {
     getRoomsList();

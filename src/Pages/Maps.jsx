@@ -5,6 +5,7 @@ import { useAxiosInterceptor } from '../Components/hoc/useAxiosInterceptor';
 import { getData } from '../api/getData';
 import { mapsUrls, links } from '../routes/routes.js';
 import { MapsComponent } from '../Components/Maps/MapsComponent.jsx';
+import { TestMapsCom } from '../Components/Maps/TestMapsCom.jsx';
 
 const yearsList = [2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010];
 
@@ -53,7 +54,7 @@ export const Maps = () => {
         <Col>
           <Form.Group className="d-flex column-gap-3 align-items-center">
             <Form.Label className="m-0">
-              <span class="fw-semibold">Укажите предприятие</span>
+              <span className="fw-semibold">Укажите предприятие</span>
             </Form.Label>
             <Col>
               <Form.Select name="agroid" onChange={setDataParams} value={params.agroid} style={{ maxWidth: '200px' }}>
@@ -70,7 +71,7 @@ export const Maps = () => {
         <Col>
           <Form.Group className="d-flex column-gap-3 align-items-center">
             <Form.Label>
-              <span class="fw-semibold">Укажите год</span>
+              <span className="fw-semibold">Укажите год</span>
             </Form.Label>
             <Col>
               <Form.Select name="year" onChange={setDataParams} value={params.year} style={{ maxWidth: '200px' }}>
@@ -92,10 +93,12 @@ export const Maps = () => {
           </Col>
         </Row>
       ) : (
-        <MapsComponent data={agroFields.features?.filter(el => el.id !== 21060)} />
+        <TestMapsCom data={agroFields} />
       )}
-
-      <MapsComponent />
     </Container>
   );
 };
+
+{
+  /* <MapsComponent data={agroFields.features?.filter(el => el.id !== 21060)} /> */
+}

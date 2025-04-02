@@ -21,6 +21,7 @@ export const url = {
   seeds: () => '/seeds',
   seedsAdd: () => '/seeds/add',
   reports: () => '/reports',
+  sowing: () => '/sowing',
 };
 
 export const links = {
@@ -123,4 +124,9 @@ export const seeds = {
 
 export const reports = {
   reports: () => [apiPath, 'reports', 'payments/'].join('/'),
+};
+
+//sowing
+export const sowing = {
+  seeds: () => [apiPath, 'efis', 'seeds/'].join('/'),
 };
